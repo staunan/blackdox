@@ -4,7 +4,7 @@
 	"scripts": {
 		"dev": "vite dev --port=80",
 		"build": "vite build",
-		"preview": "vite preview --host=0.0.0.0 --port=80"
+		"preview": "vite preview --host=blackdox.in --port=80"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
