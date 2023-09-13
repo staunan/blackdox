@@ -1,59 +1,48 @@
-<script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
-</script>
-
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="Labani's Home" />
 </svelte:head>
 
 <section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
+	<h1 class="page_title">Hi, I am Labani ♡</h1>
+	<div class="gallery">
+		<div class="image_container">
+			<img src={at_manasa_mondir} alt="At Manasa Mondir">
+		</div>
+		<div class="image_container">
+			<img src={beauty_queen} alt="Beauty Queen">
+		</div>
+	</div>
 </section>
-
+<script>
+import at_manasa_mondir from '$lib/images/labani/at_manasa_mondir.jpeg';
+import beauty_queen from '$lib/images/labani/beauty_queen.jpeg';
+</script>
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
+section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	flex: 0.6;
+}
+.page_title{
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.gallery{
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.gallery .image_container{
+	flex-basis: 300px;
+}
+.gallery .image_container>img{
+	width: 100%;
+	object-fit: cover;
+}
+h1 {
+	width: 100%;
+}
 </style>
