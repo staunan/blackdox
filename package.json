@@ -3,8 +3,9 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "vite dev --port=80",
+		"preview": "vite preview --host=blackdox.in --port=80",
 		"build": "vite build",
-		"preview": "vite preview --host=blackdox.in --port=80"
+		"start": "node -r dotenv/config build"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
@@ -14,5 +15,8 @@
 		"svelte": "^4.0.5",
 		"vite": "^4.4.2"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"dotenv": "^16.3.1"
+	}
 }
