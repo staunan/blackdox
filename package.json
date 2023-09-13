@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "vite dev --port=80",
-		"build": "vite build -host=blackdox.in --port=80",
+		"build": "vite build",
 		"preview": "vite preview --host=blackdox.in --port=80"
 	},
 	"devDependencies": {
@@ -15,8 +15,5 @@
 		"svelte": "^4.0.5",
 		"vite": "^4.4.2"
 	},
-	"type": "module",
-	"dependencies": {
-		"svelte-adapter-static-digitalocean": "^2.0.2"
-	}
+	"type": "module"
 }
