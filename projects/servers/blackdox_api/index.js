@@ -13,6 +13,7 @@ import { DB_URL } from "./configs/mongodb.js";
 
 // Import routes --
 import { indexRoute } from './routes/index.js';
+import { bookmarkRoute } from './routes/bookmark.js';
 
 const app = express();
 const dev = process.env.NODE_ENV === 'development';
@@ -39,6 +40,7 @@ app.use(cors({ origin: [], credentials: true }));
 
 // Register Routes --
 app.use("/", indexRoute);
+app.use("/bookmark", bookmarkRoute);
 
 app.use(
 	compression({ threshold: 0 }),
