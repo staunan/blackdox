@@ -1,9 +1,3 @@
-<script>
-	import { page } from '$app/stores';
-	import logo from '$lib/images/svelte-logo.svg';
-	import github from '$lib/images/github.svg';
-</script>
-
 <header>
 	<div class="website_title">Blackdox</div>
 </header>
@@ -22,5 +16,10 @@ header {
 	background: linear-gradient(to right, #1D2671, #C33764); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 	align-items: center;
 	height: 60px;
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	z-index: 10001;
 }
 </style>
