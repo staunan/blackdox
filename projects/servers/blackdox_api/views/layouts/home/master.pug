@@ -1,0 +1,8 @@
+html(lang="en")
+  block head
+    - var page_title = "Blackdox"
+  head
+    title Blackdox - #{page_title}
+  body
+    script(src='https://unpkg.com/vue@3/dist/vue.global.js')
+    block content

@@ -1,0 +1,8 @@
+extends ../../layouts/home/master.pug
+block head
+  - var page_title = "Home"
+block content
+  script(src="https://unpkg.com/vue@3/dist/vue.global.js")
+  div#app
+    h1 Home
+  script(src="/js/pages/home.js" type="text/javascript")

@@ -1,1 +1,1 @@
-export const DB_URL = () => `mongodb://127.0.0.1:27017/sweetapps?readPreference=primary&directConnection=true&ssl=false`;
+export const DB_URL = () => `mongodb://127.0.0.1:27017/blackdox?readPreference=primary&directConnection=true&ssl=false`;

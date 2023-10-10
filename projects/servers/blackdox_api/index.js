@@ -32,7 +32,7 @@ app.use(bodyParser.json({
 }));
 
 // Setup View Directory --
-app.set('view engine', 'pug')
+app.set('view engine', 'pug');
 
 // Setup Cors --
 app.use(cors({ origin: [], credentials: true }));
