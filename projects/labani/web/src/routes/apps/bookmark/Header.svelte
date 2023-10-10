@@ -2,12 +2,24 @@
 	<div class="website_title">Bookmark Manager</div>
 	<div class="menu_items">
 		<Button title="Create Bookmark" on:tap={buttonTap}></Button>
+		<FormModal 
+			active={createBookmarkModalIsActive} 
+			overlayclose={true}
+			on:close={closeFormModal}
+		>
+			<div slot="header"></div>
+		</FormModal>
 	</div>
 </header>
 <script>
 import Button from 'components/SvelteButton.svelte';
+import FormModal from 'components/FormModal.svelte';
+let createBookmarkModalIsActive = false;
 function buttonTap(event){
-	console.log(event);
+	createBookmarkModalIsActive = true;
+}
+function closeFormModal(event){
+	createBookmarkModalIsActive = false;
 }
 </script>
 <style>
