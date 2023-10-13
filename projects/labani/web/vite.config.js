@@ -7,6 +7,7 @@ export default defineConfig({
 	resolve: {
         alias: {
             components: path.resolve('src/components/'),
+            apis: path.resolve('src/apis/'),
         },
     }
 });

@@ -23,6 +23,7 @@
 	</div>
 </header>
 <script>
+import {createBookmark} from "apis/bookmark.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
@@ -54,8 +55,16 @@ function passwordChangeHandler(event){
 function noteChangeHandler(event){
 	note = event.detail;
 }
-function onCreateBookmarkSubmit(event){
-	console.log("Working");
+async function onCreateBookmarkSubmit(event){
+	let formData = {
+		'title': title,
+		'username': username,
+		'domain': domain,
+		'password': password,
+		'note': note
+	};
+	let result = await createBookmark(formData);
+	console.log(result);
 }
 </script>
 <style>
