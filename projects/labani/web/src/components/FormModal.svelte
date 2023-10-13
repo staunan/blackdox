@@ -3,7 +3,12 @@
         <div class="modal_overlay"></div>
         <div class="form_modal_window" >
             <div class="form_modal_header">
-                <slot name="header" />
+                <div class="modal_title">
+                    <span>{ title }</span>
+                </div>
+                <div class="closeButton">
+                    <CloseButton on:tap={closeModal}></CloseButton>
+                </div>
             </div>
             <div class="form_modal_body">
                 <slot name="body" />
@@ -15,10 +20,12 @@
     </div> 
 {/if}
 <script>
+import CloseButton from 'components/CloseButton.svelte';
 import {createEventDispatcher} from 'svelte';
 import { onMount } from "svelte";
 export let active = false;
 export let overlayclose = false;
+export let title = "Modal Title";
 const dispatch = createEventDispatcher();
 onMount(()=>{
     document.addEventListener("click", function(event){
@@ -29,6 +36,9 @@ onMount(()=>{
         }
     });
 });
+function closeModal(){
+    dispatch('close');
+}
 </script>
 <style>
 .form_modal{
@@ -58,17 +68,41 @@ onMount(()=>{
     background-color: #fff;
 }
 .form_modal_header{
-    height: 36px;
+    height: 40px;
     width: 100%;
-    background-color: red;
+    background-color: #fff;
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    display: flex;
+}
+.modal_title{
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 20px;
+    flex: 1;
+}
+.closeButton{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 40px;
 }
 .form_modal_body{
     flex: 1;
     overflow-y: auto;
 }
+.form_modal_body{
+    padding: 20px;
+}
 .form_modal_footer{
-    height: 36px;
-    width: 100%;
-    background-color: red;
+    height: 60px;
+    border-top: 1px solid #ccc;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 </style>

@@ -5,6 +5,70 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		%sveltekit.head%
+		<style>
+			*{
+				box-sizing: border-box;
+				font-family: 'Roboto', sans-serif;
+			}
+			.form_field{
+				margin-bottom: 20px;
+			}
+			.form_label{
+				font-size: 14px;
+				font-weight: 400;
+				margin-bottom: 5px;
+			}
+			/* Start: Flexbox Helper */
+			.d-flex{
+				display: flex;
+			}
+			.flex-column{
+				flex-direction: column;
+			}
+			.flex-wrap{
+				flex-wrap: wrap;
+			}
+			.flex-wrap-reverse{
+				flex-wrap: wrap-reverse;
+			}
+			.flex-grow{
+				flex-grow: 1;
+			}
+			.flex-one{
+				flex: 1;
+			}
+			.justify-content-start{
+				justify-content: flex-start;
+			}
+			.justify-content-end{
+				justify-content: flex-end;
+			}
+			.justify-content-center{
+				justify-content: center;
+			}
+			.justify-content-space-between{
+				justify-content: space-between;
+			}
+			.justify-content-space-around{
+				justify-content: space-around;
+			}
+			.justify-content-space-evenly{
+				justify-content: space-evenly;
+			}
+			.align-items-start{
+				align-items: flex-start;
+			}
+			.align-items-end{
+				align-items: flex-end;
+			}
+			.align-items-center{
+				align-items: center;
+			}
+			/* End: Flexbox Helper */
+		</style>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

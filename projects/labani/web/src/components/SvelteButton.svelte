@@ -1,6 +1,7 @@
-<button type="button" class="btn blue" on:click={onClick}><span>{ title }</span></button>
+<button type="button" class={'btn ' + color} on:click={onClick}><span>{ title }</span></button>
 <script>
 export let title = "Submit";
+export let color = "blue";
 import {createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 function onClick(event) {
@@ -56,5 +57,13 @@ function onClick(event) {
 }
 .btn.blue:hover, .btn.blue:focus {
     background-color: #3f51b5;
+}
+.btn.red{
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+    background-color: #f44336;
+    color: #fff;
+}
+.btn.red:hover, .btn.red:focus {
+    background-color: #e91e63;
 }
 </style>

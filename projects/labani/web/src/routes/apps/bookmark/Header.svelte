@@ -1,25 +1,61 @@
 <header>
 	<div class="website_title">Bookmark Manager</div>
 	<div class="menu_items">
-		<Button title="Create Bookmark" on:tap={buttonTap}></Button>
+		<SvelteButton title="Create Bookmark" on:tap={buttonTap}></SvelteButton>
 		<FormModal 
+			title="Create Bookmark"
 			active={createBookmarkModalIsActive} 
 			overlayclose={true}
 			on:close={closeFormModal}
 		>
-			<div slot="header"></div>
+			<div slot="body">
+				<Textbox label="Bookmark Title" placeholder="Title" on:change={titleChangeHandler} value={title}></Textbox>
+				<Textbox label="URL Address" placeholder="Website Link" on:change={domainChangeHandler} value={domain}></Textbox>
+				<Textbox label="Username" placeholder="Username" on:change={usernameChangeHandler} value={username}></Textbox>
+				<Textbox label="Password" placeholder="Password" on:change={passwordChangeHandler} value={password}></Textbox>
+				<TextArea label="Note" placeholder="Note" on:change={noteChangeHandler} value={note}></TextArea>
+			</div>
+			<div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
+				<SvelteButton color="red" title="Cancel" on:tap={closeFormModal}></SvelteButton>
+				<SvelteButton color="blue" title="Submit Bookmark" on:tap={onCreateBookmarkSubmit}></SvelteButton>
+			</div>
 		</FormModal>
 	</div>
 </header>
 <script>
-import Button from 'components/SvelteButton.svelte';
+import SvelteButton from 'components/SvelteButton.svelte';
+import Textbox from 'components/Textbox.svelte';
+import TextArea from 'components/TextArea.svelte';
 import FormModal from 'components/FormModal.svelte';
 let createBookmarkModalIsActive = false;
+let title = "";
+let domain = "";
+let username = "";
+let password = "";
+let note = "";
 function buttonTap(event){
 	createBookmarkModalIsActive = true;
 }
 function closeFormModal(event){
 	createBookmarkModalIsActive = false;
+}
+function titleChangeHandler(event){
+	title = event.detail;
+}
+function domainChangeHandler(event){
+	domain = event.detail;
+}
+function usernameChangeHandler(event){
+	username = event.detail;
+}
+function passwordChangeHandler(event){
+	password = event.detail;
+}
+function noteChangeHandler(event){
+	note = event.detail;
+}
+function onCreateBookmarkSubmit(event){
+	console.log("Working");
 }
 </script>
 <style>
