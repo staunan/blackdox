@@ -1,8 +1,8 @@
 {#if active}
-    <div class="form_modal">
+    <div class="content_modal">
         <div class="modal_overlay"></div>
-        <div class="form_modal_window" >
-            <div class="form_modal_header">
+        <div class="content_modal_window" >
+            <div class="content_modal_header">
                 <div class="modal_title">
                     <span>{ title }</span>
                 </div>
@@ -10,10 +10,10 @@
                     <CloseButton on:tap={closeModal}></CloseButton>
                 </div>
             </div>
-            <div class="form_modal_body">
+            <div class="content_modal_body">
                 <slot name="body" />
             </div>
-            <div class="form_modal_footer">
+            <div class="content_modal_footer">
                 <slot name="footer" />
             </div>
         </div>
@@ -41,7 +41,7 @@ function closeModal(){
 }
 </script>
 <style>
-.form_modal{
+.content_modal{
     position: fixed;
     top: 0;
     bottom: 0;
@@ -49,13 +49,14 @@ function closeModal(){
     right: 0;
     width: 100%;
     height: 100vh;
+    z-index: 10001;
 }
 .modal_overlay{
     background: #3f51b5c9;
     height: inherit;
     width: inherit;
 }
-.form_modal_window{
+.content_modal_window{
     position: absolute;
     top: 50%;
     left: 50%;
@@ -67,11 +68,11 @@ function closeModal(){
     box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);
     background-color: #fff;
 }
-.form_modal_header{
-    height: 40px;
+.content_modal_header{
+    height: 60px;
     width: 100%;
     background-color: #fff;
-    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    border-bottom: 1px solid #ccc;
     display: flex;
 }
 .modal_title{
@@ -88,16 +89,16 @@ function closeModal(){
     justify-content: center;
     align-items: center;
     width: 60px;
-    height: 40px;
+    height: 60px;
 }
-.form_modal_body{
+.content_modal_body{
     flex: 1;
     overflow-y: auto;
 }
-.form_modal_body{
+.content_modal_body{
     padding: 20px;
 }
-.form_modal_footer{
+.content_modal_footer{
     height: 60px;
     border-top: 1px solid #ccc;
     padding-left: 20px;

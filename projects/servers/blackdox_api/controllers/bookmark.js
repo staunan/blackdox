@@ -39,3 +39,23 @@ export const createBookmark = async (req, res) => {
 		return res.status(400).json({message: err.message});
 	}
 };
+
+export const getBookmarks = async (req, res) => {
+	try {
+		const perPage = req.query.perPage ? req.query.perPage : 10;
+      	const page = req.query.pageNum ? req.query.pageNum : 1;
+      	const skip = (page - 1) * perPage;
+		let condition = {};
+
+		let resultSet = await Bookmark.aggregate([
+			{ $match: condition },
+			{ $skip: skip },
+			{ $limit: perPage },
+		]);
+
+		return res.status(200).json({bookmarks: resultSet});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};

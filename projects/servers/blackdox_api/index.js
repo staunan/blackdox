@@ -36,7 +36,7 @@ app.use(bodyParser.json({
 app.set('view engine', 'pug');
 
 // Setup Cors --
-app.use(cors({ origin: [], credentials: true }));
+app.use(cors({ origin: ["http://localhost/", "http://localhost"], credentials: true }));
 
 // Register Routes --
 app.use("/", indexRoute);
