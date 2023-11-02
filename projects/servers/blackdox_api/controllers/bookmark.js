@@ -15,10 +15,10 @@ export const createBookmark = async (req, res) => {
 		} = req.body;
 
 		// Validation --
-		if(!req.body.title){
+		if(!title){
 			throw Error("Please provide title");
 		}
-		if(!req.body.domain){
+		if(!domain){
 			throw Error("Please provide domain");
 		}
 
@@ -30,10 +30,54 @@ export const createBookmark = async (req, res) => {
 			password: password,
 			note: note
 		};
-		let bookmark = new Bookmark(bookmarkData);
+		let bookmarkObj = new Bookmark(bookmarkData);
+    	await bookmarkObj.save();
+
+		return res.status(200).json({message: "Bookmark has been created successfully!", bookmark: bookmarkObj});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
+export const updateBookmark = async (req, res) => {
+	try {
+		let {
+			bookmark_id,
+			title,
+			domain,
+			username,
+			password,
+			note
+		} = req.body;
+
+		// Validation --
+		if(!bookmark_id){
+			throw Error("Please provide bookmark id");
+		}
+		if(!title){
+			throw Error("Please provide title");
+		}
+		if(!domain){
+			throw Error("Please provide domain");
+		}
+
+		let bookmark = await Bookmark.findOne({internalId: bookmark_id});
+
+		if(!bookmark){
+			throw Error("Bookmark not found with the provided bookmark ID: " + bookmark_id);
+		}
+		console.log(bookmark);
+
+		// Update the data --
+		bookmark.title = title;
+		bookmark.domain = domain;
+		bookmark.username = username;
+		bookmark.password = password;
+		bookmark.note = note;
     	await bookmark.save();
 
-		return res.status(200).json({message: "Bookmark has been created successfully!"});
+		return res.status(200).json({message: "Bookmark has been updated successfully!", bookmark: bookmark});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({message: err.message});
@@ -45,7 +89,7 @@ export const getBookmarks = async (req, res) => {
 		const perPage = req.query.perPage ? req.query.perPage : 10;
       	const page = req.query.pageNum ? req.query.pageNum : 1;
       	const skip = (page - 1) * perPage;
-		let condition = {};
+		let condition = {is_trash: false};
 
 		let resultSet = await Bookmark.aggregate([
 			{ $match: condition },
@@ -54,6 +98,31 @@ export const getBookmarks = async (req, res) => {
 		]);
 
 		return res.status(200).json({bookmarks: resultSet});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
+export const deleteBookmark = async (req, res) => {
+	try {
+		let {
+			bookmark_id
+		} = req.body;
+
+		if(!bookmark_id){
+			throw Error("Please provide bookmark id");
+		}
+
+		let bookmark = await Bookmark.findOne({ internalId: bookmark_id });
+		if(!bookmark){
+			throw Error("Cannot find bookmark with the provided id");
+		}
+
+		bookmark.is_trash = true;
+		bookmark.save();
+
+		return res.status(200).json({message: "Bookmark has been deleted successfully!"});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({message: err.message});

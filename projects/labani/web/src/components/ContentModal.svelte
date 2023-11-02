@@ -49,7 +49,7 @@ function closeModal(){
     right: 0;
     width: 100%;
     height: 100vh;
-    z-index: 10001;
+    z-index: 1001;
 }
 .modal_overlay{
     background: #3f51b5c9;
