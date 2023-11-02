@@ -1,24 +1,21 @@
 <header>
-	<div class="page_title">Bookmark Manager</div>
+	<div class="page_title">Spending Tracker</div>
 	<div class="menu_items">
-		<SvelteButton title="Create Bookmark" on:tap={openCreateBookmarkModal}></SvelteButton>
+		<SvelteButton title="New Spending" on:tap={openNewSpendingModal}></SvelteButton>
 	</div>
 </header>
 <div class="bookmark_list">
-    {#each bookmarks as bookmark}
+    {#each spendings as spending}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="bookmark_item" on:click={openBookmarkDetailsModal(bookmark)}>
+        <div class="bookmark_item" on:click={openSpendingDetailsModal(spending)}>
             <div class="bookmark_item_header">
-                <span class="bookmark_title">{ bookmark.title }</span>
-                <span class="bookmark_username">{ bookmark.username }</span>
-            </div>
-            <div class="copy_icon">
-
+                <span class="bookmark_title">{ spending.item_name }</span>
+                <span class="bookmark_username">Rs. { spending.price } /-</span>
             </div>
         </div>
     {/each}
-    {#if bookmarks.length === 0}
+    {#if spendings.length === 0}
         <div class="bookmark_no_item">
             No Data Found
         </div>
@@ -30,122 +27,109 @@
 
 <!-- Bookmark Details View Modal -->
 <ContentModal 
-    title={selectedBookmark ? selectedBookmark.title : '' }
-    active={detailsBookmarkModalIsActive} 
+    title={selectedSpending ? selectedSpending.item_name : '' }
+    active={detailsSpendingkModalIsActive} 
     overlayclose={true}
-    on:close={closeDetailsBookmarkModal}
+    on:close={closeDetailsSpendingModal}
 >
     <div slot="body">
-        {#if selectedBookmark}
+        {#if selectedSpending}
             <div class="text_info">
-                <div class="info_label">Domain</div>
-                <div class="info_value"><a href={ selectedBookmark.domain } target="_blank">{ selectedBookmark.domain }</a></div>
+                <div class="info_label">Price</div>
+                <div class="info_value">Rs. { selectedSpending.price } /-</div>
             </div>
             <div class="text_info">
-                <div class="info_label">Username</div>
-                <div class="info_value">{ selectedBookmark.username }</div>
-            </div>
-            <div class="text_info">
-                <div class="info_label">Password</div>
-                <div class="info_value password_value">
-                    <div class="password_protected">*****</div>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <!-- svelte-ignore a11y-no-static-element-interactions -->
-                    <div class="copy_password_button" on:click={copyTextToClipboard(selectedBookmark.password)}><i class="fa-solid fa-copy"></i></div>
-                </div>
+                <div class="info_label">Quantity</div>
+                <div class="info_value">{ selectedSpending.quantity }</div>
             </div>
             <div class="text_info">
                 <div class="info_label">Note</div>
-                <div class="info_value">{ selectedBookmark.note }</div>
+                <div class="info_value">{ selectedSpending.note }</div>
             </div>
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Bookmark" on:tap={removeBookmark}></SvelteButton>
-        <SvelteButton color="blue" title="Update Bookmark" on:tap={openUpdateBookmarkModal}></SvelteButton>
+        <SvelteButton color="red" title="Delete Spending" on:tap={removeSpending}></SvelteButton>
+        <SvelteButton color="blue" title="Update Spending" on:tap={openUpdateBookmarkModal}></SvelteButton>
     </div>
 </ContentModal>
 
 <!-- Create/Update Bookmark Modal -->
 <ContentModal 
-    title={editBookmark ? "Update Bookmark" : "Create Bookmark"}
-    active={createBookmarkModalIsActive} 
+    title={editSpending ? "Update Bookmark" : "Create Bookmark"}
+    active={newSpendingModalIsActive} 
     overlayclose={true}
-    on:close={closeCreateBookmarkModal}
+    on:close={closeNewSpendingModal}
 >
     <div slot="body">
-        <Textbox label="Bookmark Title" placeholder="Title" on:change={titleChangeHandler} value={title}></Textbox>
-        <Textbox label="URL Address" placeholder="Website Link" on:change={domainChangeHandler} value={domain}></Textbox>
-        <Textbox label="Username" placeholder="Username" on:change={usernameChangeHandler} value={username}></Textbox>
-        <Textbox label="Password" placeholder="Password" on:change={passwordChangeHandler} value={password}></Textbox>
+        <Textbox label="Item Name" placeholder="Item Name" on:change={itemNameChangeHandler} value={item_name}></Textbox>
+        <Textbox label="Price in Rupees" placeholder="Price in Rupees" on:change={priceChangeHandler} value={price}></Textbox>
+        <Textbox label="Quantity" placeholder="Quantity" on:change={quantityChangeHandler} value={quantity}></Textbox>
         <TextArea label="Note" placeholder="Note" on:change={noteChangeHandler} value={note}></TextArea>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeCreateBookmarkModal}></SvelteButton>
-        {#if editBookmark}
-            <SvelteButton color="blue" title="Update Bookmark" on:tap={onUpdateBookmarkSubmit}></SvelteButton>
+        <SvelteButton color="red" title="Cancel" on:tap={closeNewSpendingModal}></SvelteButton>
+        {#if editSpending}
+            <SvelteButton color="blue" title="Update Spending" on:tap={onUpdateSpendingSubmit}></SvelteButton>
         {:else}
-            <SvelteButton color="blue" title="Submit Bookmark" on:tap={onCreateBookmarkSubmit}></SvelteButton>
+            <SvelteButton color="blue" title="Submit Spending" on:tap={onNewSpendingSubmit}></SvelteButton>
         {/if}
-        
     </div>
 </ContentModal>
 
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
-import {createBookmark, updateBookmark, getBookmarks, deleteBookmark} from "apis/bookmark.js";
+import {newSpending, getSpendings, deleteSpending} from "apis/spending.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
 import ContentModal from 'components/ContentModal.svelte';
-let createBookmarkModalIsActive = false;
-let detailsBookmarkModalIsActive = false;
-let title = "";
-let domain = "";
-let username = "";
-let password = "";
+let newSpendingModalIsActive = false;
+let detailsSpendingkModalIsActive = false;
+
+let item_name = "";
+let price = "";
+let quantity = "";
 let note = "";
-let bookmarks = [];
-let selectedBookmark = null;
-let editBookmark = false;
+
+let spendings = [];
+let selectedSpending = null;
+let editSpending = false;
 
 onMount(() => {
-    getAllBookmarks();
+    getAllSpendings();
 });
 
-function openCreateBookmarkModal(){
-    createBookmarkModalIsActive = true;
-    editBookmark = false;
+function openNewSpendingModal(){
+    newSpendingModalIsActive = true;
+    editSpending = false;
     setBookmarkData(null);
 }
-function openBookmarkDetailsModal(bookmark){
-    selectedBookmark = bookmark;
-    detailsBookmarkModalIsActive = true;
+function closeNewSpendingModal(){
+    newSpendingModalIsActive = false;
 }
-function closeCreateBookmarkModal(){
-    createBookmarkModalIsActive = false;
+function openSpendingDetailsModal(spending){
+    selectedSpending = spending;
+    detailsSpendingkModalIsActive = true;
 }
-function closeDetailsBookmarkModal(){
-    detailsBookmarkModalIsActive = false;
+function closeDetailsSpendingModal(){
+    detailsSpendingkModalIsActive = false;
 }
-function titleChangeHandler(event){
-    title = event.detail;
+function itemNameChangeHandler(event){
+    item_name = event.detail;
 }
-function domainChangeHandler(event){
-    domain = event.detail;
+function priceChangeHandler(event){
+    price = event.detail;
 }
-function usernameChangeHandler(event){
-    username = event.detail;
-}
-function passwordChangeHandler(event){
-    password = event.detail;
+function quantityChangeHandler(event){
+    quantity = event.detail;
 }
 function noteChangeHandler(event){
     note = event.detail;
 }
 function openUpdateBookmarkModal(){
-    editBookmark = true;
+    editSpending = true;
     createBookmarkModalIsActive = true;
     detailsBookmarkModalIsActive = false;
     setBookmarkData(selectedBookmark);
@@ -165,42 +149,40 @@ function setBookmarkData(bookmark){
         note = "";
     }
 }
-async function getAllBookmarks(){
+async function getAllSpendings(){
     try{
-        let response = await getBookmarks();
-        bookmarks = response.bookmarks;
+        let response = await getSpendings();
+        spendings = response.spendings;
     }catch(error){
         console.log(error);
     }
 }
-async function onCreateBookmarkSubmit(event){
+async function onNewSpendingSubmit(event){
     let formData = {
-        'title': title,
-        'username': username,
-        'domain': domain,
-        'password': password,
+        'item_name': item_name,
+        'price': price,
+        'quantity': quantity,
         'note': note
     };
     try{
-        let response = await createBookmark(formData);
-        closeCreateBookmarkModal();
-        bookmarks = [response.bookmark, ...bookmarks];
+        let response = await newSpending(formData);
+        closeNewSpendingModal();
+        spendings = [response.spending, ...spendings];
         successToast(response.message);
     }catch(error){
         console.log(error);
     }
 }
-async function onUpdateBookmarkSubmit(event){
+async function onUpdateSpendingSubmit(event){
     let formData = {
-        'bookmark_id': selectedBookmark.internalId,
-        'title': title,
-        'username': username,
-        'domain': domain,
-        'password': password,
+        'spending_id': selectedSpending.internalId,
+        'item_name': item_name,
+        'price': price,
+        'quantity': quantity,
         'note': note
     };
     try{
-        let response = await updateBookmark(formData);
+        let response = await updateSpending(formData);
         closeCreateBookmarkModal();
         bookmarks = bookmarks.map(function(bookmark){
             if(selectedBookmark.internalId === bookmark.internalId){
@@ -214,31 +196,18 @@ async function onUpdateBookmarkSubmit(event){
         console.log(error);
     }
 }
-async function removeBookmark(){
+async function removeSpending(){
     let formData = {
-        'bookmark_id': selectedBookmark.internalId
+        'spending_id': selectedSpending.internalId
     };
     try{
-        let response = await deleteBookmark(formData);
+        let response = await deleteSpending(formData);
         successToast(response.message);
-        getAllBookmarks();
-        closeDetailsBookmarkModal();
+        getAllSpendings();
+        closeDetailsSpendingModal();
     }catch(error){
         console.log(error);
     }
-}
-function copyTextToClipboard(textToCopy){
-    // Get the text field
-    var copyText = document.getElementById("copyToClipboard");
-    copyText.value = textToCopy;
-
-    // Select the text field
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); // For mobile devices
-
-    // Copy the text inside the text field
-    window.navigator['clipboard'].writeText(copyText.value);
-    successToast("Password Copied");    
 }
 </script>
 <style>
