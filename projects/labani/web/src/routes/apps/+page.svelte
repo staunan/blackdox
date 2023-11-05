@@ -1,0 +1,81 @@
+<div class="apps">
+    <!-- svelte-ignore missing-declaration -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="app_item bookmark_manager" on:click={goToBookmarkManager}>
+        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 50 50">
+            <path d="M 5 5 C 2.25 5 0 7.25 0 10 L 0 39 C 0 41.75 2.25 44 5 44 L 21 44 C 22.664063 44 24 45.351563 24 47 C 24 47.308594 24.144531 47.601563 24.386719 47.789063 C 24.632813 47.980469 24.949219 48.046875 25.25 47.96875 C 25.511719 47.902344 25.738281 47.734375 25.875 47.5 C 25.960938 47.347656 26.003906 47.175781 26 47 C 26 45.351563 27.335938 44 29 44 L 45 44 C 47.75 44 50 41.75 50 39 L 50 10 C 50 7.25 47.75 5 45 5 L 29 5 C 27.367188 5 25.914063 5.8125 25 7.03125 C 24.085938 5.8125 22.632813 5 21 5 Z M 5 7 L 21 7 C 22.667969 7 24 8.332031 24 10 L 24 43.125 C 23.152344 42.464844 22.148438 42 21 42 L 5 42 C 3.332031 42 2 40.667969 2 39 L 2 10 C 2 8.332031 3.332031 7 5 7 Z M 29 7 L 45 7 C 46.667969 7 48 8.332031 48 10 L 48 39 C 48 40.667969 46.667969 42 45 42 L 29 42 C 27.851563 42 26.847656 42.464844 26 43.125 L 26 10 C 26 8.332031 27.332031 7 29 7 Z"></path>
+        </svg>
+        <div class="app_name">Bookmark Manager</div>
+    </div>
+    <!-- svelte-ignore missing-declaration -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="app_item spending_tracker" on:click={goToSpendingTracker}>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" version="1.1" id="Capa_1" width="40px" height="40px" viewBox="0 0 969.486 969.486" xml:space="preserve">
+            <g>
+                <g>
+                    <path d="M806.582,235.309L766.137,87.125l-137.434,37.51L571.451,9.072L114.798,235.309H0v725.105h907.137V764.973h62.35v-337.53    h-62.352V235.309H806.582z M718.441,170.63l17.654,64.68h-52.561h-75.887h-126.19l111.159-30.339l66.848-18.245L718.441,170.63z     M839.135,892.414H68V522.062v-129.13v-10.233v-69.787v-9.602h35.181h27.538h101.592h409.025h75.889h37.43h35.242h35.244h13.994    v51.272v72.86h-15.357h-35.244h-87.85H547.508h-55.217v27.356v75.888v8.758v35.244v35.244v155.039h346.846v127.441H839.135z     M901.486,696.973h-28.352h-34H560.291V591.375v-35.244v-35.244v-23.889v-1.555h3.139h90.086h129.129h56.492h34h4.445h23.904    V696.973z M540.707,100.191l21.15,42.688l-238.955,65.218L540.707,100.191z"/>
+                    <polygon points="614.146,564.57 614.146,576.676 614.146,631.152 680.73,631.152 680.73,564.57 658.498,564.57   "/>
+                </g>
+            </g>
+        </svg>
+        <div class="app_name">Spending Tracker</div>
+    </div>
+</div>
+<script>
+import { goto } from '$app/navigation';
+function goToBookmarkManager(){
+    goto("/apps/bookmark");
+}
+function goToSpendingTracker(){
+    goto("/apps/spendings");
+}
+</script>
+<style>
+.apps{
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    padding-top: 50px;
+}
+.app_item{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    width: 400px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    border-radius: 10px;
+    padding: 20px;
+    transition: 300ms all;
+}
+.app_item svg{
+    margin-right: 30px;
+}
+.app_item:hover{
+    background-color: #333;
+}
+.app_name{
+    font-size: 24px;
+    font-weight: bold;
+}
+.bookmark_manager{
+    background-color: purple;
+    color: #fff;
+}
+.bookmark_manager svg{
+    fill: #FFF;
+}
+.spending_tracker{
+    background-color: #009688;
+    color: #fff;
+}
+.spending_tracker svg{
+    fill: #FFF;
+}
+</style>
