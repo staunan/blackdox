@@ -14,7 +14,7 @@ export async function newSpending(data){
     return response.data;
 }
 
-export async function updateBookmark(data){
+export async function updateSpending(data){
     let header_config = {
         headers: {
             'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ export async function updateBookmark(data){
             maxRate: [100 * 1024],
         },
     };
-    let response = await axios.post(config.api_base_url + 'bookmark/update_bookmark', data, header_config);
+    let response = await axios.post(config.api_base_url + 'spending/update_spending', data, header_config);
     return response.data;
 }
 

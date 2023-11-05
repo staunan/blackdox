@@ -4,8 +4,8 @@ const router = express.Router();
 import {
     newSpending,
     getSpendings,
-    deleteBookmark,
-    updateBookmark
+    deleteSpending,
+    updateSpending
 } from "../controllers/spending.js";
 
 router.post(
@@ -14,8 +14,8 @@ router.post(
 );
 
 router.post(
-    "/update_bookmark",
-    updateBookmark
+    "/update_spending",
+    updateSpending
 );
 
 router.get(
@@ -24,8 +24,8 @@ router.get(
 );
 
 router.post(
-    "/delete_bookmark",
-    deleteBookmark
+    "/delete_spending",
+    deleteSpending
 );
 
 export const spendingRoute = router;

@@ -4,19 +4,19 @@
 		<SvelteButton title="New Spending" on:tap={openNewSpendingModal}></SvelteButton>
 	</div>
 </header>
-<div class="bookmark_list">
+<div class="spending_list">
     {#each spendings as spending}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="bookmark_item" on:click={openSpendingDetailsModal(spending)}>
-            <div class="bookmark_item_header">
-                <span class="bookmark_title">{ spending.item_name }</span>
-                <span class="bookmark_username">Rs. { spending.price } /-</span>
+        <div class="spending_item" on:click={openSpendingDetailsModal(spending)}>
+            <div class="spending_item_header">
+                <span class="spending_title">{ spending.item_name }</span>
+                <span class="spending_username">Rs. { spending.price } /-</span>
             </div>
         </div>
     {/each}
     {#if spendings.length === 0}
-        <div class="bookmark_no_item">
+        <div class="spending_no_item">
             No Data Found
         </div>
     {/if}
@@ -25,7 +25,7 @@
     </div>
 </div>
 
-<!-- Bookmark Details View Modal -->
+<!-- Spending Details View Modal -->
 <ContentModal 
     title={selectedSpending ? selectedSpending.item_name : '' }
     active={detailsSpendingkModalIsActive} 
@@ -50,13 +50,13 @@
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Delete Spending" on:tap={removeSpending}></SvelteButton>
-        <SvelteButton color="blue" title="Update Spending" on:tap={openUpdateBookmarkModal}></SvelteButton>
+        <SvelteButton color="blue" title="Update Spending" on:tap={openUpdateSpendingModal}></SvelteButton>
     </div>
 </ContentModal>
 
-<!-- Create/Update Bookmark Modal -->
+<!-- Create/Update Spending Modal -->
 <ContentModal 
-    title={editSpending ? "Update Bookmark" : "Create Bookmark"}
+    title={editSpending ? "Update Spending" : "Add Spending"}
     active={newSpendingModalIsActive} 
     overlayclose={true}
     on:close={closeNewSpendingModal}
@@ -80,7 +80,7 @@
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
-import {newSpending, getSpendings, deleteSpending} from "apis/spending.js";
+import {newSpending, updateSpending, getSpendings, deleteSpending} from "apis/spending.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
@@ -104,7 +104,7 @@ onMount(() => {
 function openNewSpendingModal(){
     newSpendingModalIsActive = true;
     editSpending = false;
-    setBookmarkData(null);
+    setSpendingData(null);
 }
 function closeNewSpendingModal(){
     newSpendingModalIsActive = false;
@@ -128,24 +128,22 @@ function quantityChangeHandler(event){
 function noteChangeHandler(event){
     note = event.detail;
 }
-function openUpdateBookmarkModal(){
+function openUpdateSpendingModal(){
     editSpending = true;
-    createBookmarkModalIsActive = true;
-    detailsBookmarkModalIsActive = false;
-    setBookmarkData(selectedBookmark);
+    newSpendingModalIsActive = true;
+    detailsSpendingkModalIsActive = false;
+    setSpendingData(selectedSpending);
 }
-function setBookmarkData(bookmark){
-    if(bookmark){
-        title = bookmark.title;
-        domain = bookmark.domain;
-        username = bookmark.username;
-        password = bookmark.password;
-        note = bookmark.note;
+function setSpendingData(spending){
+    if(spending){
+        item_name = spending.item_name;
+        price = spending.price;
+        quantity = spending.quantity;
+        note = spending.note;
     }else{
-        title = "";
-        domain = "";
-        username = "";
-        password = "";
+        item_name = "";
+        price = "";
+        quantity = "";
         note = "";
     }
 }
@@ -183,12 +181,12 @@ async function onUpdateSpendingSubmit(event){
     };
     try{
         let response = await updateSpending(formData);
-        closeCreateBookmarkModal();
-        bookmarks = bookmarks.map(function(bookmark){
-            if(selectedBookmark.internalId === bookmark.internalId){
-                return response.bookmark;
+        closeNewSpendingModal();
+        spendings = spendings.map(function(spending){
+            if(selectedSpending.internalId === spending.internalId){
+                return response.spending;
             }else{
-                return bookmark;
+                return spending;
             }
         });
         successToast(response.message);
@@ -238,11 +236,11 @@ header{
     align-items: center;
     padding-right: 20px;
 }
-.bookmark_list{
+.spending_list{
     padding: 50px;
     padding-top: 110px;
 }
-.bookmark_item{
+.spending_item{
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     padding: 30px;
     margin-bottom: 20px;
@@ -250,7 +248,7 @@ header{
     cursor: pointer;
     display: flex;
 }
-.bookmark_no_item{
+.spending_no_item{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -272,30 +270,17 @@ header{
     font-size: 24px;
     font-weight: 400;
 }
-.bookmark_title{
+.spending_title{
     font-size: 24px;
     font-weight: 400;
 }
-.bookmark_username{
+.spending_username{
     font-size: 14px;
     font-weight: bold;
 }
-.bookmark_item_header{
+.spending_item_header{
     display: flex;
     flex-direction: column;
     flex: 1;
-}
-.password_value{
-    display: flex;
-}
-.password_protected{
-    flex: 1;
-    font-size: 40px;
-}
-.copy_password_button{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
 }
 </style>

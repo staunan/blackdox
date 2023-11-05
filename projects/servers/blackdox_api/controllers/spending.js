@@ -2,7 +2,6 @@
 import { v4 } from "uuid";
 
 // Import Models --
-import { Bookmark } from "../models/bookmark/bookmark.js";
 import { Spending } from "../models/spending/spending.js";
 
 export const newSpending = async (req, res) => {
@@ -39,44 +38,42 @@ export const newSpending = async (req, res) => {
 	}
 };
 
-export const updateBookmark = async (req, res) => {
+export const updateSpending = async (req, res) => {
 	try {
 		let {
-			bookmark_id,
-			title,
-			domain,
-			username,
-			password,
+			spending_id,
+			item_name,
+			price,
+			quantity,
 			note
 		} = req.body;
 
 		// Validation --
-		if(!bookmark_id){
-			throw Error("Please provide bookmark id");
+		if(!spending_id){
+			throw Error("Please provide spending id");
 		}
-		if(!title){
-			throw Error("Please provide title");
+		if(!item_name){
+			throw Error("Please provide item name");
 		}
-		if(!domain){
-			throw Error("Please provide domain");
+		if(!price){
+			throw Error("Please provide price");
 		}
 
-		let bookmark = await Bookmark.findOne({internalId: bookmark_id});
+		let spending = await Spending.findOne({internalId: spending_id});
 
-		if(!bookmark){
-			throw Error("Bookmark not found with the provided bookmark ID: " + bookmark_id);
+		if(!spending){
+			throw Error("Spending not found with the provided spending ID: " + spending_id);
 		}
-		console.log(bookmark);
+		console.log(spending);
 
 		// Update the data --
-		bookmark.title = title;
-		bookmark.domain = domain;
-		bookmark.username = username;
-		bookmark.password = password;
-		bookmark.note = note;
-    	await bookmark.save();
+		spending.item_name = item_name;
+		spending.price = price;
+		spending.quantity = quantity;
+		spending.note = note;
+    	await spending.save();
 
-		return res.status(200).json({message: "Bookmark has been updated successfully!", bookmark: bookmark});
+		return res.status(200).json({message: "Spending has been updated successfully!", spending: spending});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({message: err.message});
@@ -103,25 +100,25 @@ export const getSpendings = async (req, res) => {
 	}
 };
 
-export const deleteBookmark = async (req, res) => {
+export const deleteSpending = async (req, res) => {
 	try {
 		let {
-			bookmark_id
+			spending_id
 		} = req.body;
 
-		if(!bookmark_id){
-			throw Error("Please provide bookmark id");
+		if(!spending_id){
+			throw Error("Please provide spending id");
 		}
 
-		let bookmark = await Bookmark.findOne({ internalId: bookmark_id });
-		if(!bookmark){
-			throw Error("Cannot find bookmark with the provided id");
+		let spending = await Spending.findOne({ internalId: spending_id });
+		if(!spending){
+			throw Error("Cannot find spending with the provided id: " + spending_id);
 		}
 
-		bookmark.is_trash = true;
-		bookmark.save();
+		spending.is_trash = true;
+		spending.save();
 
-		return res.status(200).json({message: "Bookmark has been deleted successfully!"});
+		return res.status(200).json({message: "Spending has been deleted successfully!"});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({message: err.message});
