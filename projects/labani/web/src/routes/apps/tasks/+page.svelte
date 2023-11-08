@@ -1,78 +1,64 @@
 <header>
-	<div class="page_title">Spending Tracker</div>
+	<div class="page_title">Task Manager</div>
 	<div class="menu_items">
-		<SvelteButton title="New Spending" on:tap={openNewSpendingModal}></SvelteButton>
+		<SvelteButton title="New Task" on:tap={openNewTaskModal}></SvelteButton>
 	</div>
 </header>
-<div class="spending_list">
-    {#each spendings as spending}
+<div class="task_list">
+    {#each tasks as task}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="spending_item" on:click={openSpendingDetailsModal(spending)}>
-            <div class="spending_item_header">
-                <span class="spending_title">{ spending.item_name }</span>
-                <span class="spending_username">Rs. { spending.price } /-</span>
+        <div class="task_item" on:click={openTaskDetailsModal(task)}>
+            <div class="task_item_header">
+                <span class="task_title">{ task.title }</span>
             </div>
         </div>
     {/each}
-    {#if spendings.length === 0}
-        <div class="spending_no_item">
-            No Data Found
+    {#if tasks.length === 0}
+        <div class="task_no_item">
+            No Tasks Found
         </div>
     {/if}
-    <div style="display: none;">
-        <input type="text" id="copyToClipboard">
-    </div>
 </div>
 
-<!-- Spending Details View Modal -->
+<!-- Task Details Modal -->
 <ContentModal 
-    title={selectedSpending ? selectedSpending.item_name : '' }
-    active={detailsSpendingkModalIsActive} 
+    title={selectedTask ? selectedTask.title : '' }
+    active={detailsTaskModalIsActive} 
     overlayclose={true}
-    on:close={closeDetailsSpendingModal}
+    on:close={closeTaskDetailsModal}
 >
     <div slot="body">
-        {#if selectedSpending}
+        {#if selectedTask}
             <div class="text_info">
-                <div class="info_label">Price</div>
-                <div class="info_value">Rs. { selectedSpending.price } /-</div>
-            </div>
-            <div class="text_info">
-                <div class="info_label">Quantity</div>
-                <div class="info_value">{ selectedSpending.quantity }</div>
-            </div>
-            <div class="text_info">
-                <div class="info_label">Note</div>
-                <div class="info_value">{ selectedSpending.note }</div>
+                <div class="info_label">Details</div>
+                <div class="info_value">{ selectedTask.details }</div>
             </div>
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Spending" on:tap={removeSpending}></SvelteButton>
-        <SvelteButton color="blue" title="Update Spending" on:tap={openUpdateSpendingModal}></SvelteButton>
+        <SvelteButton color="red" title="Delete Task" on:tap={removeTask}></SvelteButton>
+        <SvelteButton color="blue" title="Update Task" on:tap={openUpdateTaskModal}></SvelteButton>
     </div>
 </ContentModal>
 
-<!-- Create/Update Spending Modal -->
+<!-- Create/Update Task Modal -->
 <ContentModal 
-    title={editSpending ? "Update Spending" : "Add Spending"}
-    active={newSpendingModalIsActive} 
+    title={editTask ? "Update Task" : "New Task"}
+    active={newTaskModalIsActive} 
     overlayclose={true}
-    on:close={closeNewSpendingModal}
+    on:close={closeNewTaskModal}
 >
     <div slot="body">
-        <Textbox label="Item Name" placeholder="Item Name" on:change={itemNameChangeHandler} value={item_name}></Textbox>
-        <Textbox label="Price in Rupees" placeholder="Price in Rupees" on:change={priceChangeHandler} value={price}></Textbox>
-        <Textbox label="Quantity" placeholder="Quantity" on:change={quantityChangeHandler} value={quantity}></Textbox>
-        <TextArea label="Note" placeholder="Note" on:change={noteChangeHandler} value={note}></TextArea>
+        <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
+        <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeNewSpendingModal}></SvelteButton>
-        {#if editSpending}
-            <SvelteButton color="blue" title="Update Spending" on:tap={onUpdateSpendingSubmit}></SvelteButton>
+        <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
+        {#if editTask}
+            <SvelteButton color="blue" title="Update Task" on:tap={onUpdateTaskSubmit}></SvelteButton>
         {:else}
-            <SvelteButton color="blue" title="Submit Spending" on:tap={onNewSpendingSubmit}></SvelteButton>
+            <SvelteButton color="blue" title="Create Task" on:tap={onNewTaskSubmit}></SvelteButton>
         {/if}
     </div>
 </ContentModal>
@@ -80,113 +66,97 @@
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
-import {newSpending, updateSpending, getSpendings, deleteSpending} from "apis/spending.js";
+import {createTask, updateTask, getTasks, deleteTask} from "apis/tasks.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
 import ContentModal from 'components/ContentModal.svelte';
-let newSpendingModalIsActive = false;
-let detailsSpendingkModalIsActive = false;
+let newTaskModalIsActive = false;
+let detailsTaskModalIsActive = false;
 
-let item_name = "";
-let price = "";
-let quantity = "";
-let note = "";
+let title = "";
+let details = "";
 
-let spendings = [];
-let selectedSpending = null;
-let editSpending = false;
+let tasks = [];
+let selectedTask = null;
+let editTask = false;
 
 onMount(() => {
-    getAllSpendings();
+    getAllTasks();
 });
 
-function openNewSpendingModal(){
-    newSpendingModalIsActive = true;
-    editSpending = false;
-    setSpendingData(null);
+function openNewTaskModal(){
+    newTaskModalIsActive = true;
+    editTask = false;
+    setTaskData(null);
 }
-function closeNewSpendingModal(){
-    newSpendingModalIsActive = false;
+function closeNewTaskModal(){
+    newTaskModalIsActive = false;
 }
-function openSpendingDetailsModal(spending){
-    selectedSpending = spending;
-    detailsSpendingkModalIsActive = true;
+function openTaskDetailsModal(task){
+    selectedTask = task;
+    detailsTaskModalIsActive = true;
 }
-function closeDetailsSpendingModal(){
-    detailsSpendingkModalIsActive = false;
+function closeTaskDetailsModal(){
+    detailsTaskModalIsActive = false;
 }
-function itemNameChangeHandler(event){
-    item_name = event.detail;
+function titleChangeHandler(event){
+    title = event.detail;
 }
-function priceChangeHandler(event){
-    price = event.detail;
+function detailsChangeHandler(event){
+    details = event.detail;
 }
-function quantityChangeHandler(event){
-    quantity = event.detail;
+function openUpdateTaskModal(){
+    editTask = true;
+    newTaskModalIsActive = true;
+    detailsTaskModalIsActive = false;
+    setTaskData(selectedTask);
 }
-function noteChangeHandler(event){
-    note = event.detail;
-}
-function openUpdateSpendingModal(){
-    editSpending = true;
-    newSpendingModalIsActive = true;
-    detailsSpendingkModalIsActive = false;
-    setSpendingData(selectedSpending);
-}
-function setSpendingData(spending){
-    if(spending){
-        item_name = spending.item_name;
-        price = spending.price;
-        quantity = spending.quantity;
-        note = spending.note;
+function setTaskData(task){
+    if(task){
+        title = task.title;
+        details = task.details;
     }else{
-        item_name = "";
-        price = "";
-        quantity = "";
-        note = "";
+        title = "";
+        details = "";
     }
 }
-async function getAllSpendings(){
+async function getAllTasks(){
     try{
-        let response = await getSpendings();
-        spendings = response.spendings;
+        let response = await getTasks();
+        tasks = response.tasks;
     }catch(error){
         console.log(error);
     }
 }
-async function onNewSpendingSubmit(event){
+async function onNewTaskSubmit(event){
     let formData = {
-        'item_name': item_name,
-        'price': price,
-        'quantity': quantity,
-        'note': note
+        'title': title,
+        'details': details
     };
     try{
-        let response = await newSpending(formData);
-        closeNewSpendingModal();
-        spendings = [response.spending, ...spendings];
+        let response = await createTask(formData);
+        closeNewTaskModal();
+        tasks = [response.task, ...tasks];
         successToast(response.message);
     }catch(error){
         console.log(error);
     }
 }
-async function onUpdateSpendingSubmit(event){
+async function onUpdateTaskSubmit(event){
     let formData = {
-        'spending_id': selectedSpending.internalId,
-        'item_name': item_name,
-        'price': price,
-        'quantity': quantity,
-        'note': note
+        'task_id': selectedTask.internalId,
+        'title': title,
+        'details': details
     };
     try{
-        let response = await updateSpending(formData);
-        closeNewSpendingModal();
-        spendings = spendings.map(function(spending){
-            if(selectedSpending.internalId === spending.internalId){
-                return response.spending;
+        let response = await updateTask(formData);
+        closeNewTaskModal();
+        tasks = tasks.map(function(task){
+            if(selectedTask.internalId === task.internalId){
+                return response.task;
             }else{
-                return spending;
+                return task;
             }
         });
         successToast(response.message);
@@ -194,15 +164,15 @@ async function onUpdateSpendingSubmit(event){
         console.log(error);
     }
 }
-async function removeSpending(){
+async function removeTask(){
     let formData = {
-        'spending_id': selectedSpending.internalId
+        'task_id': selectedTask.internalId
     };
     try{
-        let response = await deleteSpending(formData);
+        let response = await deleteTask(formData);
         successToast(response.message);
-        getAllSpendings();
-        closeDetailsSpendingModal();
+        getAllTasks();
+        closeTaskDetailsModal();
     }catch(error){
         console.log(error);
     }
@@ -236,11 +206,11 @@ header{
     align-items: center;
     padding-right: 20px;
 }
-.spending_list{
+.task_list{
     padding: 50px;
     padding-top: 110px;
 }
-.spending_item{
+.task_item{
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     padding: 30px;
     margin-bottom: 20px;
@@ -248,7 +218,7 @@ header{
     cursor: pointer;
     display: flex;
 }
-.spending_no_item{
+.task_no_item{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -270,15 +240,11 @@ header{
     font-size: 24px;
     font-weight: 400;
 }
-.spending_title{
+.task_title{
     font-size: 24px;
     font-weight: 400;
 }
-.spending_username{
-    font-size: 14px;
-    font-weight: bold;
-}
-.spending_item_header{
+.task_item_header{
     display: flex;
     flex-direction: column;
     flex: 1;

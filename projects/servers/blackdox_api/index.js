@@ -15,6 +15,7 @@ import { DB_URL } from "./configs/mongodb.js";
 import { indexRoute } from './routes/index.js';
 import { bookmarkRoute } from './routes/bookmark.js';
 import { spendingRoute } from './routes/spending.js';
+import { tasksRoute } from './routes/tasks.js';
 
 const app = express();
 const dev = process.env.NODE_ENV === 'development';
@@ -43,6 +44,7 @@ app.use(cors({ origin: ["http://localhost/", "http://localhost"], credentials: t
 app.use("/", indexRoute);
 app.use("/bookmark", bookmarkRoute);
 app.use("/spending", spendingRoute);
+app.use("/tasks", tasksRoute);
 
 app.use(
 	compression({ threshold: 0 }),
