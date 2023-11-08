@@ -1,64 +1,62 @@
 <header>
-	<div class="page_title">Task Manager</div>
+	<div class="page_title">Stories</div>
 	<div class="menu_items">
-		<SvelteButton title="New Task" on:tap={openNewTaskModal}></SvelteButton>
+		<SvelteButton title="New Story" on:tap={openNewStoryModal}></SvelteButton>
 	</div>
 </header>
-<div class="task_list">
-    {#each tasks as task}
+<div class="story_list">
+    {#each stories as story}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="task_item" on:click={openTaskDetailsModal(task)}>
-            <div class="task_item_header">
-                <span class="task_title">{ task.title }</span>
+        <div class="story_item" on:click={openStoryDetailsModal(story)}>
+            <div class="story_item_header">
+                <span class="story_content">{ story.story }</span>
             </div>
         </div>
     {/each}
-    {#if tasks.length === 0}
-        <div class="task_no_item">
-            No Tasks Found
+    {#if stories.length === 0}
+        <div class="story_no_item">
+            No Story Found
         </div>
     {/if}
 </div>
 
-<!-- Task Details Modal -->
+<!-- Story Details Modal -->
 <ContentModal 
-    title={selectedTask ? selectedTask.title : '' }
-    active={detailsTaskModalIsActive} 
+    title="Story Details"
+    active={detailsStoryModalIsActive} 
     overlayclose={true}
-    on:close={closeTaskDetailsModal}
+    on:close={closeStoryDetailsModal}
 >
     <div slot="body">
-        {#if selectedTask}
+        {#if selectedStory}
             <div class="text_info">
-                <div class="info_label">Details</div>
-                <div class="info_value">{ selectedTask.details }</div>
+                <div class="info_value">{ selectedStory.story }</div>
             </div>
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Task" on:tap={removeTask}></SvelteButton>
-        <SvelteButton color="blue" title="Update Task" on:tap={openUpdateTaskModal}></SvelteButton>
+        <SvelteButton color="red" title="Delete Story" on:tap={removeStory}></SvelteButton>
+        <SvelteButton color="blue" title="Update Story" on:tap={openUpdateStoryModal}></SvelteButton>
     </div>
 </ContentModal>
 
-<!-- Create/Update Task Modal -->
+<!-- Create/Update Story Modal -->
 <ContentModal 
-    title={editTask ? "Update Task" : "New Task"}
-    active={newTaskModalIsActive} 
+    title={editStory ? "Update Story" : "New Story"}
+    active={newStoryModalIsActive} 
     overlayclose={true}
-    on:close={closeNewTaskModal}
+    on:close={closeNewStoryModal}
 >
     <div slot="body">
-        <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
-        <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
+        <TextArea label="Story" placeholder="Write your story..." on:change={storyContentChangeHandler} value={story}></TextArea>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
-        {#if editTask}
-            <SvelteButton color="blue" title="Update Task" on:tap={onUpdateTaskSubmit}></SvelteButton>
+        <SvelteButton color="red" title="Cancel" on:tap={closeNewStoryModal}></SvelteButton>
+        {#if editStory}
+            <SvelteButton color="blue" title="Update Story" on:tap={onUpdateStorySubmit}></SvelteButton>
         {:else}
-            <SvelteButton color="blue" title="Create Task" on:tap={onNewTaskSubmit}></SvelteButton>
+            <SvelteButton color="blue" title="Create Story" on:tap={onNewStorySubmit}></SvelteButton>
         {/if}
     </div>
 </ContentModal>
@@ -66,97 +64,89 @@
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
-import {createTask, updateTask, getTasks, deleteTask} from "apis/tasks.js";
+import {createStory, updateStory, getStories, deleteStory} from "apis/stories.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
 import ContentModal from 'components/ContentModal.svelte';
-let newTaskModalIsActive = false;
-let detailsTaskModalIsActive = false;
+let newStoryModalIsActive = false;
+let detailsStoryModalIsActive = false;
 
-let title = "";
-let details = "";
+let story = "";
 
-let tasks = [];
-let selectedTask = null;
-let editTask = false;
+let stories = [];
+let selectedStory = null;
+let editStory = false;
 
 onMount(() => {
-    getAllTasks();
+    getAllStories();
 });
 
-function openNewTaskModal(){
-    newTaskModalIsActive = true;
-    editTask = false;
-    setTaskData(null);
+function openNewStoryModal(){
+    newStoryModalIsActive = true;
+    editStory = false;
+    setStoryData(null);
 }
-function closeNewTaskModal(){
-    newTaskModalIsActive = false;
+function closeNewStoryModal(){
+    newStoryModalIsActive = false;
 }
-function openTaskDetailsModal(task){
-    selectedTask = task;
-    detailsTaskModalIsActive = true;
+function openStoryDetailsModal(story){
+    selectedStory = story;
+    detailsStoryModalIsActive = true;
 }
-function closeTaskDetailsModal(){
-    detailsTaskModalIsActive = false;
+function closeStoryDetailsModal(){
+    detailsStoryModalIsActive = false;
 }
-function titleChangeHandler(event){
-    title = event.detail;
+function storyContentChangeHandler(event){
+    story = event.detail;
 }
-function detailsChangeHandler(event){
-    details = event.detail;
+function openUpdateStoryModal(){
+    editStory = true;
+    newStoryModalIsActive = true;
+    detailsStoryModalIsActive = false;
+    setStoryData(selectedStory);
 }
-function openUpdateTaskModal(){
-    editTask = true;
-    newTaskModalIsActive = true;
-    detailsTaskModalIsActive = false;
-    setTaskData(selectedTask);
-}
-function setTaskData(task){
-    if(task){
-        title = task.title;
-        details = task.details;
+function setStoryData(story_data){
+    if(story_data){
+        story = story_data.story;
     }else{
-        title = "";
-        details = "";
+        story = "";
     }
 }
-async function getAllTasks(){
+async function getAllStories(){
     try{
-        let response = await getTasks();
-        tasks = response.tasks;
+        let response = await getStories();
+        stories = response.stories;
     }catch(error){
         console.log(error);
     }
 }
-async function onNewTaskSubmit(event){
+async function onNewStorySubmit(event){
     let formData = {
-        'title': title,
-        'details': details
+        'story': story
     };
     try{
-        let response = await createTask(formData);
-        closeNewTaskModal();
-        tasks = [response.task, ...tasks];
+        let response = await createStory(formData);
+        closeNewStoryModal();
+        stories = [response.story, ...stories];
         successToast(response.message);
     }catch(error){
         console.log(error);
     }
 }
-async function onUpdateTaskSubmit(event){
+async function onUpdateStorySubmit(event){
     let formData = {
-        'task_id': selectedTask.internalId,
-        'title': title,
-        'details': details
+        'story_id': selectedStory.internalId,
+        'story': story
     };
     try{
-        let response = await updateTask(formData);
-        closeNewTaskModal();
-        tasks = tasks.map(function(task){
-            if(selectedTask.internalId === task.internalId){
-                return response.task;
+        let response = await updateStory(formData);
+        closeNewStoryModal();
+        stories = stories.map(function(story){
+            if(selectedStory.internalId === story.internalId){
+                return response.story;
             }else{
-                return task;
+                return story;
             }
         });
         successToast(response.message);
@@ -164,15 +154,15 @@ async function onUpdateTaskSubmit(event){
         console.log(error);
     }
 }
-async function removeTask(){
+async function removeStory(){
     let formData = {
-        'task_id': selectedTask.internalId
+        'story_id': selectedStory.internalId
     };
     try{
-        let response = await deleteTask(formData);
+        let response = await deleteStory(formData);
         successToast(response.message);
-        getAllTasks();
-        closeTaskDetailsModal();
+        getAllStories();
+        closeStoryDetailsModal();
     }catch(error){
         console.log(error);
     }
@@ -206,11 +196,11 @@ header{
     align-items: center;
     padding-right: 20px;
 }
-.task_list{
+.story_list{
     padding: 50px;
     padding-top: 110px;
 }
-.task_item{
+.story_item{
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     padding: 30px;
     margin-bottom: 20px;
@@ -218,7 +208,7 @@ header{
     cursor: pointer;
     display: flex;
 }
-.task_no_item{
+.story_no_item{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -240,11 +230,11 @@ header{
     font-size: 24px;
     font-weight: 400;
 }
-.task_title{
+.story_content{
     font-size: 24px;
     font-weight: 400;
 }
-.task_item_header{
+.story_item_header{
     display: flex;
     flex-direction: column;
     flex: 1;
