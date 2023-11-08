@@ -50,6 +50,7 @@
 >
     <div slot="body">
         <TextArea label="Story" placeholder="Write your story..." on:change={storyContentChangeHandler} value={story}></TextArea>
+        <QuillEditor></QuillEditor>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeNewStoryModal}></SvelteButton>
@@ -66,7 +67,7 @@ import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
 import {createStory, updateStory, getStories, deleteStory} from "apis/stories.js";
 import SvelteButton from 'components/SvelteButton.svelte';
-import Textbox from 'components/Textbox.svelte';
+import QuillEditor from 'components/QuillEditor.svelte';
 import TextArea from 'components/TextArea.svelte';
 import ContentModal from 'components/ContentModal.svelte';
 let newStoryModalIsActive = false;
