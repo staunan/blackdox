@@ -7,7 +7,7 @@ let storyScheama = new mongoose.Schema(
         required: true,
     },
     story: {
-        type: String,
+        type: Object,
         require: true,
     },
     is_trash: {

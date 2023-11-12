@@ -10,7 +10,7 @@
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="story_item" on:click={openStoryDetailsModal(story)}>
             <div class="story_item_header">
-                <span class="story_content">{ story.story }</span>
+                <span class="story_content"><QuillView content={story.story}></QuillView></span>
             </div>
         </div>
     {/each}
@@ -28,10 +28,12 @@
     overlayclose={true}
     on:close={closeStoryDetailsModal}
 >
-    <div slot="body">
+    <div slot="body" class="details_body">
         {#if selectedStory}
             <div class="text_info">
-                <div class="info_value">{ selectedStory.story }</div>
+                <div class="info_value">
+                    <QuillView content={selectedStory.story}></QuillView>
+                </div>
             </div>
         {/if}
     </div>
@@ -49,8 +51,7 @@
     on:close={closeNewStoryModal}
 >
     <div slot="body">
-        <TextArea label="Story" placeholder="Write your story..." on:change={storyContentChangeHandler} value={story}></TextArea>
-        <QuillEditor></QuillEditor>
+        <QuillEditor content={initial_story} on:change={quillContentChangeHandler}></QuillEditor>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeNewStoryModal}></SvelteButton>
@@ -68,24 +69,27 @@ import {successToast} from "lib/js/toast.js";
 import {createStory, updateStory, getStories, deleteStory} from "apis/stories.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import QuillEditor from 'components/QuillEditor.svelte';
-import TextArea from 'components/TextArea.svelte';
+import QuillView from 'components/QuillView.svelte';
 import ContentModal from 'components/ContentModal.svelte';
+
 let newStoryModalIsActive = false;
 let detailsStoryModalIsActive = false;
 
 let story = "";
+let initial_story = "";
 
 let stories = [];
 let selectedStory = null;
 let editStory = false;
 
-onMount(() => {
+onMount(async () => {
     getAllStories();
 });
 
 function openNewStoryModal(){
     newStoryModalIsActive = true;
     editStory = false;
+    initial_story = "";
     setStoryData(null);
 }
 function closeNewStoryModal(){
@@ -98,7 +102,7 @@ function openStoryDetailsModal(story){
 function closeStoryDetailsModal(){
     detailsStoryModalIsActive = false;
 }
-function storyContentChangeHandler(event){
+function quillContentChangeHandler(event){
     story = event.detail;
 }
 function openUpdateStoryModal(){
@@ -223,10 +227,6 @@ header{
 .text_info{
     margin-bottom: 30px;
 }
-.info_label{
-    font-size: 13px;
-    font-weight: bold;
-}
 .info_value{
     font-size: 24px;
     font-weight: 400;
@@ -239,5 +239,8 @@ header{
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+.details_body{
+    padding: 20px;
 }
 </style>

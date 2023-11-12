@@ -91,6 +91,7 @@ export const getSpendings = async (req, res) => {
 			{ $match: condition },
 			{ $skip: skip },
 			{ $limit: perPage },
+			{ $sort: { createdAt: -1 } },
 		]);
 
 		return res.status(200).json({spendings: resultSet});

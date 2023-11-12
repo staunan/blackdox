@@ -95,9 +95,6 @@ function closeModal(){
     flex: 1;
     overflow-y: auto;
 }
-.content_modal_body{
-    padding: 20px;
-}
 .content_modal_footer{
     height: 60px;
     border-top: 1px solid #ccc;
