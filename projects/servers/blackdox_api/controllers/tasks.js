@@ -8,7 +8,8 @@ export const createTask = async (req, res) => {
 	try {
 		let {
 			title,
-			details
+			details,
+			status
 		} = req.body;
 
 		// Validation --
@@ -19,7 +20,8 @@ export const createTask = async (req, res) => {
 		let taskData = {
 			internalId: v4(),
 			title: title,
-			details: details
+			details: details,
+			status: status
 		};
 		let taskObj = new Task(taskData);
     	await taskObj.save();
@@ -36,7 +38,8 @@ export const updateTask = async (req, res) => {
 		let {
 			task_id,
 			title,
-			details
+			details,
+			status
 		} = req.body;
 
 		// Validation --
@@ -46,6 +49,10 @@ export const updateTask = async (req, res) => {
 		if(!title){
 			throw Error("Please provide task title");
 		}
+		if(!status){
+			throw Error("Please provide task status");
+		}
+
 
 		let task = await Task.findOne({internalId: task_id});
 
@@ -57,6 +64,7 @@ export const updateTask = async (req, res) => {
 		// Update the data --
 		task.title = title;
 		task.details = details;
+		task.status = status;
     	await task.save();
 
 		return res.status(200).json({message: "Task has been updated successfully!", task: task});

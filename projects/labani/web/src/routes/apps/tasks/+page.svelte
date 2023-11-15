@@ -12,6 +12,9 @@
             <div class="task_item_header">
                 <span class="task_title">{ task.title }</span>
             </div>
+            <div class="task_item_status">
+                <span class="status_text">{ task.status }</span>
+            </div>
         </div>
     {/each}
     {#if tasks.length === 0}
@@ -52,7 +55,7 @@
     <div slot="body" class="modal_body">
         <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
         <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
-        <Dropdown items={task_status} on:change={statusChangeHandler} />
+        <Dropdown items={task_status} currentitem={current_status} on:change={statusChangeHandler} />
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
@@ -127,9 +130,11 @@ function setTaskData(task){
     if(task){
         title = task.title;
         details = task.details;
+        current_status = task_status.filter((item)=>item.label === task.status)[0];
     }else{
         title = "";
         details = "";
+        current_status = null;
     }
 }
 async function getAllTasks(){
@@ -143,7 +148,8 @@ async function getAllTasks(){
 async function onNewTaskSubmit(event){
     let formData = {
         'title': title,
-        'details': details
+        'details': details,
+        'status': current_status ? current_status.label : STATUS.Pending
     };
     try{
         let response = await createTask(formData);
@@ -155,10 +161,12 @@ async function onNewTaskSubmit(event){
     }
 }
 async function onUpdateTaskSubmit(event){
+    console.log(current_status);
     let formData = {
         'task_id': selectedTask.internalId,
         'title': title,
-        'details': details
+        'details': details,
+        'status': current_status ? current_status.label : STATUS.Pending
     };
     try{
         let response = await updateTask(formData);
@@ -259,6 +267,13 @@ header{
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+.task_item_status{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
 }
 .modal_body{
     padding: 20px;

@@ -27,8 +27,14 @@
 import {createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 export let items = [];
+export let currentitem = null;
 let active = false;
 let selected_item = null;
+$: {
+    if(currentitem){
+        selected_item = currentitem;
+    }
+}
 function handleDropdownItemClick(item){
     dispatch('change', item);
     selected_item = item;
