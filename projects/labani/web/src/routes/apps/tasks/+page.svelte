@@ -28,7 +28,7 @@
     overlayclose={true}
     on:close={closeTaskDetailsModal}
 >
-    <div slot="body">
+    <div slot="body" class="modal_body">
         {#if selectedTask}
             <div class="text_info">
                 <div class="info_label">Details</div>
@@ -37,7 +37,7 @@
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Task" on:tap={removeTask}></SvelteButton>
+        <DeleteButton on:tap={removeTask} title="Delete Task"></DeleteButton>
         <SvelteButton color="blue" title="Update Task" on:tap={openUpdateTaskModal}></SvelteButton>
     </div>
 </ContentModal>
@@ -49,9 +49,10 @@
     overlayclose={true}
     on:close={closeNewTaskModal}
 >
-    <div slot="body">
+    <div slot="body" class="modal_body">
         <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
         <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
+        <Dropdown items={task_status} on:change={statusChangeHandler} />
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
@@ -66,8 +67,11 @@
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
+import { STATUS } from "./const.js";
 import {createTask, updateTask, getTasks, deleteTask} from "apis/tasks.js";
 import SvelteButton from 'components/SvelteButton.svelte';
+import Dropdown from 'components/Dropdown.svelte';
+import DeleteButton from 'components/DeleteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
 import ContentModal from 'components/ContentModal.svelte';
@@ -76,10 +80,13 @@ let detailsTaskModalIsActive = false;
 
 let title = "";
 let details = "";
+let current_status = null;
 
 let tasks = [];
 let selectedTask = null;
 let editTask = false;
+
+let task_status = Object.keys(STATUS).map((item)=>{return {"label": STATUS[item], "value": STATUS[item]}});
 
 onMount(() => {
     getAllTasks();
@@ -105,6 +112,10 @@ function titleChangeHandler(event){
 }
 function detailsChangeHandler(event){
     details = event.detail;
+}
+function statusChangeHandler(event){
+    current_status = event.detail;
+    console.log(current_status);
 }
 function openUpdateTaskModal(){
     editTask = true;
@@ -248,5 +259,8 @@ header{
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+.modal_body{
+    padding: 20px;
 }
 </style>

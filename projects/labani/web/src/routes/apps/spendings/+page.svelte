@@ -49,7 +49,7 @@
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Spending" on:tap={removeSpending}></SvelteButton>
+        <DeleteButton on:tap={removeSpending} title="Delete Spending"></DeleteButton>
         <SvelteButton color="blue" title="Update Spending" on:tap={openUpdateSpendingModal}></SvelteButton>
     </div>
 </ContentModal>
@@ -81,6 +81,7 @@
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
 import {newSpending, updateSpending, getSpendings, deleteSpending} from "apis/spending.js";
+import DeleteButton from 'components/DeleteButton.svelte';
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';

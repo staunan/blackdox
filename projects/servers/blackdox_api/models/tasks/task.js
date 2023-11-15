@@ -14,6 +14,11 @@ let taskScheama = new mongoose.Schema(
         type: String,
         required: false,
     },
+    status: {
+      type: String,
+      required: false,
+      default: "Pending"
+    },
     is_trash: {
         type: Boolean,
         required: false,

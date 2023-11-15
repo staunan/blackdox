@@ -61,7 +61,7 @@
         {/if}
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Delete Bookmark" on:tap={removeBookmark}></SvelteButton>
+        <DeleteButton on:tap={removeBookmark} title="Delete Bookmark"></DeleteButton>
         <SvelteButton color="blue" title="Update Bookmark" on:tap={openUpdateBookmarkModal}></SvelteButton>
     </div>
 </ContentModal>
@@ -95,6 +95,7 @@
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
 import {createBookmark, updateBookmark, getBookmarks, deleteBookmark} from "apis/bookmark.js";
+import DeleteButton from 'components/DeleteButton.svelte';
 import SvelteButton from 'components/SvelteButton.svelte';
 import Textbox from 'components/Textbox.svelte';
 import TextArea from 'components/TextArea.svelte';
