@@ -4,6 +4,15 @@ import { v4 } from "uuid";
 // Import Models --
 import { Task } from "../models/tasks/task.js";
 
+let STATUS = {
+    Draft: "Draft",
+    Pending: "Pending",
+    Hold: "Hold",
+    Running: "Running",
+    Finished: "Finished",
+    Invalid: "Invalid"
+};
+
 export const createTask = async (req, res) => {
 	try {
 		let {
@@ -74,12 +83,43 @@ export const updateTask = async (req, res) => {
 	}
 };
 
+export const getPendingTasks = async (req, res) => {
+	try {
+		const perPage = req.query.perPage ? req.query.perPage : 10;
+      	const page = req.query.pageNum ? req.query.pageNum : 1;
+      	const skip = (page - 1) * perPage;
+		let condition = {
+			is_trash: false,
+			status: STATUS.Pending
+		};
+
+		let resultSet = await Task.aggregate([
+			{ $match: condition },
+			{ $skip: skip },
+			{ $limit: perPage },
+			{ $sort: { createdAt: -1 } },
+		]);
+
+		return res.status(200).json({tasks: resultSet});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
 export const getTasks = async (req, res) => {
 	try {
 		const perPage = req.query.perPage ? req.query.perPage : 10;
       	const page = req.query.pageNum ? req.query.pageNum : 1;
       	const skip = (page - 1) * perPage;
-		let condition = {is_trash: false};
+		let status = req.query.status;
+
+		let condition = {
+			is_trash: false,
+		};
+		if(status){
+			condition.status = status;
+		}
 
 		let resultSet = await Task.aggregate([
 			{ $match: condition },

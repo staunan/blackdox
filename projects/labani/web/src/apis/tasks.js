@@ -27,7 +27,7 @@ export async function updateTask(data){
     return response.data;
 }
 
-export async function getTasks(data){
+export async function getPendingTasks(data){
     let header_config = {
         headers: {
             'Content-Type': 'application/json',
@@ -36,7 +36,23 @@ export async function getTasks(data){
             maxRate: [100 * 1024],
         },
     };
-    let response = await axios.get(config.api_base_url + 'tasks/get_tasks', data, header_config);
+    let response = await axios.get(config.api_base_url + 'tasks/get_pending_tasks', data, header_config);
+    return response.data;
+}
+
+export async function getTasks(data = {}){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+
+    const searchParams = new URLSearchParams(data);
+
+    let response = await axios.get(config.api_base_url + 'tasks/get_tasks?' + searchParams, header_config);
     return response.data;
 }
 

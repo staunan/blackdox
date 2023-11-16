@@ -4,8 +4,9 @@ const router = express.Router();
 import {
     createTask,
     updateTask,
+    getPendingTasks,
     getTasks,
-    deleteTask, 
+    deleteTask,
 } from "../controllers/tasks.js";
 
 router.post(
@@ -16,6 +17,11 @@ router.post(
 router.post(
     "/update_task",
     updateTask
+);
+
+router.get(
+    "/get_pending_tasks",
+    getPendingTasks
 );
 
 router.get(

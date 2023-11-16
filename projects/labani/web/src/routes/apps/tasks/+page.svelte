@@ -4,6 +4,11 @@
 		<SvelteButton title="New Task" on:tap={openNewTaskModal}></SvelteButton>
 	</div>
 </header>
+<div class="filter_menu">
+    <div class="status_filter">
+        <Dropdown items={all_task_status} currentitem={current_filter_status} on:change={filterStatusChangeHandler} />
+    </div>
+</div>
 <div class="task_list">
     {#each tasks as task}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -55,7 +60,7 @@
     <div slot="body" class="modal_body">
         <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
         <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
-        <Dropdown items={task_status} currentitem={current_status} on:change={statusChangeHandler} />
+        <Dropdown items={all_task_status} currentitem={current_status} on:change={statusChangeHandler} />
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
@@ -89,7 +94,8 @@ let tasks = [];
 let selectedTask = null;
 let editTask = false;
 
-let task_status = Object.keys(STATUS).map((item)=>{return {"label": STATUS[item], "value": STATUS[item]}});
+let all_task_status = Object.keys(STATUS).map((item)=>{return {"label": STATUS[item], "value": STATUS[item]}});
+let current_filter_status = all_task_status[1];
 
 onMount(() => {
     getAllTasks();
@@ -118,7 +124,11 @@ function detailsChangeHandler(event){
 }
 function statusChangeHandler(event){
     current_status = event.detail;
-    console.log(current_status);
+}
+function filterStatusChangeHandler(event){
+    current_filter_status = event.detail;
+    getAllTasks();
+    console.log(current_filter_status);
 }
 function openUpdateTaskModal(){
     editTask = true;
@@ -130,16 +140,22 @@ function setTaskData(task){
     if(task){
         title = task.title;
         details = task.details;
-        current_status = task_status.filter((item)=>item.label === task.status)[0];
+        current_status = all_task_status.filter((item)=>item.label === task.status)[0];
     }else{
         title = "";
         details = "";
-        current_status = null;
+        current_status = current_status = all_task_status.filter((item)=>item.label === STATUS.Pending)[0];
     }
 }
 async function getAllTasks(){
     try{
-        let response = await getTasks();
+        let formData = {};
+        if(current_filter_status){
+            formData.status = current_filter_status.label;
+        }else{
+            formData.status = STATUS.Pending;
+        }
+        let response = await getTasks(formData);
         tasks = response.tasks;
     }catch(error){
         console.log(error);
@@ -190,7 +206,7 @@ async function removeTask(){
     try{
         let response = await deleteTask(formData);
         successToast(response.message);
-        getAllTasks();
+        getTasks();
         closeTaskDetailsModal();
     }catch(error){
         console.log(error);
@@ -227,7 +243,6 @@ header{
 }
 .task_list{
     padding: 50px;
-    padding-top: 110px;
 }
 .task_item{
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -277,5 +292,12 @@ header{
 }
 .modal_body{
     padding: 20px;
+}
+.filter_menu{
+    display: flex;
+    padding-left: 30px;
+    height: 50px;
+    align-items: center;
+    padding-top: 110px;
 }
 </style>

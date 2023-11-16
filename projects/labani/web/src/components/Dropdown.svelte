@@ -25,6 +25,7 @@
 </div>
 <script>
 import {createEventDispatcher} from 'svelte';
+import { onMount } from "svelte";
 const dispatch = createEventDispatcher();
 export let items = [];
 export let currentitem = null;
@@ -35,6 +36,13 @@ $: {
         selected_item = currentitem;
     }
 }
+onMount(()=>{
+    document.addEventListener("click", function(event){
+        if(!event.target.closest(".dropdown")){
+            active = false;
+        }
+    });
+});
 function handleDropdownItemClick(item){
     dispatch('change', item);
     selected_item = item;
@@ -76,6 +84,7 @@ function handleDropdownItemClick(item){
     border: 1px solid #ccc;
     display: none;
     z-index: 10001;
+    background-color: #fff;
 }
 .show{
     display: block !important;
@@ -104,6 +113,7 @@ function handleDropdownItemClick(item){
 .dropdown_expand_icon{
     display: flex;
     align-items: center;
+    margin-left: 30px;
 }
 .dropdown_no_item{
     width: 100%;
