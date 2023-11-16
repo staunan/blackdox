@@ -14,6 +14,19 @@ export async function createTask(data){
     return response.data;
 }
 
+export async function createProject(data){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+    let response = await axios.post(config.api_base_url + 'tasks/create_project', data, header_config);
+    return response.data;
+}
+
 export async function updateTask(data){
     let header_config = {
         headers: {
@@ -24,6 +37,19 @@ export async function updateTask(data){
         },
     };
     let response = await axios.post(config.api_base_url + 'tasks/update_task', data, header_config);
+    return response.data;
+}
+
+export async function updateProject(data){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+    let response = await axios.post(config.api_base_url + 'tasks/update_project', data, header_config);
     return response.data;
 }
 

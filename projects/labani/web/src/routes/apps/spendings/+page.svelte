@@ -32,7 +32,7 @@
     overlayclose={true}
     on:close={closeDetailsSpendingModal}
 >
-    <div slot="body">
+    <div slot="body" class="spending_details">
         {#if selectedSpending}
             <div class="text_info">
                 <div class="info_label">Price</div>
@@ -61,7 +61,7 @@
     overlayclose={true}
     on:close={closeNewSpendingModal}
 >
-    <div slot="body">
+    <div slot="body" class="spending_form">
         <Textbox label="Item Name" placeholder="Item Name" on:change={itemNameChangeHandler} value={item_name}></Textbox>
         <Textbox label="Price in Rupees" placeholder="Price in Rupees" on:change={priceChangeHandler} value={price}></Textbox>
         <Textbox label="Quantity" placeholder="Quantity" on:change={quantityChangeHandler} value={quantity}></Textbox>
@@ -283,5 +283,8 @@ header{
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+.spending_form, .spending_details{
+    padding: 20px;
 }
 </style>
