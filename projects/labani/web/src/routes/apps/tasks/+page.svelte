@@ -18,16 +18,20 @@
         {#if selectedLeftMenuItem === "Tasks"}
             <h3><MenuItem icon="fa-list" label="Tasks" clickable={false} background="#009688" color="#fff"></MenuItem></h3>
             <div class="filter_menu">
-                <div class="status_filter">
-                    <Dropdown items={all_task_status} currentitem={current_filter_status} on:change={filterStatusChangeHandler} />
-                </div>
+                <TaskFilter on:change={onFilterChange}></TaskFilter>
             </div>
             {#each tasks as task}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div class="task_item" on:click={openTaskDetailsModal(task)}>
                     <div class="task_item_header">
-                        <span class="task_title">{ task.title }</span>
+                        <div class="task_title">{ task.title }</div>
+                        {#if task.project_details && task.project_details.length === 1}
+                        <div class="task_project_name">
+                            <i class="fa fa-box"></i>
+                            <span>{ task.project_details[0].project_name }</span>
+                        </div>
+                        {/if}
                     </div>
                     <div class="task_item_status">
                         <span class="status_text">{ task.status }</span>
@@ -41,128 +45,101 @@
             {/if}
         {:else if selectedLeftMenuItem === "Projects"}
             <h3><MenuItem icon="fa-list" label="Projects" clickable={false} background="#795548" color="#fff"></MenuItem></h3>
+            {#each projects as project}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div class="task_item" on:click={openProjectDetailsModal(project)}>
+                    <div class="task_item_header">
+                        <div class="project_name">{ project.project_name }</div>
+                        <div class="project_details">{ project.project_details }</div>
+                    </div>
+                </div>
+            {/each}
+            {#if tasks.length === 0}
+                <div class="task_no_item">
+                    No Tasks Found
+                </div>
+            {/if}
         {/if}
     </div>
 </div>
 
-<!-- Task Details Modal -->
-<ContentModal 
-    title={selectedTask ? selectedTask.title : '' }
-    active={detailsTaskModalIsActive} 
-    overlayclose={true}
-    on:close={closeTaskDetailsModal}
->
-    <div slot="body" class="modal_body">
-        {#if selectedTask}
-            <div class="text_info">
-                <div class="info_label">Details</div>
-                <div class="info_value">{ selectedTask.details }</div>
-            </div>
-        {/if}
-    </div>
-    <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <DeleteButton on:tap={removeTask} title="Delete Task"></DeleteButton>
-        <SvelteButton color="blue" title="Update Task" on:tap={openUpdateTaskModal}></SvelteButton>
-    </div>
-</ContentModal>
+<div class="modals">
+    <EditTaskModal 
+        task={selectedTask} 
+        active={newTaskModalIsActive} 
+        edit={editTask} 
+        on:close={closeNewTaskModal}
+        on:created={onNewTaskCreated}
+        on:updated={onTaskUpdated}
+    ></EditTaskModal>
 
-<!-- Create/Update Task Modal -->
-<ContentModal 
-    title={editTask ? "Update Task" : "New Task"}
-    active={newTaskModalIsActive} 
-    overlayclose={true}
-    on:close={closeNewTaskModal}
->
-    <div slot="body" class="modal_body">
-        <Textbox label="Task Title" placeholder="Task Title" on:change={titleChangeHandler} value={title}></Textbox>
-        <TextArea label="Task Details" placeholder="Details" on:change={detailsChangeHandler} value={details}></TextArea>
-        <Dropdown items={all_task_status} currentitem={current_status} on:change={statusChangeHandler} />
-    </div>
-    <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeNewTaskModal}></SvelteButton>
-        {#if editTask}
-            <SvelteButton color="blue" title="Update Task" on:tap={onUpdateTaskSubmit}></SvelteButton>
-        {:else}
-            <SvelteButton color="blue" title="Create Task" on:tap={onNewTaskSubmit}></SvelteButton>
-        {/if}
-    </div>
-</ContentModal>
+    <EditProjectModal 
+        task={selectedProject}
+        active={newProjectModalIsActive} 
+        edit={editProject} 
+        on:close={closeNewProjectModal}
+        on:created={onNewProjectCreated}
+        on:updated={onProjectUpdated}
+    ></EditProjectModal>
 
-<!-- Create/Update Project Modal -->
-<ContentModal 
-    title={editProject ? "Update Project" : "New Project"}
-    active={newProjectModalIsActive} 
-    overlayclose={true}
-    on:close={closeNewProjectModal}
->
-    <div slot="body" class="modal_body">
-        <Textbox label="Project Name" placeholder="Name" on:change={projectNameChangeHandler} value={project_name}></Textbox>
-        <TextArea label="Project Details" placeholder="Details" on:change={projectDetailsChangeHandler} value={project_details}></TextArea>
-    </div>
-    <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeNewProjectModal}></SvelteButton>
-        {#if editProject}
-            <SvelteButton color="blue" title="Update Project" on:tap={onUpdateProjectSubmit}></SvelteButton>
-        {:else}
-            <SvelteButton color="blue" title="Create Project" on:tap={onNewProjectSubmit}></SvelteButton>
-        {/if}
-    </div>
-</ContentModal>
+    <TaskDetailsModal 
+        task={selectedTask}
+        active={detailsTaskModalIsActive} 
+        on:close={closeTaskDetailsModal}
+        on:edit={openTaskUpdateModal}
+        on:removed={onTaskRemoved}
+    ></TaskDetailsModal>
+</div>
 
 <script>
 import { onMount } from 'svelte';
-import {successToast} from "lib/js/toast.js";
-import { STATUS } from "./const.js";
-import {createTask, createProject, updateTask, updateProject, getTasks, deleteTask} from "apis/tasks.js";
+import {getTasks, getProjects} from "apis/tasks.js";
 import SvelteButton from 'components/SvelteButton.svelte';
-import Dropdown from 'components/Dropdown.svelte';
-import DeleteButton from 'components/DeleteButton.svelte';
-import Textbox from 'components/Textbox.svelte';
-import TextArea from 'components/TextArea.svelte';
-import ContentModal from 'components/ContentModal.svelte';
 import MenuItem from 'components/MenuItem.svelte';
+import EditTaskModal from "./EditTaskModal.svelte";
+import EditProjectModal from "./EditProjectModal.svelte";
+import TaskDetailsModal from "./TaskDetailsModal.svelte";
+import TaskFilter from "./TaskFilter.svelte";
 
-
+let selectedLeftMenuItem = "Tasks";
 let newTaskModalIsActive = false;
 let newProjectModalIsActive = false;
 let detailsTaskModalIsActive = false;
 
-let title = "";
-let details = "";
-let current_status = null;
-
-let projects = [];
-let project_name = "";
-let project_details = "";
-let editProject = false;
+let selectedTask = null;
 let selectedProject = null;
 
-let tasks = [];
-let selectedTask = null;
 let editTask = false;
+let editProject = false;
 
-let selectedLeftMenuItem = "Tasks";
-
-let all_task_status = Object.keys(STATUS).map((item)=>{return {"label": STATUS[item], "value": STATUS[item]}});
-let current_filter_status = all_task_status[1];
+let tasks = [];
+let projects = [];
+let currentFilter = {};
 
 onMount(() => {
     getAllTasks();
+    getAllProjects();
 });
 function handleLeftMenuItemSelected(menu_item_name){
     console.log(menu_item_name);
     selectedLeftMenuItem = menu_item_name;
 }
 function openNewTaskModal(){
+    selectedTask = null;
     newTaskModalIsActive = true;
     editTask = false;
-    setTaskData(null);
 }
-function openNewProjectModal(){
-    newProjectModalIsActive = true;
+function openTaskUpdateModal(){
+    closeTaskDetailsModal();
+    newTaskModalIsActive = true;
+    editTask = true;
 }
 function closeNewTaskModal(){
     newTaskModalIsActive = false;
+}
+function openNewProjectModal(){
+    newProjectModalIsActive = true;
 }
 function closeNewProjectModal(){
     newProjectModalIsActive = false;
@@ -174,42 +151,44 @@ function openTaskDetailsModal(task){
 function closeTaskDetailsModal(){
     detailsTaskModalIsActive = false;
 }
-function titleChangeHandler(event){
-    title = event.detail;
+function openProjectDetailsModal(project){
+    selectedProject = project;
 }
-function detailsChangeHandler(event){
-    details = event.detail;
+function onFilterChange(event){
+    currentFilter = event.detail;
 }
-function projectNameChangeHandler(event){
-    project_name = event.detail;
+function onNewTaskCreated(event){
+    tasks = [event.detail, ...tasks];
+    newTaskModalIsActive = false;
 }
-function projectDetailsChangeHandler(event){
-    project_details = event.detail;
+function onNewProjectCreated(event){
+    projects = [event.detail, ...projects];
+    newProjectModalIsActive = false;
 }
-function statusChangeHandler(event){
-    current_status = event.detail;
+function onTaskUpdated(event){
+    let task = event.detail;
+    tasks = tasks.map(function(each){
+        if(task.internalId === each.internalId){
+            return task;
+        }else{
+            return each;
+        }
+    });
 }
-function filterStatusChangeHandler(event){
-    current_filter_status = event.detail;
-    getAllTasks();
-    console.log(current_filter_status);
+function onTaskRemoved(){
+    tasks = tasks.filter(function(each){
+       return selectedTask.internalId !== each.internalId
+    });
 }
-function openUpdateTaskModal(){
-    editTask = true;
-    newTaskModalIsActive = true;
-    detailsTaskModalIsActive = false;
-    setTaskData(selectedTask);
-}
-function setTaskData(task){
-    if(task){
-        title = task.title;
-        details = task.details;
-        current_status = all_task_status.filter((item)=>item.label === task.status)[0];
-    }else{
-        title = "";
-        details = "";
-        current_status = current_status = all_task_status.filter((item)=>item.label === STATUS.Pending)[0];
-    }
+function onProjectUpdated(event){
+    let project = event.detail;
+    projects = projects.map(function(each){
+        if(project.internalId === each.internalId){
+            return project;
+        }else{
+            return each;
+        }
+    });
 }
 async function getAllTasks(){
     try{
@@ -219,93 +198,22 @@ async function getAllTasks(){
         }else{
             formData.status = STATUS.Pending;
         }
+        if(selectedProject){
+            formData.project_id = selectedProject.value;
+        }
+        
         let response = await getTasks(formData);
         tasks = response.tasks;
     }catch(error){
         console.log(error);
     }
 }
-async function onNewTaskSubmit(event){
-    let formData = {
-        'title': title,
-        'details': details,
-        'status': current_status ? current_status.label : STATUS.Pending
-    };
+async function getAllProjects(){
     try{
-        let response = await createTask(formData);
-        closeNewTaskModal();
-        tasks = [response.task, ...tasks];
-        successToast(response.message);
-    }catch(error){
-        console.log(error);
-    }
-}
-async function onUpdateTaskSubmit(event){
-    let formData = {
-        'task_id': selectedTask.internalId,
-        'title': title,
-        'details': details,
-        'status': current_status ? current_status.label : STATUS.Pending
-    };
-    try{
-        let response = await updateTask(formData);
-        closeNewTaskModal();
-        tasks = tasks.map(function(task){
-            if(selectedTask.internalId === task.internalId){
-                return response.task;
-            }else{
-                return task;
-            }
-        });
-        successToast(response.message);
-    }catch(error){
-        console.log(error);
-    }
-}
-async function onNewProjectSubmit(event){
-    let formData = {
-        'project_name': project_name,
-        'project_details': project_details
-    };
-    try{
-        let response = await createProject(formData);
-        closeNewProjectModal();
-        projects = [response.project, ...projects];
-        successToast(response.message);
-    }catch(error){
-        console.log(error);
-    }
-}
-async function onUpdateProjectSubmit(event){
-    let formData = {
-        'project_id': selectedProject.internalId,
-        'project_name': project_name,
-        'project_details': project_details
-    };
-    try{
-        let response = await updateProject(formData);
-        closeNewProjectModal();
-        projects = projects.map(function(project){
-            if(selectedProject.internalId === project.internalId){
-                return response.project;
-            }else{
-                return project;
-            }
-        });
-        successToast(response.message);
-    }catch(error){
-        console.log(error);
-    }
-}
-async function removeTask(){
-    let formData = {
-        'task_id': selectedTask.internalId
-    };
-    try{
-        let response = await deleteTask(formData);
-        successToast(response.message);
-        getTasks();
-        closeTaskDetailsModal();
+        let formData = {};
+        let response = await getProjects(formData);
+        projects = response.projects;
+        console.log(projects);
     }catch(error){
         console.log(error);
     }
@@ -365,17 +273,6 @@ header{
     background-color: #ddd;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
-.text_info{
-    margin-bottom: 30px;
-}
-.info_label{
-    font-size: 13px;
-    font-weight: bold;
-}
-.info_value{
-    font-size: 24px;
-    font-weight: 400;
-}
 .task_title{
     font-size: 24px;
     font-weight: 400;
@@ -392,9 +289,6 @@ header{
     font-size: 20px;
     font-weight: bold;
 }
-.modal_body{
-    padding: 20px;
-}
 .filter_menu{
     display: flex;
     height: 50px;
@@ -409,5 +303,22 @@ header{
 }
 .task_right_panel{
     flex-basis: 80%;
+}
+.project_name{
+    font-size: 24px;
+    font-weight: 600;
+}
+.project_details{
+    font-size: 14px;
+    font-weight: 400;
+}
+.task_project_name{
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.task_project_name i{
+    margin-right: 15px;
 }
 </style>

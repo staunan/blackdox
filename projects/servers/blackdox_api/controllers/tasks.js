@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 
 // Import Models --
 import { Task } from "../models/tasks/task.js";
+import { Project } from "../models/tasks/project.js";
 
 let STATUS = {
     Draft: "Draft",
@@ -18,17 +19,22 @@ export const createTask = async (req, res) => {
 		let {
 			title,
 			details,
-			status
+			status,
+			project_id
 		} = req.body;
 
 		// Validation --
 		if(!title){
 			throw Error("Please provide task title");
 		}
+		if(!project_id){
+			throw Error("Please provide project id");
+		}
 
 		let taskData = {
 			internalId: v4(),
 			title: title,
+			project_id: project_id,
 			details: details,
 			status: status
 		};
@@ -42,10 +48,43 @@ export const createTask = async (req, res) => {
 	}
 };
 
+export const createProject = async (req, res) => {
+	try {
+		let {
+			project_name,
+			project_details,
+			project_id
+		} = req.body;
+
+		// Validation --
+		if(!project_name){
+			throw Error("Please provide task project name");
+		}
+		if(!project_id){
+			throw Error("Please provide project id");
+		}
+
+		let projectData = {
+			internalId: v4(),
+			project_name: project_name,
+			project_details: project_details,
+			project_id: project_id
+		};
+		let projectObj = new Project(projectData);
+    	await projectObj.save();
+
+		return res.status(200).json({message: "Project has been created successfully!", project: projectObj});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
 export const updateTask = async (req, res) => {
 	try {
 		let {
 			task_id,
+			project_id,
 			title,
 			details,
 			status
@@ -54,6 +93,9 @@ export const updateTask = async (req, res) => {
 		// Validation --
 		if(!task_id){
 			throw Error("Please provide task id");
+		}
+		if(!project_id){
+			throw Error("Please provide project id");
 		}
 		if(!title){
 			throw Error("Please provide task title");
@@ -71,6 +113,7 @@ export const updateTask = async (req, res) => {
 		console.log(task);
 
 		// Update the data --
+		task.project_id = project_id;
 		task.title = title;
 		task.details = details;
 		task.status = status;
@@ -113,6 +156,43 @@ export const getTasks = async (req, res) => {
       	const page = req.query.pageNum ? req.query.pageNum : 1;
       	const skip = (page - 1) * perPage;
 		let status = req.query.status;
+		let project_id = req.query.project_id;
+
+		let condition = {
+			is_trash: false,
+		};
+		if(status){
+			condition.status = status;
+			condition.project_id = project_id;
+		}
+
+		let resultSet = await Task.aggregate([
+			{ $match: condition },
+			{ $skip: skip },
+			{ $limit: perPage },
+			{ $sort: { createdAt: -1 } },
+			{ $lookup: {
+					from: "projects",
+					localField: "project_id",
+					foreignField: "internalId",
+					as: "project_details"
+				}
+			}
+		]);
+
+		return res.status(200).json({tasks: resultSet});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
+export const getProjects = async (req, res) => {
+	try {
+		const perPage = req.query.perPage ? req.query.perPage : 10;
+      	const page = req.query.pageNum ? req.query.pageNum : 1;
+      	const skip = (page - 1) * perPage;
+		let status = req.query.status;
 
 		let condition = {
 			is_trash: false,
@@ -121,14 +201,14 @@ export const getTasks = async (req, res) => {
 			condition.status = status;
 		}
 
-		let resultSet = await Task.aggregate([
+		let resultSet = await Project.aggregate([
 			{ $match: condition },
 			{ $skip: skip },
 			{ $limit: perPage },
 			{ $sort: { createdAt: -1 } },
 		]);
 
-		return res.status(200).json({tasks: resultSet});
+		return res.status(200).json({projects: resultSet});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({message: err.message});

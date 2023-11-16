@@ -82,6 +82,22 @@ export async function getTasks(data = {}){
     return response.data;
 }
 
+export async function getProjects(data = {}){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+
+    const searchParams = new URLSearchParams(data);
+
+    let response = await axios.get(config.api_base_url + 'tasks/get_projects?' + searchParams, header_config);
+    return response.data;
+}
+
 export async function deleteTask(data){
     let header_config = {
         headers: {

@@ -5,7 +5,7 @@
         {#if selected_item}
         <div class="dropdown_label">{selected_item.label}</div>
         {:else}
-        <div class="dropdown_no_selected_item">--Select Item--</div>
+        <div class="dropdown_no_selected_item">{placeholder}</div>
         {/if}
         <div class="dropdown_expand_icon"><i class="fa fa-arrow-down" aria-hidden="true"></i></div>
     </div>
@@ -29,6 +29,7 @@ import { onMount } from "svelte";
 const dispatch = createEventDispatcher();
 export let items = [];
 export let currentitem = null;
+export let placeholder = "--Select Item--";
 let active = false;
 let selected_item = null;
 $: {
@@ -85,6 +86,7 @@ function handleDropdownItemClick(item){
     display: none;
     z-index: 10001;
     background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 .show{
     display: block !important;

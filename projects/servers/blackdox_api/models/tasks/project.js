@@ -1,27 +1,18 @@
 import mongoose from "mongoose";
 
-let taskScheama = new mongoose.Schema(
+let projectScheama = new mongoose.Schema(
   {
     internalId: {
         type: String,
         required: true,
     },
-    title: {
+    project_name: {
         type: String,
         require: true,
     },
-    details: {
+    project_details: {
         type: String,
         required: false,
-    },
-    status: {
-      type: String,
-      required: false,
-      default: "Pending"
-    },
-    project_id: {
-      type: String,
-      required: true
     },
     is_trash: {
         type: Boolean,
@@ -32,4 +23,4 @@ let taskScheama = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Task = mongoose.model("tasks", taskScheama);
+export const Project = mongoose.model("projects", projectScheama);
