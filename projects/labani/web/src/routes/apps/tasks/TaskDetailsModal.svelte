@@ -1,15 +1,29 @@
 <!-- Task Details Modal -->
 <ContentModal 
-    title={task ? task.title : '' }
+    title="Task Details"
     active={active} 
     overlayclose={true}
     on:close={closeModal}
 >
     <div slot="body" class="modal_body">
         {#if task}
-            <div class="text_info">
-                <div class="info_label">Details</div>
-                <div class="info_value">{ task.details }</div>
+            <div class="task_details">
+                <div class="task_title">{ task.title }</div>
+                <div class="task_description">{ task.details }</div>
+            </div>
+            <div class="project_and_status">
+                
+                <div class="status_info">
+                    <div class="status_label">
+                        <i class="fa fa-list"></i>
+                        <span>Project</span>
+                    </div>
+                    <div class="status_value">{ task.project_details[0].project_name }</div>
+                </div>
+                <div class="status_info">
+                    <div class="status_label">Status</div>
+                    <div class="status_value">{ task.status }</div>
+                </div>
             </div>
         {/if}
     </div>
@@ -53,15 +67,41 @@ function openEdit(){
 .modal_body{
     padding: 20px;
 }
-.text_info{
-    margin-bottom: 30px;
-}
-.info_label{
-    font-size: 13px;
+.task_title{
+    font-size: 18px;
     font-weight: bold;
 }
-.info_value{
-    font-size: 24px;
+.task_description{
+    font-size: 14px;
     font-weight: 400;
+}
+.project_and_status{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    display: flex;
+}
+.project_and_status>div{
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+}
+.status_info{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+.status_label{
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    justify-content: flex-start;
+}
+.status_label i{
+    margin-right: 15px;
+}
+.status_value{
+    font-size: 22px;
 }
 </style>

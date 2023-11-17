@@ -56,9 +56,6 @@ header{
     align-items: center;
     padding-right: 20px;
 }
-.menu_item{
-    margin-left: 20px;
-}
 .task_list{
     padding: 50px;
     display: flex;
