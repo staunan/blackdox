@@ -12,7 +12,6 @@
                 <div class="task_description">{ task.details }</div>
             </div>
             <div class="project_and_status">
-                
                 <div class="status_info">
                     <div class="status_label">
                         <i class="fa fa-list"></i>
@@ -23,6 +22,15 @@
                 <div class="status_info">
                     <div class="status_label">Status</div>
                     <div class="status_value">{ task.status }</div>
+                </div>
+            </div>
+            <div class="project_and_status">
+                <div class="status_info">
+                    <div class="status_label">
+                        <i class="fa fa-clock"></i>
+                        <span>Created On</span>
+                    </div>
+                    <div class="status_value">{ getDateFormat(task.createdAt) }</div>
                 </div>
             </div>
         {/if}
@@ -62,6 +70,9 @@ async function removeTask(){
 function openEdit(){
     dispatch("edit");
 }
+function getDateFormat(date){
+    return date.substring(0, 10);
+}
 </script>
 <style>
 .modal_body{
@@ -77,7 +88,7 @@ function openEdit(){
 }
 .project_and_status{
     padding-top: 20px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     display: flex;
 }
 .project_and_status>div{

@@ -115,7 +115,7 @@ async function onNewTaskSubmit(event){
 }
 async function onUpdateTaskSubmit(event){
     let formData = {
-        'task_id': selectedTask.internalId,
+        'task_id': task.internalId,
         'project_id': selectedProject.value,
         'title': title,
         'details': details,
@@ -124,7 +124,6 @@ async function onUpdateTaskSubmit(event){
     try{
         let response = await updateTask(formData);
         dispatch('updated', response.task);
-        closeNewTaskModal();
         successToast(response.message);
     }catch(error){
         console.log(error);
