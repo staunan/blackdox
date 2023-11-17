@@ -1,4 +1,12 @@
-<h3><MenuItem icon="fa-box" label="Projects" clickable={false} background="#795548" color="#fff"></MenuItem></h3>
+<div class="page_title">
+    <div class="page_name">
+        <i class="fa fa-box"></i>
+        <span>Projects</span>
+    </div>
+    <div class="create_task">
+        <SvelteButton title="New Project" on:tap={openNewProjectModal}></SvelteButton>
+    </div>
+</div>
 {#each projects as project}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -14,14 +22,28 @@
         No Project Found
     </div>
 {/if}
+<div class="modals">
+    <EditProjectModal 
+        task={selectedProject}
+        active={newProjectModalIsActive} 
+        edit={editProject} 
+        on:close={closeNewProjectModal}
+        on:created={onNewProjectCreated}
+        on:updated={onProjectUpdated}
+    ></EditProjectModal>
+</div>
 <script>
 import { onMount } from 'svelte';
 import {createEventDispatcher} from 'svelte';
-import MenuItem from 'components/MenuItem.svelte';
-import {getProjects} from "apis/tasks.js";
+import {getProjects} from "apis/tasks.js"
+import SvelteButton from 'components/SvelteButton.svelte';
+import EditProjectModal from "./EditProjectModal.svelte";
+;
 const dispatch = createEventDispatcher();
 let projects = [];
 let selectedProject = null;
+let newProjectModalIsActive = false;
+let editProject = false;
 onMount(() => {
     getAllProjects();
 });
@@ -35,9 +57,29 @@ async function getAllProjects(){
         console.log(error);
     }
 }
+function openNewProjectModal(){
+    newProjectModalIsActive = true;
+}
 function openProjectDetailsModal(project){
     selectedProject = project;
     dispatch('selected', selectedProject);
+}
+function closeNewProjectModal(){
+    newProjectModalIsActive = false;
+}
+function onNewProjectCreated(event){
+    projects = [event.detail, ...projects];
+    newProjectModalIsActive = false;
+}
+function onProjectUpdated(event){
+    let project = event.detail;
+    projects = projects.map(function(each){
+        if(project.internalId === each.internalId){
+            return project;
+        }else{
+            return each;
+        }
+    });
 }
 </script>
 <style>
@@ -72,5 +114,26 @@ function openProjectDetailsModal(project){
 .project_details{
     font-size: 14px;
     font-weight: 400;
+}
+.page_title{
+    display: flex;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.page_name{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 24px;
+    font-weight: bold;
+}
+.page_name i{
+    margin-right: 15px;
+}
+.create_task{
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 </style>

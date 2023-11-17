@@ -58,8 +58,9 @@ let selectedProject = null;
 
 $: {
     if(task){
-        console.log("Task Changed", task);
         setTaskData(task);
+    }else{
+        setTaskData(null);
     }
 }
 onMount(() => {
@@ -107,6 +108,7 @@ async function onNewTaskSubmit(event){
         let response = await createTask(formData);
         dispatch('created', response.task);
         successToast(response.message);
+        setTaskData(null);
     }catch(error){
         console.log(error);
     }

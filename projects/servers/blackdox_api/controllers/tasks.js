@@ -52,23 +52,18 @@ export const createProject = async (req, res) => {
 	try {
 		let {
 			project_name,
-			project_details,
-			project_id
+			project_details
 		} = req.body;
 
 		// Validation --
 		if(!project_name){
 			throw Error("Please provide task project name");
 		}
-		if(!project_id){
-			throw Error("Please provide project id");
-		}
 
 		let projectData = {
 			internalId: v4(),
 			project_name: project_name,
-			project_details: project_details,
-			project_id: project_id
+			project_details: project_details
 		};
 		let projectObj = new Project(projectData);
     	await projectObj.save();

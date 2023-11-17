@@ -1,4 +1,12 @@
-<h3><MenuItem icon="fa-list" label="Tasks" clickable={false} background="#009688" color="#fff"></MenuItem></h3>
+<div class="page_title">
+    <div class="page_name">
+        <i class="fa fa-list"></i>
+        <span>Tasks</span>
+    </div>
+    <div class="create_task">
+        <SvelteButton title="New Task" on:tap={openNewTaskModal}></SvelteButton>
+    </div>
+</div>
 <div class="filter_menu">
     <TaskFilter on:change={onFilterChange}></TaskFilter>
 </div>
@@ -25,16 +33,42 @@
         No Tasks Found
     </div>
 {/if}
+<div class="modals">
+    <EditTaskModal 
+        task={selectedTask} 
+        active={newTaskModalIsActive} 
+        edit={editTask} 
+        on:close={closeNewTaskModal}
+        on:created={onNewTaskCreated}
+        on:updated={onTaskUpdated}
+    ></EditTaskModal>
+
+    <TaskDetailsModal 
+        task={selectedTask}
+        active={detailsTaskModalIsActive} 
+        on:close={closeTaskDetailsModal}
+        on:edit={openTaskUpdateModal}
+        on:removed={onTaskRemoved}
+    ></TaskDetailsModal>
+</div>
+
 <script>
 import {createEventDispatcher} from 'svelte';
 import TaskFilter from "./TaskFilter.svelte";
-import MenuItem from 'components/MenuItem.svelte';
 import {getTasks} from "apis/tasks.js";
 import { STATUS } from "./const.js";
+import EditTaskModal from "./EditTaskModal.svelte";
+import TaskDetailsModal from "./TaskDetailsModal.svelte";
+import SvelteButton from 'components/SvelteButton.svelte';
+
 const dispatch = createEventDispatcher();
 let tasks = [];
 let currentFilter = {};
 let selectedTask = null;
+
+let newTaskModalIsActive = false;
+let detailsTaskModalIsActive = false;
+let editTask = false;
 
 function onFilterChange(event){
     currentFilter = event.detail;
@@ -60,7 +94,43 @@ async function getAllTasks(){
 }
 function handleOnItemClick(task){
     selectedTask = task;
-    dispatch('selected', selectedTask);
+    detailsTaskModalIsActive = true;
+}
+function onTaskUpdated(event){
+    let task = event.detail;
+    tasks = tasks.map(function(each){
+        if(task.internalId === each.internalId){
+            return task;
+        }else{
+            return each;
+        }
+    });
+}
+function onTaskRemoved(){
+    tasks = tasks.filter(function(each){
+       return selectedTask.internalId !== each.internalId
+    });
+    detailsTaskModalIsActive = false;
+}
+function onNewTaskCreated(event){
+    tasks = [event.detail, ...tasks];
+    newTaskModalIsActive = false;
+}
+function openTaskUpdateModal(){
+    closeTaskDetailsModal();
+    newTaskModalIsActive = true;
+    editTask = true;
+}
+function closeNewTaskModal(){
+    newTaskModalIsActive = false;
+}
+function closeTaskDetailsModal(){
+    detailsTaskModalIsActive = false;
+}
+function openNewTaskModal(){
+    selectedTask = null;
+    newTaskModalIsActive = true;
+    editTask = false;
 }
 </script>
 <style>
@@ -107,5 +177,25 @@ function handleOnItemClick(task){
 }
 .task_project_name i{
     margin-right: 15px;
+}
+.page_title{
+    display: flex;
+    padding-top: 20px;
+}
+.page_name{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 24px;
+    font-weight: bold;
+}
+.page_name i{
+    margin-right: 15px;
+}
+.create_task{
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 </style>
