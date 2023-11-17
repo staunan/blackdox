@@ -69,14 +69,31 @@ let selectedProject = null;
 
 let editTask = false;
 let editProject = false;
-
-function handleLeftMenuItemSelected(menu_item_name){
-    selectedLeftMenuItem = menu_item_name;
+function openNewProjectModal(){
+    newProjectModalIsActive = true;
 }
 function openNewTaskModal(){
     selectedTask = null;
     newTaskModalIsActive = true;
     editTask = false;
+}
+function handleLeftMenuItemSelected(menu_item_name){
+    selectedLeftMenuItem = menu_item_name;
+}
+function onTaskItemSelected(event){
+    selectedTask = event.detail;
+    detailsTaskModalIsActive = true;
+}
+function onProjectItemSelected(event){
+    selectedProject = event.detail;
+}
+function onNewTaskCreated(event){
+    tasks = [event.detail, ...tasks];
+    newTaskModalIsActive = false;
+}
+function onNewProjectCreated(event){
+    projects = [event.detail, ...projects];
+    newProjectModalIsActive = false;
 }
 function openTaskUpdateModal(){
     closeTaskDetailsModal();
@@ -86,28 +103,11 @@ function openTaskUpdateModal(){
 function closeNewTaskModal(){
     newTaskModalIsActive = false;
 }
-function openNewProjectModal(){
-    newProjectModalIsActive = true;
-}
 function closeNewProjectModal(){
     newProjectModalIsActive = false;
 }
 function closeTaskDetailsModal(){
     detailsTaskModalIsActive = false;
-}
-function onProjectItemSelected(event){
-    selectedProject = event.detail;
-}
-function onTaskItemSelected(event){
-    selectedTask = event.detail;
-}
-function onNewTaskCreated(event){
-    tasks = [event.detail, ...tasks];
-    newTaskModalIsActive = false;
-}
-function onNewProjectCreated(event){
-    projects = [event.detail, ...projects];
-    newProjectModalIsActive = false;
 }
 function onTaskUpdated(event){
     let task = event.detail;
@@ -119,11 +119,6 @@ function onTaskUpdated(event){
         }
     });
 }
-function onTaskRemoved(){
-    tasks = tasks.filter(function(each){
-       return selectedTask.internalId !== each.internalId
-    });
-}
 function onProjectUpdated(event){
     let project = event.detail;
     projects = projects.map(function(each){
@@ -132,6 +127,11 @@ function onProjectUpdated(event){
         }else{
             return each;
         }
+    });
+}
+function onTaskRemoved(){
+    tasks = tasks.filter(function(each){
+       return selectedTask.internalId !== each.internalId
     });
 }
 </script>
