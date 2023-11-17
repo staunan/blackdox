@@ -16,54 +16,12 @@
     </div>
     <div class="task_right_panel">
         {#if selectedLeftMenuItem === "Tasks"}
-            <h3><MenuItem icon="fa-list" label="Tasks" clickable={false} background="#009688" color="#fff"></MenuItem></h3>
-            <div class="filter_menu">
-                <TaskFilter on:change={onFilterChange}></TaskFilter>
-            </div>
-            {#each tasks as task}
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
-                <div class="task_item" on:click={openTaskDetailsModal(task)}>
-                    <div class="task_item_header">
-                        <div class="task_title">{ task.title }</div>
-                        {#if task.project_details && task.project_details.length === 1}
-                        <div class="task_project_name">
-                            <i class="fa fa-box"></i>
-                            <span>{ task.project_details[0].project_name }</span>
-                        </div>
-                        {/if}
-                    </div>
-                    <div class="task_item_status">
-                        <span class="status_text">{ task.status }</span>
-                    </div>
-                </div>
-            {/each}
-            {#if tasks.length === 0}
-                <div class="task_no_item">
-                    No Tasks Found
-                </div>
-            {/if}
+            <TaskList on:selected={onTaskItemSelected} />
         {:else if selectedLeftMenuItem === "Projects"}
-            <h3><MenuItem icon="fa-list" label="Projects" clickable={false} background="#795548" color="#fff"></MenuItem></h3>
-            {#each projects as project}
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
-                <div class="task_item" on:click={openProjectDetailsModal(project)}>
-                    <div class="task_item_header">
-                        <div class="project_name">{ project.project_name }</div>
-                        <div class="project_details">{ project.project_details }</div>
-                    </div>
-                </div>
-            {/each}
-            {#if tasks.length === 0}
-                <div class="task_no_item">
-                    No Tasks Found
-                </div>
-            {/if}
+            <ProjectList on:selected={onProjectItemSelected} />
         {/if}
     </div>
 </div>
-
 <div class="modals">
     <EditTaskModal 
         task={selectedTask} 
@@ -93,14 +51,13 @@
 </div>
 
 <script>
-import { onMount } from 'svelte';
-import {getTasks, getProjects} from "apis/tasks.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import MenuItem from 'components/MenuItem.svelte';
 import EditTaskModal from "./EditTaskModal.svelte";
 import EditProjectModal from "./EditProjectModal.svelte";
 import TaskDetailsModal from "./TaskDetailsModal.svelte";
-import TaskFilter from "./TaskFilter.svelte";
+import ProjectList from "./ProjectList.svelte";
+import TaskList from "./TaskList.svelte";
 
 let selectedLeftMenuItem = "Tasks";
 let newTaskModalIsActive = false;
@@ -113,16 +70,7 @@ let selectedProject = null;
 let editTask = false;
 let editProject = false;
 
-let tasks = [];
-let projects = [];
-let currentFilter = {};
-
-onMount(() => {
-    getAllTasks();
-    getAllProjects();
-});
 function handleLeftMenuItemSelected(menu_item_name){
-    console.log(menu_item_name);
     selectedLeftMenuItem = menu_item_name;
 }
 function openNewTaskModal(){
@@ -144,18 +92,14 @@ function openNewProjectModal(){
 function closeNewProjectModal(){
     newProjectModalIsActive = false;
 }
-function openTaskDetailsModal(task){
-    selectedTask = task;
-    detailsTaskModalIsActive = true;
-}
 function closeTaskDetailsModal(){
     detailsTaskModalIsActive = false;
 }
-function openProjectDetailsModal(project){
-    selectedProject = project;
+function onProjectItemSelected(event){
+    selectedProject = event.detail;
 }
-function onFilterChange(event){
-    currentFilter = event.detail;
+function onTaskItemSelected(event){
+    selectedTask = event.detail;
 }
 function onNewTaskCreated(event){
     tasks = [event.detail, ...tasks];
@@ -189,34 +133,6 @@ function onProjectUpdated(event){
             return each;
         }
     });
-}
-async function getAllTasks(){
-    try{
-        let formData = {};
-        if(current_filter_status){
-            formData.status = current_filter_status.label;
-        }else{
-            formData.status = STATUS.Pending;
-        }
-        if(selectedProject){
-            formData.project_id = selectedProject.value;
-        }
-        
-        let response = await getTasks(formData);
-        tasks = response.tasks;
-    }catch(error){
-        console.log(error);
-    }
-}
-async function getAllProjects(){
-    try{
-        let formData = {};
-        let response = await getProjects(formData);
-        projects = response.projects;
-        console.log(projects);
-    }catch(error){
-        console.log(error);
-    }
 }
 </script>
 <style>
@@ -254,48 +170,6 @@ header{
     padding: 50px;
     display: flex;
 }
-.task_item{
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    padding: 30px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-}
-.task_no_item{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
-    width: 75%;
-    height: 200px;
-    border-radius: 10px;
-    background-color: #ddd;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-}
-.task_title{
-    font-size: 24px;
-    font-weight: 400;
-}
-.task_item_header{
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-.task_item_status{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: bold;
-}
-.filter_menu{
-    display: flex;
-    height: 50px;
-    align-items: center;
-    margin-top: 25px;
-    margin-bottom: 25px;
-}
 .task_left_panel{
     flex-basis: 20%;
     padding: 20px;
@@ -303,22 +177,5 @@ header{
 }
 .task_right_panel{
     flex-basis: 80%;
-}
-.project_name{
-    font-size: 24px;
-    font-weight: 600;
-}
-.project_details{
-    font-size: 14px;
-    font-weight: 400;
-}
-.task_project_name{
-    margin-top: 10px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-.task_project_name i{
-    margin-right: 15px;
 }
 </style>
