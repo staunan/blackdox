@@ -8,7 +8,7 @@
     </div>
 </div>
 <div class="filter_menu">
-    <TaskFilter on:change={onFilterChange}></TaskFilter>
+    <TaskFilter filter={filter} on:change={onFilterChange}></TaskFilter>
 </div>
 {#each tasks as task}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -60,8 +60,10 @@ import { STATUS } from "./const.js";
 import EditTaskModal from "./EditTaskModal.svelte";
 import TaskDetailsModal from "./TaskDetailsModal.svelte";
 import SvelteButton from 'components/SvelteButton.svelte';
-
 const dispatch = createEventDispatcher();
+
+export let filter = {};
+
 let tasks = [];
 let currentFilter = {};
 let selectedTask = null;
@@ -69,7 +71,12 @@ let selectedTask = null;
 let newTaskModalIsActive = false;
 let detailsTaskModalIsActive = false;
 let editTask = false;
-
+$: {
+    if(filter){
+        console.log("Filter Changed", filter);
+        currentFilter = filter;
+    }
+}
 function onFilterChange(event){
     currentFilter = event.detail;
     getAllTasks();

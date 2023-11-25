@@ -44,40 +44,27 @@
 </ContentModal>
 
 <!-- Create/Update Story Modal -->
-<ContentModal 
-    title={editStory ? "Update Story" : "New Story"}
-    active={newStoryModalIsActive} 
-    overlayclose={true}
+<EditStory 
+    active={editStoryModalIsActive}
+    edit={editStory}
+    story={selectedStory}
     on:close={closeNewStoryModal}
->
-    <div slot="body">
-        <QuillEditor content={initial_story} on:change={quillContentChangeHandler}></QuillEditor>
-    </div>
-    <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
-        <SvelteButton color="red" title="Cancel" on:tap={closeNewStoryModal}></SvelteButton>
-        {#if editStory}
-            <SvelteButton color="blue" title="Update Story" on:tap={onUpdateStorySubmit}></SvelteButton>
-        {:else}
-            <SvelteButton color="blue" title="Create Story" on:tap={onNewStorySubmit}></SvelteButton>
-        {/if}
-    </div>
-</ContentModal>
+    on:created={onNewStoryCreated}
+    on:updated={onStoryUpdated}
+></EditStory>
 
 <script>
 import { onMount } from 'svelte';
 import {successToast} from "lib/js/toast.js";
-import {createStory, updateStory, getStories, deleteStory} from "apis/stories.js";
+import {getStories, deleteStory} from "apis/stories.js";
 import SvelteButton from 'components/SvelteButton.svelte';
 import DeleteButton from 'components/DeleteButton.svelte';
-import QuillEditor from 'components/QuillEditor.svelte';
 import QuillView from 'components/QuillView.svelte';
 import ContentModal from 'components/ContentModal.svelte';
+import EditStory from './EditStory.svelte';
 
-let newStoryModalIsActive = false;
+let editStoryModalIsActive = false;
 let detailsStoryModalIsActive = false;
-
-let story = "";
-let initial_story = "";
 
 let stories = [];
 let selectedStory = null;
@@ -88,14 +75,34 @@ onMount(async () => {
 });
 
 function openNewStoryModal(){
-    newStoryModalIsActive = true;
+    selectedStory = null;
     editStory = false;
-    initial_story = "";
-    setStoryData(null);
+    editStoryModalIsActive = true;
+}
+function openUpdateStoryModal(){
+    editStory = true;
+    editStoryModalIsActive = true;
+    detailsStoryModalIsActive = false;
 }
 function closeNewStoryModal(){
-    newStoryModalIsActive = false;
+    editStoryModalIsActive = false;
 }
+function onNewStoryCreated(event){
+    let newStory = event.detail;
+    stories = [newStory, ...stories];
+}
+function onStoryUpdated(event){
+    let updatedStory = event.detail;
+    stories = stories.map(function(storyItem){
+        if(updatedStory.internalId === storyItem.internalId){
+            return updatedStory;
+        }else{
+            return storyItem;
+        }
+    });
+}
+
+
 function openStoryDetailsModal(story){
     selectedStory = story;
     detailsStoryModalIsActive = true;
@@ -103,59 +110,10 @@ function openStoryDetailsModal(story){
 function closeStoryDetailsModal(){
     detailsStoryModalIsActive = false;
 }
-function quillContentChangeHandler(event){
-    story = event.detail;
-}
-function openUpdateStoryModal(){
-    editStory = true;
-    newStoryModalIsActive = true;
-    detailsStoryModalIsActive = false;
-    setStoryData(selectedStory);
-}
-function setStoryData(story_data){
-    if(story_data){
-        story = story_data.story;
-    }else{
-        story = "";
-    }
-}
 async function getAllStories(){
     try{
         let response = await getStories();
         stories = response.stories;
-    }catch(error){
-        console.log(error);
-    }
-}
-async function onNewStorySubmit(event){
-    let formData = {
-        'story': story
-    };
-    try{
-        let response = await createStory(formData);
-        closeNewStoryModal();
-        stories = [response.story, ...stories];
-        successToast(response.message);
-    }catch(error){
-        console.log(error);
-    }
-}
-async function onUpdateStorySubmit(event){
-    let formData = {
-        'story_id': selectedStory.internalId,
-        'story': story
-    };
-    try{
-        let response = await updateStory(formData);
-        closeNewStoryModal();
-        stories = stories.map(function(story){
-            if(selectedStory.internalId === story.internalId){
-                return response.story;
-            }else{
-                return story;
-            }
-        });
-        successToast(response.message);
     }catch(error){
         console.log(error);
     }

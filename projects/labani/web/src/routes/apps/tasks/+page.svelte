@@ -11,21 +11,27 @@
     </div>
     <div class="task_right_panel">
         {#if selectedLeftMenuItem === "Tasks"}
-            <TaskList />
+            <TaskList filter={currentFilter} />
         {:else if selectedLeftMenuItem === "Projects"}
-            <ProjectList />
+            <ProjectList on:selected={handleOnProjectSelect} />
         {/if}
     </div>
 </div>
-
 <script>
 import MenuItem from 'components/MenuItem.svelte';
 import ProjectList from "./ProjectList.svelte";
 import TaskList from "./TaskList.svelte";
 
 let selectedLeftMenuItem = "Tasks";
+let selectedProject = null;
+let currentFilter = {};
 function handleLeftMenuItemSelected(menu_item_name){
     selectedLeftMenuItem = menu_item_name;
+}
+function handleOnProjectSelect(event){
+    selectedProject = event.detail;
+    currentFilter = {"project": selectedProject.internalId};
+    selectedLeftMenuItem = "Tasks";
 }
 </script>
 <style>

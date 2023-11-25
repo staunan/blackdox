@@ -35,7 +35,7 @@
     overlayclose={true}
     on:close={closeDetailsBookmarkModal}
 >
-    <div slot="body">
+    <div slot="body" class="modal_body">
         {#if selectedBookmark}
             <div class="text_info">
                 <div class="info_label">Domain</div>
@@ -73,7 +73,7 @@
     overlayclose={true}
     on:close={closeCreateBookmarkModal}
 >
-    <div slot="body">
+    <div slot="body" class="modal_body">
         <Textbox label="Bookmark Title" placeholder="Title" on:change={titleChangeHandler} value={title}></Textbox>
         <Textbox label="URL Address" placeholder="Website Link" on:change={domainChangeHandler} value={domain}></Textbox>
         <Textbox label="Username" placeholder="Username" on:change={usernameChangeHandler} value={username}></Textbox>
@@ -329,5 +329,8 @@ header{
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+.modal_body{
+    padding: 20px;
 }
 </style>
