@@ -6,6 +6,8 @@
 >
     <div slot="body">
         <QuillEditor content={default_story} on:change={quillContentChangeHandler}></QuillEditor>
+
+
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeModal}></SvelteButton>
@@ -30,6 +32,8 @@ export let edit = false;
 export let story = "";
 let default_story = "";
 let quill_story_content = "";
+let tags = [];
+
 $: {
     if(story){
         default_story = story.story;

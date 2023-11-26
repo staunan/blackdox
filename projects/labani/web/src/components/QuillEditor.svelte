@@ -3,7 +3,9 @@
 </div>
 <script>
 import { onMount } from "svelte";
+import "quill-emoji/dist/quill-emoji.css";
 import {createEventDispatcher} from 'svelte';
+
 export let placeholder = "Write your story...";
 export let toolbarOptions = [
     [{ header: 1 }, { header: 2 }, "blockquote", "link", "image", "video"],
@@ -26,9 +28,14 @@ $: {
 
 onMount(async () => {
     const { default: Quill } = await import("quill");
+    const { default: Emoji } = await import("quill-emoji");
+    Quill.register("modules/emoji", Emoji);
     quillObj = new Quill(editorElement, {
         modules: {
-            toolbar: toolbarOptions
+            toolbar: toolbarOptions,
+            "emoji-toolbar": true,
+            "emoji-textarea": true,
+            "emoji-shortname": true,
         },
         theme: "snow",
         placeholder: placeholder
@@ -54,5 +61,15 @@ function onContentChangeHandler(){
 }
 :global(.editor-wrapper .ql-toolbar) {
 	border-top: none;
+}
+:global(#textarea-emoji) {
+    max-width: 70% !important;
+}
+:global(#tab-panel) {
+    padding: 10px;
+}
+:global(#tab-panel>span) {
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
 </style>
