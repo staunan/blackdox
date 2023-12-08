@@ -6,8 +6,7 @@
 >
     <div slot="body">
         <QuillEditor content={default_story} on:change={quillContentChangeHandler}></QuillEditor>
-
-
+        <TagSelector selected={selectedTags}></TagSelector>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeModal}></SvelteButton>
@@ -22,6 +21,7 @@
 import QuillEditor from 'components/QuillEditor.svelte';
 import ContentModal from 'components/ContentModal.svelte';
 import SvelteButton from 'components/SvelteButton.svelte';
+import TagSelector from './TagSelector.svelte';
 import {createEventDispatcher} from 'svelte';
 import {createStory, updateStory} from "apis/stories.js";
 import {successToast} from "lib/js/toast.js";
@@ -32,7 +32,7 @@ export let edit = false;
 export let story = "";
 let default_story = "";
 let quill_story_content = "";
-let tags = [];
+let selectedTags = ["Tag 2"];
 
 $: {
     if(story){
