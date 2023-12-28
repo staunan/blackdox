@@ -56,12 +56,6 @@ function onContentChangeHandler(){
 </script>
 <style>
 @import 'https://cdn.quilljs.com/1.3.6/quill.snow.css';
-:global(.editor-wrapper .ql-container) {
-	border-bottom: none;
-}
-:global(.editor-wrapper .ql-toolbar) {
-	border-top: none;
-}
 :global(#textarea-emoji) {
     max-width: 70% !important;
 }

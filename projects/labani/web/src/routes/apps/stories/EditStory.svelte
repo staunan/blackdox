@@ -5,8 +5,16 @@
     on:close={closeModal}
 >
     <div slot="body">
-        <QuillEditor content={default_story} on:change={quillContentChangeHandler}></QuillEditor>
-        <TagSelector selected={selectedTags}></TagSelector>
+        <div class="story_editor_form">
+            <div class="rich_text_editor">
+                <div class="form_label">Write your story</div>
+                <QuillEditor content={default_story} on:change={quillContentChangeHandler}></QuillEditor>
+            </div>
+            <div class="tag_selector">
+                <div class="form_label">Select Tags</div>
+                <TagSelector selected={selectedTags}></TagSelector>
+            </div>
+        </div>
     </div>
     <div slot="footer" class="footer_button_wrapper d-flex justify-content-space-between">
         <SvelteButton color="red" title="Cancel" on:tap={closeModal}></SvelteButton>
@@ -76,3 +84,11 @@ async function handleUpdateStoryButtonClick(event){
     }
 }
 </script>
+<style>
+.rich_text_editor{
+    padding: 20px;
+}
+.tag_selector{
+    padding: 20px;
+}
+</style>
