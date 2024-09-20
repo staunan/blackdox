@@ -30,6 +30,6 @@ header{
 }
 .page_area{
     padding: 50px;
-    padding-top: 110px;
+    padding-top: 60px;
 }
 </style>
