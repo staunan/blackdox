@@ -84,6 +84,25 @@ export const updateBookmark = async (req, res) => {
 	}
 };
 
+export const searchBookmark = async (req, res) => {
+	try {
+		let {
+			search_text
+		} = req.body;
+
+		let condition = {};
+		if(search_text){
+			condition["$text"] = {$search: search_text};
+		}
+		let resultSet = await Bookmark.find(condition);
+
+		return res.status(200).json({bookmarks: resultSet});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({message: err.message});
+	}
+};
+
 export const getBookmarks = async (req, res) => {
 	try {
 		const perPage = req.query.perPage ? req.query.perPage : 10;

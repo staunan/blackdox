@@ -5,7 +5,8 @@ import {
     createBookmark,
     getBookmarks,
     deleteBookmark,
-    updateBookmark
+    updateBookmark,
+    searchBookmark
 } from "../controllers/bookmark.js";
 
 router.post(
@@ -26,6 +27,11 @@ router.get(
 router.post(
     "/delete_bookmark",
     deleteBookmark
+);
+
+router.post(
+    "/search_bookmark",
+    searchBookmark
 );
 
 export const bookmarkRoute = router;
