@@ -4,8 +4,8 @@
 		
 	</div>
 </header>
-<div class="spending_list">
-    <h1>Spending List</h1>
+<div class="page_area">
+    <h1>Routine List</h1>
 </div>
 <style>
 header{
@@ -27,5 +27,9 @@ header{
     font-size: 25px;
     font-weight: bold;
     color: #fff;
+}
+.page_area{
+    padding: 50px;
+    padding-top: 110px;
 }
 </style>
