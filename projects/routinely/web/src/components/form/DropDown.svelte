@@ -1,5 +1,7 @@
 <div class="dropdown_container">
-    <FormLabel label={label}></FormLabel>
+    {#if label }
+        <FormLabel label={label}></FormLabel>
+    {/if}
     <div class="dropdown">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -29,19 +31,25 @@
             </div>        
         </div>
     </div>
+    {#if hasError}
+        <FormErrorMessage message={errorMessage}></FormErrorMessage>
+    {/if}
 </div>
 
 <script>
-import FormLabel from 'components/FormLabel.svelte';
-
+import FormLabel from 'components/form/FormLabel.svelte';
+import FormErrorMessage from 'components/form/FormErrorMessage.svelte';
 import {createEventDispatcher} from 'svelte';
 import { onMount } from "svelte";
 const dispatch = createEventDispatcher();
 
-export let label = "Input Label";
+export let label = "";
 export let items = [];
 export let currentitem = null;
 export let placeholder = "--Select Item--";
+export let hasError = false;
+export let errorMessage = "";
+
 let active = false;
 let selected_item = null;
 $: {
