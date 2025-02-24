@@ -31,7 +31,6 @@ $: {
             selectedItems.forEach((item)=>{
                 arr.push(days.filter((day)=>day.short == item)[0]);
             });
-            console.log(arr);
             selectedDays = arr;
         }else{
             selectedDays = [];
@@ -55,7 +54,6 @@ function dayClickedHandler(day){
 </script>
 <style>
 .days{
-    padding-top: 10px;
     display: flex;
     align-items: center;
     justify-content: left;
@@ -64,17 +62,17 @@ function dayClickedHandler(day){
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
     border-radius: 50%;
     border: 1px solid #ccc;
     background-color: #fff;
-    margin-right: 20px;
-    margin-bottom: 20px;
+    margin-right: 15px;
+    margin-bottom: 10px;
     font-family: monospace;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 500;
 }
 .day:hover{
     background-color: #ccc;

@@ -15,8 +15,10 @@
 import Dropdown from 'components/form/Dropdown.svelte';
 import FormLabel from 'components/form/FormLabel.svelte';
 export let label = "";
+export let selectedTime = "00:00";
 
 let Hours = [
+    {"label": "00", "value": 0},
 	{"label": "01", "value": 1},
     {"label": "02", "value": 2},
     {"label": "03", "value": 3},
@@ -48,11 +50,29 @@ let Minutes = [
 let selectedHour = null;
 let selectedMinute = null;
 
+$: {
+    if(selectedTime){
+        let arr = selectedTime.split(":");
+        try{
+            selectedHour = Hours.filter((h)=> h.label == arr[0])[0];
+            selectedMinute = Minutes.filter((m)=> m.label == arr[1])[0];
+            console.log(selectedHour);
+            console.log(selectedMinute);
+        }catch(err){
+            console.log("Error while parsing time input");
+            console.log(err);
+        }
+    }
+}
+
 function hourChangeHandler(event){
-    selectedHour = event.detail;
+    calculateTime(event.detail.label, selectedMinute.label);
 }
 function minuteChangeHandler(event){
-    selectedMinute = event.detail;
+    calculateTime(selectedHour.label, event.detail.label);
+}
+function calculateTime(hour, minute){
+    
 }
 </script>
 <style>

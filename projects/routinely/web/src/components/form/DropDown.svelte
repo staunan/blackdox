@@ -12,9 +12,7 @@
             <div class="dropdown_no_selected_item">{placeholder}</div>
             {/if}
             <div class="dropdown_expand_icon" class:collapse={active}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none">
-                    <path d="M7 10L12 15L17 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <ArrowDown></ArrowDown>
             </div>
         </div>
         <div class="dropdown_content" class:show={active}>
@@ -39,6 +37,8 @@
 <script>
 import FormLabel from 'components/form/FormLabel.svelte';
 import FormErrorMessage from 'components/form/FormErrorMessage.svelte';
+import ArrowDown from 'components/svg/ArrowDown.svelte';
+
 import {createEventDispatcher} from 'svelte';
 import { onMount } from "svelte";
 const dispatch = createEventDispatcher();

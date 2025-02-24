@@ -7,5 +7,6 @@ export let label = "Input Label";
     font-family: monospace;
     font-size: 14px;
     font-weight: bold;
+    padding-bottom: 5px;
 }
 </style>
