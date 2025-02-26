@@ -1,6 +1,6 @@
 <script>
-	import Header from './Header.svelte';
-	import '../app.css';
+	import Header from "./Header.svelte";
+	import "../app.css";
 
 	let { children } = $props();
 </script>
@@ -14,7 +14,8 @@
 
 	<footer>
 		<p>
-			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
+			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to
+			learn about SvelteKit
 		</p>
 	</footer>
 </div>
