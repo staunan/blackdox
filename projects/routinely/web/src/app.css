@@ -107,6 +107,9 @@ button:focus:not(:focus-visible) {
 }
 
 /* Routinely */
+*{
+    box-sizing: border-box;
+}
 sup { 
 	vertical-align: top; font-size: 0.6em; 
 }

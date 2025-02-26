@@ -23,6 +23,7 @@
 	let node_routine_mode_display_string;
 	let routine_mode_display_string_has_error;
 	let routine_mode_display_string_error_message;
+	let is_success_modal_active = false;
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -57,15 +58,7 @@
 	}
 
 	onMount(() => {
-		// Set Default Values --
-		routine_title = "";
-		routine_details = "";
-		selected_routine_mode = all_routine_modes[0]; // Daily
-		selected_days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-		selected_week_day = "";
-		selected_month_day = 0;
-		selected_month_and_date = "00-00";
-		selectedTime = "00:00";
+		resetForm();
 	});
 
 	function titleChangedHandler(event) {
@@ -350,15 +343,35 @@
 		if (routineObj === false) {
 			return;
 		}
-		let formData = {
-			routine_title: routine_title,
-		};
 		try {
-			let response = await createRoutine(formData);
-			console.log(response);
+			// let response = await createRoutine(routineObj);
+			// console.log(response);
+			is_success_modal_active = true;
 		} catch (error) {
 			console.log(error);
 		}
+	}
+	function successModalCloseHandler() {
+		is_success_modal_active = false;
+	}
+	function createAnotherRoutineHandler() {
+		successModalCloseHandler();
+		resetForm();
+	}
+	function goToListHandler() {
+		successModalCloseHandler();
+	}
+	function resetForm() {
+		// Set Default Values --
+		routine_title = "";
+		routine_details = "";
+		selected_routine_mode = all_routine_modes[0]; // Daily
+		selected_days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		selected_week_day = "";
+		selected_month_day = 0;
+		selected_month_and_date = "00-00";
+		selectedTime = "00:00";
+		generateRoutineModeDisplayString();
 	}
 </script>
 
@@ -510,7 +523,13 @@
 	</div>
 </Card>
 
-<SuccessModal active={false}></SuccessModal>
+<SuccessModal
+	active={is_success_modal_active}
+	overlayclose={false}
+	on:close={successModalCloseHandler}
+	on:createanother={createAnotherRoutineHandler}
+	on:gotolist={goToListHandler}
+></SuccessModal>
 
 <style>
 	.form_heading {

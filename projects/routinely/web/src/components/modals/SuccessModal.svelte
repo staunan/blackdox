@@ -1,7 +1,9 @@
 <script>
 	import CloseButton from "components/buttons/CloseButton.svelte";
+	import SubmitButton from "components/form/SubmitButton.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onMount } from "svelte";
+	import "animate.css";
 
 	export let active = false;
 	export let overlayclose = false;
@@ -19,16 +21,46 @@
 	function closeModal() {
 		dispatch("close");
 	}
+	function goToListHandler() {
+		dispatch("gotolist");
+	}
+	function createAnotherHandler() {
+		dispatch("createanother");
+	}
 </script>
 
 {#if active}
 	<div class="content_modal">
 		<div class="modal_overlay"></div>
 		<div class="content_modal_window">
-			<!-- Success Tick -->
-			<div class="checkmark-circle">
-				<div class="background"></div>
-				<div class="checkmark draw"></div>
+			<div class="content_area animate__animated animate__tada">
+				<!-- Success Tick -->
+				<div class="success_tick">
+					<div class="checkmark-circle">
+						<div class="background"></div>
+						<div class="checkmark draw"></div>
+					</div>
+				</div>
+				<div class="success_title">Awesome!</div>
+				<div class="success_message">
+					Your routine has been created successfully.
+				</div>
+				<div class="row">
+					<div class="go_to_list">
+						<SubmitButton
+							title="Go to list"
+							on:tap={goToListHandler}
+							color="red"
+						></SubmitButton>
+					</div>
+					<div class="create_another">
+						<SubmitButton
+							title="Create Another"
+							on:tap={createAnotherHandler}
+							color="blue"
+						></SubmitButton>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -44,6 +76,7 @@
 		width: 100%;
 		height: 100vh;
 		z-index: 1001;
+		font-family: monospace;
 	}
 	.modal_overlay {
 		background: #3f51b5c9;
@@ -51,17 +84,68 @@
 		width: inherit;
 	}
 	.content_modal_window {
-		position: absolute;
+		position: fixed !important;
 		top: 50%;
 		left: 50%;
 		width: 500px;
-		height: 90%;
+		height: auto;
 		transform: translate(-50%, -50%);
-		display: flex;
-		flex-direction: column;
+		border-radius: 8px;
+		z-index: 10001;
+		animation-delay: 200ms;
+		background: transparent;
+	}
+	.content_area {
 		box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
 		background-color: #fff;
+		border-radius: 8px;
+		padding-bottom: 20px;
+		display: flex;
+		flex-direction: column;
 	}
+	.success_tick {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-top: 20px;
+	}
+	.success_title {
+		justify-content: center;
+		align-items: center;
+		padding-top: 30px;
+		display: flex;
+		width: 100%;
+		font-size: 24px;
+		font-weight: 700;
+		letter-spacing: 10px;
+	}
+	.row {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		justify-content: space-between;
+		padding: 20px;
+	}
+	.go_to_list {
+		flex: 1;
+		display: flex;
+		justify-content: start;
+		align-items: center;
+	}
+	.create_another {
+		flex: 1;
+		display: flex;
+		justify-content: end;
+		align-items: center;
+	}
+	.success_message {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-top: 20px;
+	}
+	/* Start - Checkmark Circle */
 	.checkmark-circle {
 		width: 150px;
 		height: 150px;
@@ -80,15 +164,15 @@
 		border-radius: 5px;
 	}
 	.checkmark-circle .checkmark.draw:after {
-		-webkit-animation-delay: 300ms;
-		-moz-animation-delay: 300ms;
-		animation-delay: 300ms;
-		-webkit-animation-duration: 1s;
-		-moz-animation-duration: 1s;
-		animation-duration: 1s;
-		-webkit-animation-timing-function: ease;
-		-moz-animation-timing-function: ease;
-		animation-timing-function: ease;
+		-webkit-animation-delay: 500ms;
+		-moz-animation-delay: 500ms;
+		animation-delay: 500ms;
+		-webkit-animation-duration: 2s;
+		-moz-animation-duration: 2s;
+		animation-duration: 2s;
+		-webkit-animation-timing-function: ease-out;
+		-moz-animation-timing-function: ease-out;
+		animation-timing-function: ease-out;
 		-webkit-animation-name: checkmark;
 		-moz-animation-name: checkmark;
 		animation-name: checkmark;
@@ -184,4 +268,5 @@
 			opacity: 1;
 		}
 	}
+	/* End - Checkmark Circle */
 </style>

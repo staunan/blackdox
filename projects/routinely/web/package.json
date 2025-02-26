@@ -10,6 +10,7 @@
 		"prepare": "svelte-kit sync || echo ''"
 	},
 	"dependencies": {
+		"animate.css": "^4.1.1",
 		"axios": "^1.5.1",
 		"date-picker-svelte": "^2.15.1"
 	},
