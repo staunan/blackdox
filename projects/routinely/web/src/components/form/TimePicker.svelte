@@ -12,26 +12,16 @@
     </div>
 </div>
 <script>
+import { onMount } from "svelte";
 import Dropdown from 'components/form/Dropdown.svelte';
 import FormLabel from 'components/form/FormLabel.svelte';
+import {createEventDispatcher} from 'svelte';
+const dispatch = createEventDispatcher();
 export let label = "";
-export let selectedTime = "00:00";
+export let value = "00:00";
+export let format = "24Hours";
 
-let Hours = [
-    {"label": "00", "value": 0},
-	{"label": "01", "value": 1},
-    {"label": "02", "value": 2},
-    {"label": "03", "value": 3},
-    {"label": "04", "value": 4},
-    {"label": "05", "value": 5},
-    {"label": "06", "value": 6},
-    {"label": "07", "value": 7},
-    {"label": "08", "value": 8},
-    {"label": "09", "value": 9},
-    {"label": "10", "value": 10},
-    {"label": "11", "value": 11},
-    {"label": "12", "value": 12},
-];
+let Hours = [];
 let Minutes = [
 	{"label": "00", "value": 0},
     {"label": "05", "value": 5},
@@ -50,14 +40,59 @@ let Minutes = [
 let selectedHour = null;
 let selectedMinute = null;
 
+onMount(()=>{
+    if(format === "24Hours"){
+        Hours = [
+            {"label": "00", "value": 0},
+            {"label": "01", "value": 1},
+            {"label": "02", "value": 2},
+            {"label": "03", "value": 3},
+            {"label": "04", "value": 4},
+            {"label": "05", "value": 5},
+            {"label": "06", "value": 6},
+            {"label": "07", "value": 7},
+            {"label": "08", "value": 8},
+            {"label": "09", "value": 9},
+            {"label": "10", "value": 10},
+            {"label": "11", "value": 11},
+            {"label": "12", "value": 12},
+            {"label": "13", "value": 13},
+            {"label": "14", "value": 14},
+            {"label": "15", "value": 15},
+            {"label": "16", "value": 16},
+            {"label": "17", "value": 17},
+            {"label": "18", "value": 18},
+            {"label": "19", "value": 19},
+            {"label": "20", "value": 20},
+            {"label": "21", "value": 21},
+            {"label": "22", "value": 22},
+            {"label": "23", "value": 23}
+        ];
+    }else{
+        Hours = [
+            {"label": "00", "value": 0},
+            {"label": "01", "value": 1},
+            {"label": "02", "value": 2},
+            {"label": "03", "value": 3},
+            {"label": "04", "value": 4},
+            {"label": "05", "value": 5},
+            {"label": "06", "value": 6},
+            {"label": "07", "value": 7},
+            {"label": "08", "value": 8},
+            {"label": "09", "value": 9},
+            {"label": "10", "value": 10},
+            {"label": "11", "value": 11},
+            {"label": "12", "value": 12},
+        ];
+    }
+});
+
 $: {
-    if(selectedTime){
-        let arr = selectedTime.split(":");
+    if(value){
+        let arr = value.split(":");
         try{
             selectedHour = Hours.filter((h)=> h.label == arr[0])[0];
             selectedMinute = Minutes.filter((m)=> m.label == arr[1])[0];
-            console.log(selectedHour);
-            console.log(selectedMinute);
         }catch(err){
             console.log("Error while parsing time input");
             console.log(err);
@@ -66,13 +101,16 @@ $: {
 }
 
 function hourChangeHandler(event){
+    selectedHour = event.detail;
     calculateTime(event.detail.label, selectedMinute.label);
 }
 function minuteChangeHandler(event){
+    selectedMinute = event.detail;
     calculateTime(selectedHour.label, event.detail.label);
 }
 function calculateTime(hour, minute){
-    
+    let time = hour + ":" + minute;
+    dispatch('change', time);
 }
 </script>
 <style>

@@ -105,3 +105,8 @@ button:focus:not(:focus-visible) {
 	width: 1px;
 	white-space: nowrap;
 }
+
+/* Routinely */
+sup { 
+	vertical-align: top; font-size: 0.6em; 
+}

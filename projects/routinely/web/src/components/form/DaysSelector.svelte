@@ -1,5 +1,7 @@
 <div class="days_selector">
-    <FormLabel label={label}></FormLabel>
+    {#if label }
+        <FormLabel label={label}></FormLabel>
+    {/if}
     <div class="days">
         {#if days.length > 0}
             {#each days as day}
@@ -12,8 +14,13 @@
 </div>
 <script>
 import FormLabel from 'components/form/FormLabel.svelte';
-export let label = "Input Label";
-export let selectedItems = [];
+import {createEventDispatcher} from 'svelte';
+
+// Props --
+export let label = "";
+export let value = [];
+
+const dispatch = createEventDispatcher();
 let selectedDays = [];
 let days = [
     {id: 1, short: "Sun", title: "Sunday"},
@@ -25,10 +32,10 @@ let days = [
     {id: 7, short: "Sat", title: "Saturday"},
 ];
 $: {
-    if(selectedItems){
-        if(selectedItems.length > 0){
+    if(value){
+        if(value.length > 0){
             let arr = [];
-            selectedItems.forEach((item)=>{
+            value.forEach((item)=>{
                 arr.push(days.filter((day)=>day.short == item)[0]);
             });
             selectedDays = arr;
@@ -50,6 +57,7 @@ function dayClickedHandler(day){
     if(match == false){
         selectedDays = [...selectedDays, day];
     }
+    dispatch('change', selectedDays.map((d)=>d.short));
 }
 </script>
 <style>

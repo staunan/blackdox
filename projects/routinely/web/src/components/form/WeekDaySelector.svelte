@@ -1,19 +1,25 @@
 <div class="days_selector">
-    <FormLabel label={label}></FormLabel>
+    {#if label }
+        <FormLabel label={label}></FormLabel>
+    {/if}
     <div class="days">
         {#if days.length > 0}
             {#each days as day}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                  <!-- svelte-ignore a11y-no-static-element-interactions -->
-                <div class="day" class:selected={ day.id == selectedDay.id } on:click={() => dayClickedHandler(day)} title={day.title}>{day.short}</div>
+                <div class="day" class:selected={selectedDay && day.id == selectedDay.id } on:click={() => dayClickedHandler(day)} title={day.title}>{day.short}</div>
             {/each}
         {/if}
     </div>
 </div>
 <script>
 import FormLabel from 'components/form/FormLabel.svelte';
-export let label = "Input Label";
-export let selectedItem = "";
+import {createEventDispatcher} from 'svelte';
+
+export let label = "";
+export let value = "";
+
+const dispatch = createEventDispatcher();
 let selectedDay = null;
 let days = [
     {id: 1, short: "Sun", title: "Sunday"},
@@ -23,20 +29,26 @@ let days = [
     {id: 5, short: "Thu", title: "Thursday"},
     {id: 6, short: "Fri", title: "Friday"},
     {id: 7, short: "Sat", title: "Saturday"},
-    {id: 8, short: "Any", title: "Anyday"},
 ];
 $: {
-    if(selectedItem){
-        selectedDay = days.filter((day)=>day.short == selectedItem)[0];
+    if(value){
+        selectedDay = days.filter((day)=>day.short == value)[0];
+    }else{
+        selectedDay = null;
     }
 }
 function dayClickedHandler(day){
-    selectedDay = day;
+    if(selectedDay && day.id === selectedDay.id){
+        selectedDay = null;
+        dispatch('change', null);
+    }else{
+        selectedDay = day;
+        dispatch('change', selectedDay.short);
+    }
 }
 </script>
 <style>
 .days{
-    padding-top: 10px;
     display: flex;
     align-items: center;
     justify-content: left;
@@ -45,17 +57,17 @@ function dayClickedHandler(day){
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
     border-radius: 50%;
     border: 1px solid #ccc;
     background-color: #fff;
-    margin-right: 20px;
-    margin-bottom: 20px;
+    margin-right: 10px;
+    margin-bottom: 10px;
     font-family: monospace;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 500;
 }
 .day:hover{
     background-color: #ccc;

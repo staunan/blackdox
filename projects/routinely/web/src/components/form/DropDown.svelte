@@ -1,18 +1,18 @@
-<div class="dropdown_container">
+<div class="dropdown_container" class:disabled={disabled}>
     {#if label }
         <FormLabel label={label}></FormLabel>
     {/if}
     <div class="dropdown">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="dropdown_trigger" on:click={() => active = !active}>
+        <div class="dropdown_trigger" on:click={() => active = !active} >
             {#if selected_item}
             <div class="dropdown_label">{selected_item.label}</div>
             {:else}
             <div class="dropdown_no_selected_item">{placeholder}</div>
             {/if}
             <div class="dropdown_expand_icon" class:collapse={active}>
-                <ArrowDown></ArrowDown>
+                <ArrowDown disabled={disabled}></ArrowDown>
             </div>
         </div>
         <div class="dropdown_content" class:show={active}>
@@ -21,7 +21,7 @@
                     {#each items as item}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
-                    <div class="dropdown_listitem" on:click={() => handleDropdownItemClick(item)}>{item.label}</div>
+                    <div class="dropdown_listitem" class:selected={selected_item && item.value === selected_item.value} on:click={() => handleDropdownItemClick(item)}>{item.label}</div>
                     {/each}
                 {:else}
                 <div class="dropdown_no_item" >No Data Found !</div>
@@ -49,12 +49,15 @@ export let currentitem = null;
 export let placeholder = "--Select Item--";
 export let hasError = false;
 export let errorMessage = "";
+export let disabled = false;
 
 let active = false;
 let selected_item = null;
 $: {
     if(currentitem){
         selected_item = currentitem;
+    }else{
+        selected_item = null;
     }
 }
 onMount(()=>{
@@ -65,12 +68,22 @@ onMount(()=>{
     });
 });
 function handleDropdownItemClick(item){
+    if(disabled){
+        return;
+    }
     dispatch('change', item);
     selected_item = item;
     active = !active;
 }
 </script>
 <style>
+.dropdown_container.disabled{
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.dropdown_container.disabled *{
+    color: #ddd;
+}
 .dropdown{
     position: relative;
     font-family: monospace;
@@ -133,6 +146,10 @@ function handleDropdownItemClick(item){
 }
 .dropdown_listitem:hover{
     background-color: #ddd;
+}
+.dropdown_listitem.selected{
+    background-color: #673ab7;
+    color: #fff;
 }
 .dropdown_label{
     font-size: 18px;

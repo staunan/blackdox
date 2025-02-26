@@ -3,15 +3,22 @@
         <FormLabel label={label}></FormLabel>
     {/if}
     <div class="daypicker_input">
-        <Dropdown placeholder="00" items={Days} currentitem={selectedDay} on:change={dayChangeHandler} />
+        <Dropdown placeholder="00" items={Days} currentitem={day} on:change={dayChangeHandler} />
     </div>
 </div>
 <script>
 import Dropdown from 'components/form/Dropdown.svelte';
 import FormLabel from 'components/form/FormLabel.svelte';
-export let label = "";
+import {createEventDispatcher} from 'svelte';
 
+export let label = "";
+export let value = 0;
+
+const dispatch = createEventDispatcher();
 let Days = [
+    {"label": "Anyday", "value": 0},
+    {"label": "End of the Month", "value": 32},
+    {"label": "The day before end of the Month", "value": 33},
     {"label": "01", "value": 1},
     {"label": "02", "value": 2},
     {"label": "03", "value": 3},
@@ -42,14 +49,20 @@ let Days = [
     {"label": "28", "value": 28},
     {"label": "29", "value": 29},
     {"label": "30", "value": 30},
-    {"label": "31", "value": 31},
-    {"label": "End of the Month", "value": 32},
-    {"label": "The day before end of the Month", "value": 33},
-    {"label": "Anyday", "value": 34},
+    {"label": "31", "value": 31}
 ];
-let selectedDay = null;
+let day = null;
+
+$: {
+    if(value && value <=33){
+        day = Days.filter((d)=>d.value == value)[0];
+    }else if(value === 0){
+        day = Days[0];
+    }
+}
 
 function dayChangeHandler(event){
-    selectedDay = event.detail;
+    day = event.detail;
+    dispatch('change', day.value);
 }
 </script>
