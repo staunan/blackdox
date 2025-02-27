@@ -1,3 +1,22 @@
+<script>
+	import { createEventDispatcher } from "svelte";
+	const dispatch = createEventDispatcher();
+
+	function dailyClickHandler(event) {
+		dispatch("change", "daily");
+	}
+	function weeklyClickHandler(event) {
+		dispatch("change", "weekly");
+	}
+	function monthlyClickHandler(event) {
+		dispatch("change", "monthly");
+	}
+	function yearlyClickHandler(event) {
+		dispatch("change", "yearly");
+	}
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="tabs">
 	<input
 		id="tab-1"
@@ -6,54 +25,31 @@
 		checked="checked"
 		name="tab"
 	/>
-	<label for="tab-1" class="tab tab-primary">Daily</label>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<label for="tab-1" class="tab tab-primary" on:click={dailyClickHandler}
+		>Daily</label
+	>
 	<input id="tab-2" type="radio" class="tab tab-selector" name="tab" />
-	<label for="tab-2" class="tab tab-success">Weekly</label>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<label for="tab-2" class="tab tab-success" on:click={weeklyClickHandler}
+		>Weekly</label
+	>
 	<input id="tab-3" type="radio" class="tab tab-selector" name="tab" />
-	<label for="tab-3" class="tab tab-default">Monthly</label>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<label for="tab-3" class="tab tab-default" on:click={monthlyClickHandler}
+		>Monthly</label
+	>
 	<input id="tab-4" type="radio" class="tab tab-selector" name="tab" />
-	<label for="tab-4" class="tab tab-warning">Yearly</label>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<label for="tab-4" class="tab tab-warning" on:click={yearlyClickHandler}
+		>Yearly</label
+	>
 	<div class="tabsShadow"></div>
 	<div class="glider"></div>
-	<section class="content">
-		<div class="item" id="content-1">
-			<h2 class="tab-title tab-primary">Sweep + Slide Dog Toy</h2>
-			<p>
-				<span class="numit">1</span> The Sweep + Slide is an indoor dog toy
-				with a sleek base designed to glide across any floor. Not only does
-				this toy stimulate your dog's natural chase instincts, but it also
-				sweeps away floor dust and grime with a replaceable sweeper bottom
-				cover.
-			</p>
-		</div>
-		<div class="item" id="content-2">
-			<h2 class="tab-title tab-success">Tab 2</h2>
-			<p>
-				<span class="numit">2</span> Lorem ipsum dolor sit amet, consectetur
-				adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-				magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-				ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-				irure dolor
-			</p>
-		</div>
-		<div class="item" id="content-3">
-			<h2 class="tab-title tab-default">Tab 3</h2>
-			<p>
-				<span class="numit">3</span> Lorem ipsum dolor sit amet, consectetur
-				adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-				magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-				ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
-			</p>
-		</div>
-		<div class="item" id="content-4">
-			<h2 class="tab-title tab-warning">Tab 4</h2>
-			<p>
-				<span class="numit">4</span> Lorem ipsum dolor sit amet, consectetur
-				adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-				magna aliqua.
-			</p>
-		</div>
-	</section>
 </div>
 
 <style>
@@ -86,14 +82,6 @@
 		pointer-events: none;
 	}
 
-	.content .item {
-		opacity: 0;
-		visibility: hidden;
-		transition: all 0.3s;
-		position: absolute;
-		padding: 10px 20px;
-	}
-
 	#tab-1:checked ~ .glider {
 		left: 0px;
 	}
@@ -108,18 +96,9 @@
 	#tab-3:checked + label {
 		color: #525252;
 	}
-
-	#tab-1:checked ~ section #content-1,
-	#tab-2:checked ~ section #content-2,
-	#tab-3:checked ~ section #content-3,
-	#tab-4:checked ~ section #content-4 {
-		opacity: 1;
-		visibility: visible;
-	}
-
 	.tabs input + label {
 		margin: 12px -2px;
-		width: 20%;
+		width: 25%;
 		transition: all 0.3s;
 		text-align: center;
 		border: none;
@@ -144,80 +123,6 @@
 		background: hsl(232deg 6% 17%);
 		cursor: pointer;
 	}
-
-	.content {
-		margin: 1px -2px;
-		text-align: left;
-		line-height: 20px;
-		height: 240px;
-		border-radius: 0;
-		box-shadow:
-			0 2px 3px rgb(10 10 10 / 10%),
-			0 0 0 1px rgb(10 10 10 / 10%);
-		display: block;
-		padding: 1.25rem;
-		z-index: 2;
-		border-top: 1px solid #3b3d3f;
-		background: hsl(232deg 16% 15%);
-		position: relative;
-	}
-
-	.content p {
-		margin: 10px 15px 10px 0;
-		letter-spacing: 0.75px;
-		font-size: 14pt;
-		font-style: normal;
-		color: #f0f2fc;
-		line-height: 30px;
-		margin-top: 10pt;
-		font-family: "freight-display-pro";
-		font-weight: 300 !important;
-	}
-	h2.tab-title.tab-warning,
-	h2.tab-title.tab-success,
-	h2.tab-title.tab-primary,
-	h2.tab-title.tab-default {
-		display: inline-flex;
-		color: #fff;
-		background-position: bottom center;
-		margin-bottom: 0pt !important;
-		margin-top: 6pt;
-		height: 22pt;
-		background-clip: text !important;
-		-webkit-text-fill-color: transparent !important;
-		-webkit-background-clip: text !important;
-		-moz-background-clip: text;
-		-moz-text-fill-color: transparent;
-		-ms-background-clip: text;
-		-ms-text-fill-color: transparent;
-		text-transform: capitalize;
-		font-size: 24px;
-		letter-spacing: 0px;
-		font-family: "Manrope" !important;
-		font-weight: 800 !important;
-	}
-
-	h2.tab-title.tab-default {
-		background: linear-gradient(10deg, #f7ec9c, #ff8651);
-	}
-
-	h2.tab-title.tab-success {
-		background: linear-gradient(10deg, #02ce85, #02ceab);
-	}
-
-	h2.tab-title.tab-primary {
-		background: linear-gradient(
-			60deg,
-			hsl(202deg 100% 75%),
-			hsl(205deg 100% 64%),
-			hsl(230deg 100% 75%),
-			hsl(270deg 100% 72%)
-		);
-	}
-
-	h2.tab-title.tab-warning {
-		background: linear-gradient(70deg, #c51574, #97389b);
-	}
 	label.tab.tab-primary {
 		border-radius: 0;
 	}
@@ -236,7 +141,7 @@
 	}
 
 	#tab-2:checked ~ .glider {
-		left: 20%;
+		left: 25%;
 	}
 	#tab-3:checked ~ .glider {
 		background: linear-gradient(
@@ -248,18 +153,18 @@
 			#ff974d 85%,
 			#ff8052 100%
 		);
-		left: 40%;
+		left: 50%;
 		box-shadow: 0px 0px 8px 0px hsl(17.72deg 100% 70% / 70%);
 	}
 
 	#tab-4:checked ~ .glider {
 		background: linear-gradient(90deg, #b9326f 0%, #ff5ddc 100%);
 		box-shadow: 0px 0px 8px 0px rgba(231, 13, 93, 0.57);
-		left: 60% !important;
+		left: 75% !important;
 	}
 
 	.glider {
-		width: 20%;
+		width: 25%;
 		padding: 0px 15px;
 		height: 5px;
 		border-radius: 0 0 1px 1px;
@@ -273,18 +178,5 @@
 		transition: all 0.3s;
 		top: 55px;
 		z-index: 2;
-	}
-
-	span.numit {
-		font-size: 12pt;
-		font-family: "muli";
-		font-weight: 600;
-		text-shadow: 0.5px 0.5px 0.5px #e7e9f5;
-		color: #0e101a;
-		margin-right: 2px;
-		margin-left: -2px;
-		padding: 0;
-		color: aliceblue;
-		text-shadow: 0.5pt 0.5pt 0.5pt #2d3748;
 	}
 </style>

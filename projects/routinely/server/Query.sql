@@ -12,7 +12,11 @@ create table routines (
     routine_title varchar(200) default "",
     routine_description varchar(5000) default "",
     routine_mode varchar(50) default "Daily", -- Daily, Weekly, Monthly or Yearly
-    routine_time time default '00:00:00',
+    daily_basis_days varchar(50) default "", -- Empty Value = Everyday
+    weekly_basis_weekday varchar(10) default "", -- Empty Value = Anyday of the Week
+    monthly_basis_date int default 0, -- 0 = Anyday of the month, 32 = End of the Month, 33 = The day before end of the Month, 1 - 31 = date value
+    yearly_basis_month_date varchar(10) default "", -- Empty String = Anyday of the year, 00-00 = Anyday of the year, Format = Month-Date
+    routine_time time default '00:00:00', -- 00:00:00 = Anytime of the day, Format = Hour:Minute:Second
     is_trash tinyint default 0,
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp

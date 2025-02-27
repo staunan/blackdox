@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
@@ -21,14 +23,18 @@ const (
 )
 
 type Routine struct {
-	ID          int64
-	UserId      int64
-	Title       string
-	Description string
-	Mode        string
-	Time        string
-	IsTrash     string
-	CreatedAt   string
+	ID                   int64
+	UserId               int64
+	Title                string
+	Description          string
+	Mode                 string
+	DailyBasisDays       string
+	WeeklyBasisWeekDays  string
+	MonthlyBasisDate     int8
+	YearlyBasisMonthDate string
+	Time                 string
+	IsTrash              int8
+	CreatedAt            string
 }
 type Response struct {
 	HasError bool
@@ -81,14 +87,23 @@ func main() {
 	e.POST("/create_routine", func(c echo.Context) error {
 		var routine Routine
 		var routine_details Routine
+
 		routine.UserId = 1
-		routine.Title = "Demo Title"
-		routine.Description = "Demo Description"
+		routine.Title = c.FormValue("title")
+		routine.Description = c.FormValue("description")
+		routine.Mode = c.FormValue("mode")
+		routine.DailyBasisDays = c.FormValue("days")
+		routine.WeeklyBasisWeekDays = c.FormValue("weekday")
+		i, err := strconv.ParseInt(c.FormValue("monthday"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		routine.MonthlyBasisDate = int8(i)
+		routine.YearlyBasisMonthDate = c.FormValue("yearlymonthdate")
+		routine.Time = c.FormValue("yearlymonthdate")
+		routine.IsTrash = 0
 
 		var last_inserted_id int64 = createRoutine(routine)
-		if err != nil {
-			panic("Unable to prepare query")
-		}
 		if last_inserted_id == 0 {
 			panic("Unable to retrieve last return id")
 		} else {
@@ -108,37 +123,96 @@ func main() {
 
 func createRoutine(routine Routine) int64 {
 	// Preparing SQL statement --
-	query := "INSERT INTO `routines` (user_id, routine_title, routine_description, routine_mode, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?);"
+	query := "INSERT INTO `routines` (user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 	insert, err := db.Prepare(query)
 	if err != nil {
 		panic("Unable to prepare query")
 	}
 
 	// Finalizing DB Column values --
+	// User ID --
 	var user_id int64 = routine.UserId
 	if user_id == 0 {
 		panic("UserID should be present")
 	}
+	// Title --
 	var title string = routine.Title
 	if title == "" {
-		panic("Please provide title")
+		panic("Routine title should be present")
+	} else if len(title) > 200 {
+		panic("Routine title is too big")
 	}
+	// Description --
 	var description string = routine.Description
+	if len(description) > 5000 {
+		panic("Routine description is too big")
+	}
+	// Mode --
 	var mode string = routine.Mode
+	var Modes = []string{"Daily", "Weekly", "Monthly", "Yearly"}
 	if mode == "" {
 		mode = DEFAULT_ROUTINE_MODE
+	} else if !slices.Contains(Modes, mode) {
+		panic("Invalid routine mode provided")
 	}
+	var daily_basis_days string = ""
+	var weekly_basis_weekday string = ""
+	var monthly_basis_date int8 = 0
+	var yearly_basis_month_date string = ""
+	var Days = []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+	if mode == "Daily" {
+		// Daily Basis --
+		if routine.DailyBasisDays == "" {
+			daily_basis_days = ""
+		} else {
+			days := strings.Split(routine.DailyBasisDays, ",")
+			for _, d := range days {
+				if !slices.Contains(Days, d) {
+					panic("Invalid days value")
+				}
+			}
+			daily_basis_days = routine.DailyBasisDays
+		}
+	} else if mode == "Weekly" {
+		// Weekly Basis --
+		if routine.WeeklyBasisWeekDays == "" {
+			weekly_basis_weekday = ""
+		} else {
+			if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
+				panic("Invalid weekday value")
+			}
+			weekly_basis_weekday = routine.DailyBasisDays
+		}
+	} else if mode == "Monthly" {
+		// Weekly Basis --
+		if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
+			panic("Invalid date index")
+		}
+		monthly_basis_date = routine.MonthlyBasisDate
+	} else if mode == "Yearly" {
+		arr := strings.Split(routine.YearlyBasisMonthDate, "-")
+		for _, value := range arr {
+			i, err := strconv.ParseInt(value, 10, 32)
+			if err != nil {
+				panic("Invalid date format for yearly month date")
+			}
+			if int8(i) < 0 || int8(i) > 31 {
+				panic("Month should be between 0 to 12 in yearly month date")
+			}
+		}
+		yearly_basis_month_date = routine.YearlyBasisMonthDate
+	}
+
+	// Time --
 	var time string = routine.Time
 	if time == "" {
 		time = DEFAULT_ROUTINE_TIME
 	}
-	var is_trash int = 0
-	if routine.IsTrash == "Yes" {
-		is_trash = 1
-	}
+	// Is Trash --
+	var is_trash int8 = routine.IsTrash
 
 	// Execute DB Query --
-	dbResponse, err := insert.Exec(user_id, title, description, mode, time, is_trash)
+	dbResponse, err := insert.Exec(user_id, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, is_trash)
 	if err != nil {
 		panic("Unable to execute query")
 	}
@@ -198,11 +272,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	routine.Description = routine_description
 	routine.Mode = routine_mode
 	routine.Time = routine_time
-	if is_trash == 1 {
-		routine.IsTrash = "Yes"
-	} else {
-		routine.IsTrash = "No"
-	}
+	routine.IsTrash = int8(is_trash)
 	routine.CreatedAt = created_at
 	return routine
 }
@@ -229,11 +299,7 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 		routine.Description = description
 		routine.Mode = routine_mode
 		routine.Time = routine_time
-		if is_trash == 1 {
-			routine.IsTrash = "Yes"
-		} else {
-			routine.IsTrash = "No"
-		}
+		routine.IsTrash = is_trash
 		routine.CreatedAt = created_at
 		routines = append(routines, routine)
 	}
