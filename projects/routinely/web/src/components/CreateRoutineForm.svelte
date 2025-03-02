@@ -341,11 +341,12 @@
 	async function createRoutineHandler(event) {
 		let routineObj = validateRoutineForm();
 		if (routineObj === false) {
+			console.log("Invalid Form");
 			return;
 		}
 		try {
-			// let response = await createRoutine(routineObj);
-			// console.log(response);
+			let response = await createRoutine(routineObj);
+			console.log(response);
 			is_success_modal_active = true;
 		} catch (error) {
 			console.log(error);

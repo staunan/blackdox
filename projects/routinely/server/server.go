@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"slices"
@@ -84,25 +85,68 @@ func main() {
 		return c.JSON(http.StatusOK, response)
 	})
 
+	e.POST("/all_routines", func(c echo.Context) error {
+		var user_id int64 = 1
+		var routines []Routine = getRoutines(user_id)
+
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Successfully retrieved list"
+		response.Data = routines
+		return c.JSON(http.StatusOK, response)
+	})
+
 	e.POST("/create_routine", func(c echo.Context) error {
-		var routine Routine
 		var routine_details Routine
 
-		routine.UserId = 1
-		routine.Title = c.FormValue("title")
-		routine.Description = c.FormValue("description")
-		routine.Mode = c.FormValue("mode")
-		routine.DailyBasisDays = c.FormValue("days")
-		routine.WeeklyBasisWeekDays = c.FormValue("weekday")
-		i, err := strconv.ParseInt(c.FormValue("monthday"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		routine.MonthlyBasisDate = int8(i)
-		routine.YearlyBasisMonthDate = c.FormValue("yearlymonthdate")
-		routine.Time = c.FormValue("yearlymonthdate")
-		routine.IsTrash = 0
+		// Get Request Data --
+		var reqData map[string]any = getRequestData(c)
 
+		// Create Routine Object
+		var routine Routine
+		routine.UserId = 1
+		if reqData["title"] == nil {
+			routine.Title = ""
+		} else {
+			routine.Title = reqData["title"].(string)
+		}
+		if reqData["description"] == nil {
+			routine.Description = ""
+		} else {
+			routine.Description = reqData["description"].(string)
+		}
+		if reqData["mode"] == nil {
+			routine.Mode = ""
+		} else {
+			routine.Mode = reqData["mode"].(string)
+		}
+		if reqData["days"] == nil {
+			routine.DailyBasisDays = ""
+		} else {
+			routine.DailyBasisDays = reqData["days"].(string)
+		}
+		if reqData["weekday"] == nil {
+			routine.WeeklyBasisWeekDays = ""
+		} else {
+			routine.WeeklyBasisWeekDays = reqData["weekday"].(string)
+		}
+		if reqData["monthday"] == nil {
+			routine.MonthlyBasisDate = 0
+		} else {
+			routine.MonthlyBasisDate = reqData["monthday"].(int8)
+		}
+		if reqData["yearlymonthdate"] == nil {
+			routine.YearlyBasisMonthDate = ""
+		} else {
+			routine.YearlyBasisMonthDate = reqData["yearlymonthdate"].(string)
+		}
+		if reqData["time"] == nil {
+			routine.Time = ""
+		} else {
+			routine.Time = reqData["time"].(string)
+		}
+		routine.IsTrash = 0
 		var last_inserted_id int64 = createRoutine(routine)
 		if last_inserted_id == 0 {
 			panic("Unable to retrieve last return id")
@@ -113,7 +157,7 @@ func main() {
 		// Return Response --
 		var response Response
 		response.HasError = false
-		response.Message = "Successfully Retrieved Routine Details!"
+		response.Message = "Routine has been created sucessfully"
 		response.Data = routine_details
 		return c.JSON(http.StatusOK, response)
 	})
@@ -229,7 +273,8 @@ func createRoutine(routine Routine) int64 {
 func getRoutines(user_id int64) []Routine {
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
-	rows, err := db.Query("SELECT id, user_id, routine_title, routine_description, routine_mode, routine_time, is_trash, created_at FROM routines where user_id = ?", user_id_str)
+
+	rows, err := db.Query("SELECT id, user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ?", user_id_str)
 	if err != nil {
 		panic("Unable to retrieve routine list from Database")
 	}
@@ -242,9 +287,8 @@ func getRoutines(user_id int64) []Routine {
 func getRoutineDetails(routine_id int64) Routine {
 	// Get Routine Details from DB --
 	var routine_id_str string = strconv.Itoa(int(routine_id))
-	row := db.QueryRow("SELECT id, user_id, routine_title, routine_description, routine_mode, routine_time, is_trash, created_at FROM routines where id = ?", routine_id_str)
-	var routine Routine = mapDBDataToRoutineDetails(row)
-	return routine
+	row := db.QueryRow("SELECT id, user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where id = ?", routine_id_str)
+	return mapDBDataToRoutineDetails(row)
 }
 
 func mapDBDataToRoutineDetails(row *sql.Row) Routine {
@@ -254,12 +298,16 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	var routine_title string
 	var routine_description string
 	var routine_mode string
+	var daily_basis_days string
+	var weekly_basis_weekday string
+	var monthly_basis_date int8
+	var yearly_basis_month_date string
 	var routine_time string
-	var is_trash int64
+	var is_trash int8
 	var created_at string
 
 	// Scan fields --
-	err := row.Scan(&routine_id, &user_id, &routine_title, &routine_description, &routine_mode, &routine_time, &is_trash, &created_at)
+	err := row.Scan(&routine_id, &user_id, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at)
 	if err != nil {
 		panic(err)
 	}
@@ -271,6 +319,10 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	routine.Title = routine_title
 	routine.Description = routine_description
 	routine.Mode = routine_mode
+	routine.DailyBasisDays = daily_basis_days
+	routine.WeeklyBasisWeekDays = weekly_basis_weekday
+	routine.MonthlyBasisDate = monthly_basis_date
+	routine.YearlyBasisMonthDate = yearly_basis_month_date
 	routine.Time = routine_time
 	routine.IsTrash = int8(is_trash)
 	routine.CreatedAt = created_at
@@ -284,13 +336,17 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	var title string
 	var description string
 	var routine_mode string
+	var daily_basis_days string
+	var weekly_basis_weekday string
+	var monthly_basis_date int8
+	var yearly_basis_month_date string
 	var routine_time string
 	var is_trash int8
 	var created_at string
 
 	for rows.Next() {
 		var routine Routine
-		if err := rows.Scan(&routine_id, &user_id, &title, &description, &routine_mode, &routine_time, &is_trash, &created_at); err != nil {
+		if err := rows.Scan(&routine_id, &user_id, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at); err != nil {
 			panic("Error while scaning routines")
 		}
 		routine.ID = routine_id
@@ -298,6 +354,10 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 		routine.Title = title
 		routine.Description = description
 		routine.Mode = routine_mode
+		routine.DailyBasisDays = daily_basis_days
+		routine.WeeklyBasisWeekDays = weekly_basis_weekday
+		routine.MonthlyBasisDate = monthly_basis_date
+		routine.YearlyBasisMonthDate = yearly_basis_month_date
 		routine.Time = routine_time
 		routine.IsTrash = is_trash
 		routine.CreatedAt = created_at
@@ -305,4 +365,14 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	}
 
 	return routines
+}
+
+func getRequestData(c echo.Context) map[string]interface{} {
+	json_map := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	if err != nil {
+		return json_map
+	} else {
+		return json_map
+	}
 }

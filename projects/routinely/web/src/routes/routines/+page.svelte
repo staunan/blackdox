@@ -1,5 +1,16 @@
 <script>
 	import CarbonTab from "components/tabs/CarbonTab.svelte";
+	import { onMount } from "svelte";
+	import { getAllRoutines } from "apis/apis.js";
+
+	onMount(async () => {
+		try {
+			let response = await getAllRoutines({ user_id: 1 });
+			console.log(response);
+		} catch (error) {
+			console.log(error);
+		}
+	});
 </script>
 
 <svelte:head>

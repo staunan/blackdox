@@ -1,10 +1,6 @@
 use routinely;
 select * from routines;
 
--- Insert Data
-insert into routines (routine_title) values ("Brush my teeth!");
-insert into routines (routine_title, routine_description) values ("Have Bath!", "Take a hot shower");
-
 -- Create Schema
 create table routines (
 	id bigint primary key auto_increment,
