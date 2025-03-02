@@ -5,22 +5,53 @@
 	import MonthlyRoutineList from "components/MonthlyRoutineList.svelte";
 	import YearlyRoutineList from "components/YearlyRoutineList.svelte";
 	import { onMount } from "svelte";
-	import { getAllRoutines } from "apis/apis.js";
+	import { getAllRoutines, getProgress } from "apis/apis.js";
 
 	let daily_routines = [];
 	let weekly_routines = [];
 	let monthly_routines = [];
 	let yearly_routines = [];
+	let progress = [];
 	let currentTabName = "daily";
 	onMount(async () => {
 		try {
-			let response = await getAllRoutines({ user_id: 1 });
-			daily_routines = response.Data.filter((r) => r.Mode === "Daily");
-			weekly_routines = response.Data.filter((r) => r.Mode === "Weekly");
-			monthly_routines = response.Data.filter(
+			let all_routines_response = await getAllRoutines({ user_id: 1 });
+			let progress_response = await getProgress({ user_id: 1 });
+			if (!progress_response.HasError) {
+				progress = progress_response.Data;
+			}
+
+			let daily_routine_list = all_routines_response.Data.filter(
+				(r) => r.Mode === "Daily"
+			);
+			daily_routine_list.forEach((routine) => {
+				let entry = null;
+				if (progress) {
+					for (let i = 0; i < progress.length; i++) {
+						if (progress[i].RoutineID === routine.ID) {
+							entry = progress[i];
+							break;
+						}
+					}
+				}
+				if (entry) {
+					routine.Done = true;
+					routine.DoneData = entry;
+				} else {
+					routine.Done = false;
+					routine.DoneData = null;
+				}
+			});
+			daily_routines = daily_routine_list;
+			weekly_routines = all_routines_response.Data.filter(
+				(r) => r.Mode === "Weekly"
+			);
+			monthly_routines = all_routines_response.Data.filter(
 				(r) => r.Mode === "Monthly"
 			);
-			yearly_routines = response.Data.filter((r) => r.Mode === "Yearly");
+			yearly_routines = all_routines_response.Data.filter(
+				(r) => r.Mode === "Yearly"
+			);
 		} catch (error) {
 			console.log(error);
 		}
@@ -32,6 +63,28 @@
 		} else if (event.detail == "monthly") {
 		} else if (event.detail == "yearly") {
 		}
+	}
+	function entryAddedHandler(event) {
+		let entry = event.detail;
+		daily_routines = daily_routines.map(function (dr) {
+			if (dr.ID === entry.RoutineID) {
+				return { ...dr, Done: true, DoneData: entry };
+			} else {
+				return dr;
+			}
+		});
+		progress.push(entry);
+	}
+	function entryRemovedHandler(event) {
+		let entry = event.detail;
+		daily_routines = daily_routines.map(function (dr) {
+			if (dr.ID === entry.RoutineID) {
+				return { ...dr, Done: false, DoneData: null };
+			} else {
+				return dr;
+			}
+		});
+		progress = progress.filter((p) => p.ID !== entry.ID);
 	}
 </script>
 
@@ -49,6 +102,8 @@
 		<DailyRoutineList
 			active={currentTabName === "daily"}
 			routines={daily_routines}
+			on:entryadded={entryAddedHandler}
+			on:entryremoved={entryRemovedHandler}
 		></DailyRoutineList>
 		<WeeklyRoutineList active={currentTabName === "weekly"}
 		></WeeklyRoutineList>

@@ -1,10 +1,13 @@
 <script>
 	import SuccessTick from "components/checkmark/SuccessTick.svelte";
 	import { TodayDate } from "lib/js/datetime.js";
-	import { markRoutineAsDone } from "apis/apis.js";
+	import { markRoutineAsDone, markRoutineAsNotDone } from "apis/apis.js";
+	import { createEventDispatcher } from "svelte";
 
 	export let active = false;
 	export let routines = [];
+
+	const dispatch = createEventDispatcher();
 
 	function routineClickedHandler(routine) {
 		console.log(routine);
@@ -15,19 +18,31 @@
 				routine_id: routine.ID,
 				checked_on_date: TodayDate(),
 			};
-
 			try {
 				let response = await markRoutineAsDone(data);
-				console.log(response);
+				dispatch("entryadded", response.Data);
 			} catch (error) {
 				console.log(error);
+			}
+		} else if (event.detail === false) {
+			if (routine.DoneData) {
+				let routine_entry = routine.DoneData;
+				let data = {
+					routine_id: routine_entry.RoutineID,
+					checked_on_date: routine_entry.CheckedOnDate,
+				};
+				try {
+					let response = await markRoutineAsNotDone(data);
+					dispatch("entryremoved", routine_entry);
+				} catch (error) {
+					console.log(error);
+				}
 			}
 		}
 	}
 </script>
 
 {#if active}
-	<h1>Daily Routine List</h1>
 	<div class="routine_container">
 		{#each routines as routine}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -44,7 +59,7 @@
 				</div>
 				<div class="routine_item_right">
 					<SuccessTick
-						checked={false}
+						checked={routine.Done === true ? true : false}
 						on:change={(event) =>
 							routineCheckHandler(event, routine)}
 					></SuccessTick>
@@ -55,6 +70,9 @@
 {/if}
 
 <style>
+	.routine_container {
+		padding-top: 20px;
+	}
 	.routine_item {
 		display: flex;
 		border-radius: 4px;

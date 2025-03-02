@@ -1,4 +1,5 @@
 use routinely;
+SET SQL_SAFE_UPDATES = 0;
 select * from routines;
 select * from routine_entries;
 
@@ -20,8 +21,9 @@ create table routines (
 );
 create table routine_entries (
 	id bigint primary key auto_increment,
+    user_id bigint not null,
     routine_id bigint not null,
     checked_on_date date,
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
-)
+);

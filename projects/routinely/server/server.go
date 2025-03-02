@@ -40,6 +40,7 @@ type Routine struct {
 }
 type RoutineEntry struct {
 	ID            int64
+	UserID        int64
 	RoutineID     int64
 	CheckedOnDate string
 	CreatedAt     string
@@ -174,6 +175,75 @@ func main() {
 
 		// Get Request Data --
 		var reqData map[string]any = getRequestData(c)
+		routine_entry.UserID = 1
+		if reqData["routine_id"] == nil {
+			panic("Routine ID is required!")
+		} else {
+			routine_entry.RoutineID = int64(reqData["routine_id"].(float64))
+		}
+		if reqData["checked_on_date"] == nil {
+			panic("Checked On Date is required!")
+		} else {
+			routine_entry.CheckedOnDate = reqData["checked_on_date"].(string)
+		}
+
+		// Check if data is already present in database --
+		var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
+		var checked_on_date_str string = routine_entry.CheckedOnDate
+		var user_id_str string = strconv.Itoa(int(routine_entry.UserID))
+		var exsisted_row_id int64
+		var row_exist bool = false
+		err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
+		switch {
+		case err == sql.ErrNoRows:
+			row_exist = false
+		case err != nil:
+			panic(err)
+		default:
+			row_exist = true
+		}
+		if row_exist && exsisted_row_id > 0 {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Already marked as done"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		} else {
+			// Insert an entry --
+			query := "INSERT INTO `routine_entries` (user_id, routine_id, checked_on_date) VALUES (?, ?, ?);"
+			insert, err := db.Prepare(query)
+			if err != nil {
+				panic("Unable to prepare query")
+			}
+
+			dbResponse, err := insert.Exec(user_id_str, routine_id_str, checked_on_date_str)
+			if err != nil {
+				panic(err)
+			}
+			// Return last inserted ID --
+			lastInsertId, err := dbResponse.LastInsertId()
+			if err != nil {
+				panic("Unable to retrieve last inserted id")
+			}
+			routine_entry.ID = lastInsertId
+			routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+			// Return Response --
+			var response Response
+			response.HasError = false
+			response.Message = "Today's entry has been created for this routine"
+			response.Data = routine_entry
+			return c.JSON(http.StatusOK, response)
+		}
+	})
+
+	e.POST("/mark_routine_as_not_done", func(c echo.Context) error {
+		var routine_entry RoutineEntry
+
+		// Get Request Data --
+		var reqData map[string]any = getRequestData(c)
+		routine_entry.UserID = 1
 		if reqData["routine_id"] == nil {
 			panic("Routine ID is required!")
 		} else {
@@ -200,39 +270,36 @@ func main() {
 			row_exist = true
 		}
 		if row_exist && exsisted_row_id > 0 {
-			// Return Response --
-			var response Response
-			response.HasError = true
-			response.Message = "Already marked as done"
-			response.Data = nil
-			return c.JSON(http.StatusOK, response)
-		} else {
-			// Insert an entry --
-			query := "INSERT INTO `routine_entries` (routine_id, checked_on_date) VALUES (?, ?);"
-			insert, err := db.Prepare(query)
+			// Remove the entries --
+			_, err := db.Exec(`DELETE FROM routine_entries WHERE id = ?`, exsisted_row_id)
 			if err != nil {
-				panic("Unable to prepare query")
+				log.Fatal(err)
 			}
-
-			dbResponse, err := insert.Exec(routine_id_str, checked_on_date_str)
-			if err != nil {
-				panic(err)
-			}
-			// Return last inserted ID --
-			lastInsertId, err := dbResponse.LastInsertId()
-			if err != nil {
-				panic("Unable to retrieve last inserted id")
-			}
-			routine_entry.ID = lastInsertId
-			routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-
 			// Return Response --
 			var response Response
 			response.HasError = false
-			response.Message = "Today's entry has been created for this routine"
+			response.Message = "Routine has been marked as not done"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		} else {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Entry not found"
 			response.Data = routine_entry
 			return c.JSON(http.StatusOK, response)
 		}
+	})
+
+	e.GET("/progress", func(c echo.Context) error {
+		var user_id int64 = 1
+		var routine_entries []RoutineEntry = getProgress(user_id)
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Successfully retrieved today's progress!"
+		response.Data = routine_entries
+		return c.JSON(http.StatusOK, response)
 	})
 
 	e.Logger.Fatal(e.Start(":1323"))
@@ -357,6 +424,19 @@ func getRoutines(user_id int64) []Routine {
 	return mapDBDataToRoutineList(rows)
 }
 
+func getProgress(user_id int64) []RoutineEntry {
+	// Prepare statement for reading data
+	var user_id_str string = strconv.Itoa(int(user_id))
+	rows, err := db.Query("SELECT id, user_id, routine_id, checked_on_date, created_at FROM routine_entries where user_id = ?", user_id_str)
+	if err != nil {
+		panic("Unable to retrieve routine list from Database")
+	}
+	defer rows.Close()
+
+	// Map to Routine List --
+	return mapDBDataToRoutineEntryList(rows)
+}
+
 func getRoutineDetails(routine_id int64) Routine {
 	// Get Routine Details from DB --
 	var routine_id_str string = strconv.Itoa(int(routine_id))
@@ -438,6 +518,30 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	}
 
 	return routines
+}
+
+func mapDBDataToRoutineEntryList(rows *sql.Rows) []RoutineEntry {
+	var routine_entries []RoutineEntry
+	var id int64
+	var user_id int64
+	var routine_id int64
+	var checked_on_date string
+	var created_at string
+
+	for rows.Next() {
+		var routine_entry RoutineEntry
+		if err := rows.Scan(&id, &user_id, &routine_id, &checked_on_date, &created_at); err != nil {
+			panic("Error while scaning routines")
+		}
+		routine_entry.ID = id
+		routine_entry.UserID = user_id
+		routine_entry.RoutineID = routine_id
+		routine_entry.CheckedOnDate = checked_on_date
+		routine_entry.CreatedAt = created_at
+		routine_entries = append(routine_entries, routine_entry)
+	}
+
+	return routine_entries
 }
 
 func getRequestData(c echo.Context) map[string]interface{} {

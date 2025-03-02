@@ -5,14 +5,15 @@
 	export let checked = false;
 
 	function checkedChangeHandler(event) {
-		if (!checked) {
+		if (checked) {
+			dispatch("change", false);
+		} else {
 			dispatch("change", true);
-			checked = true;
 		}
 	}
 </script>
 
-<div class:editdisabled={checked}>
+<div class:editdisabled={false}>
 	<label class="field">
 		<input
 			class="field__checkbox"
