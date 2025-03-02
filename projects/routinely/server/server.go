@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
@@ -36,6 +37,12 @@ type Routine struct {
 	Time                 string
 	IsTrash              int8
 	CreatedAt            string
+}
+type RoutineEntry struct {
+	ID            int64
+	RoutineID     int64
+	CheckedOnDate string
+	CreatedAt     string
 }
 type Response struct {
 	HasError bool
@@ -160,6 +167,72 @@ func main() {
 		response.Message = "Routine has been created sucessfully"
 		response.Data = routine_details
 		return c.JSON(http.StatusOK, response)
+	})
+
+	e.POST("/mark_routine_as_done", func(c echo.Context) error {
+		var routine_entry RoutineEntry
+
+		// Get Request Data --
+		var reqData map[string]any = getRequestData(c)
+		if reqData["routine_id"] == nil {
+			panic("Routine ID is required!")
+		} else {
+			routine_entry.RoutineID = int64(reqData["routine_id"].(float64))
+		}
+		if reqData["checked_on_date"] == nil {
+			panic("Checked On Date is required!")
+		} else {
+			routine_entry.CheckedOnDate = reqData["checked_on_date"].(string)
+		}
+
+		// Check if data is already present in database --
+		var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
+		var checked_on_date_str string = routine_entry.CheckedOnDate
+		var exsisted_row_id int64
+		var row_exist bool = false
+		err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
+		switch {
+		case err == sql.ErrNoRows:
+			row_exist = false
+		case err != nil:
+			panic(err)
+		default:
+			row_exist = true
+		}
+		if row_exist && exsisted_row_id > 0 {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Already marked as done"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		} else {
+			// Insert an entry --
+			query := "INSERT INTO `routine_entries` (routine_id, checked_on_date) VALUES (?, ?);"
+			insert, err := db.Prepare(query)
+			if err != nil {
+				panic("Unable to prepare query")
+			}
+
+			dbResponse, err := insert.Exec(routine_id_str, checked_on_date_str)
+			if err != nil {
+				panic(err)
+			}
+			// Return last inserted ID --
+			lastInsertId, err := dbResponse.LastInsertId()
+			if err != nil {
+				panic("Unable to retrieve last inserted id")
+			}
+			routine_entry.ID = lastInsertId
+			routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+			// Return Response --
+			var response Response
+			response.HasError = false
+			response.Message = "Today's entry has been created for this routine"
+			response.Data = routine_entry
+			return c.JSON(http.StatusOK, response)
+		}
 	})
 
 	e.Logger.Fatal(e.Start(":1323"))

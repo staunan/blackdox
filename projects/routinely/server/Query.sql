@@ -1,5 +1,6 @@
 use routinely;
 select * from routines;
+select * from routine_entries;
 
 -- Create Schema
 create table routines (
@@ -17,3 +18,10 @@ create table routines (
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );
+create table routine_entries (
+	id bigint primary key auto_increment,
+    routine_id bigint not null,
+    checked_on_date date,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp on update current_timestamp
+)

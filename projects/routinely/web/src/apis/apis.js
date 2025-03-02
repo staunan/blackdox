@@ -26,3 +26,16 @@ export async function getAllRoutines(data){
     let response = await axios.post(config.api_base_url + 'all_routines', data, header_config);
     return response.data;
 }
+
+export async function markRoutineAsDone(data){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+    let response = await axios.post(config.api_base_url + 'mark_routine_as_done', data, header_config);
+    return response.data;
+}
