@@ -18,7 +18,11 @@
 			let all_routines_response = await getAllRoutines({ user_id: 1 });
 			let progress_response = await getProgress({ user_id: 1 });
 			if (!progress_response.HasError) {
-				progress = progress_response.Data;
+				if (progress_response.Data == null) {
+					progress = [];
+				} else {
+					progress = progress_response.Data;
+				}
 			}
 
 			let daily_routine_list = all_routines_response.Data.filter(

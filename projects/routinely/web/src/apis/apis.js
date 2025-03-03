@@ -27,6 +27,19 @@ export async function getAllRoutines(data){
     return response.data;
 }
 
+export async function getRoutineDetails(data){
+    let header_config = {
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": true,
+            maxRedirects: 0,
+            maxRate: [100 * 1024],
+        },
+    };
+    let response = await axios.post(config.api_base_url + 'routine_details', data, header_config);
+    return response.data;
+}
+
 export async function markRoutineAsDone(data){
     let header_config = {
         headers: {

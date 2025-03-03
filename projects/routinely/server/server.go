@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -27,6 +28,7 @@ const (
 type Routine struct {
 	ID                   int64
 	UserId               int64
+	Slug                 string
 	Title                string
 	Description          string
 	Mode                 string
@@ -159,13 +161,36 @@ func main() {
 		if last_inserted_id == 0 {
 			panic("Unable to retrieve last return id")
 		} else {
-			routine_details = getRoutineDetails(last_inserted_id)
+			routine_details = getRoutineDetailsById(last_inserted_id)
 		}
 
 		// Return Response --
 		var response Response
 		response.HasError = false
 		response.Message = "Routine has been created sucessfully"
+		response.Data = routine_details
+		return c.JSON(http.StatusOK, response)
+	})
+
+	e.POST("/routine_details", func(c echo.Context) error {
+		var user_id int64 = 1
+		var routine_details Routine
+
+		// Get Request Data --
+		var reqData map[string]any = getRequestData(c)
+
+		if reqData["routine_slug"] == nil {
+			panic("Routine Slug is required!")
+		} else {
+			routine_details.Slug = reqData["routine_slug"].(string)
+		}
+
+		routine_details = getRoutineDetailsBySlug(user_id, routine_details.Slug)
+
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Successfully retrieved routine data!"
 		response.Data = routine_details
 		return c.JSON(http.StatusOK, response)
 	})
@@ -307,7 +332,7 @@ func main() {
 
 func createRoutine(routine Routine) int64 {
 	// Preparing SQL statement --
-	query := "INSERT INTO `routines` (user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+	query := "INSERT INTO `routines` (user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 	insert, err := db.Prepare(query)
 	if err != nil {
 		panic("Unable to prepare query")
@@ -325,6 +350,13 @@ func createRoutine(routine Routine) int64 {
 		panic("Routine title should be present")
 	} else if len(title) > 200 {
 		panic("Routine title is too big")
+	}
+	// Slug --
+	var slug string = createSlug(title)
+	// Check if slug already exists --
+	var slug_exists bool = checkIfSlugAlreadyExists(user_id, slug)
+	if slug_exists {
+		panic("Duplicate routine slug")
 	}
 	// Description --
 	var description string = routine.Description
@@ -396,7 +428,7 @@ func createRoutine(routine Routine) int64 {
 	var is_trash int8 = routine.IsTrash
 
 	// Execute DB Query --
-	dbResponse, err := insert.Exec(user_id, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, is_trash)
+	dbResponse, err := insert.Exec(user_id, slug, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, is_trash)
 	if err != nil {
 		panic("Unable to execute query")
 	}
@@ -414,7 +446,7 @@ func getRoutines(user_id int64) []Routine {
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
 
-	rows, err := db.Query("SELECT id, user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ?", user_id_str)
+	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ?", user_id_str)
 	if err != nil {
 		panic("Unable to retrieve routine list from Database")
 	}
@@ -437,10 +469,17 @@ func getProgress(user_id int64) []RoutineEntry {
 	return mapDBDataToRoutineEntryList(rows)
 }
 
-func getRoutineDetails(routine_id int64) Routine {
+func getRoutineDetailsById(routine_id int64) Routine {
 	// Get Routine Details from DB --
 	var routine_id_str string = strconv.Itoa(int(routine_id))
-	row := db.QueryRow("SELECT id, user_id, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where id = ?", routine_id_str)
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where id = ?", routine_id_str)
+	return mapDBDataToRoutineDetails(row)
+}
+
+func getRoutineDetailsBySlug(user_id int64, routine_slug string) Routine {
+	var user_id_str string = strconv.Itoa(int(user_id))
+	// Get Routine Details from DB --
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ? and slug = ?", user_id_str, routine_slug)
 	return mapDBDataToRoutineDetails(row)
 }
 
@@ -448,6 +487,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	// Declaring variable --
 	var routine_id int64
 	var user_id int64
+	var slug string
 	var routine_title string
 	var routine_description string
 	var routine_mode string
@@ -460,7 +500,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	var created_at string
 
 	// Scan fields --
-	err := row.Scan(&routine_id, &user_id, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at)
+	err := row.Scan(&routine_id, &user_id, &slug, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at)
 	if err != nil {
 		panic(err)
 	}
@@ -469,6 +509,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	var routine Routine
 	routine.ID = routine_id
 	routine.UserId = user_id
+	routine.Slug = slug
 	routine.Title = routine_title
 	routine.Description = routine_description
 	routine.Mode = routine_mode
@@ -486,6 +527,7 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	var routines []Routine
 	var routine_id int64
 	var user_id int64
+	var slug string
 	var title string
 	var description string
 	var routine_mode string
@@ -499,11 +541,12 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 
 	for rows.Next() {
 		var routine Routine
-		if err := rows.Scan(&routine_id, &user_id, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at); err != nil {
+		if err := rows.Scan(&routine_id, &user_id, &slug, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at); err != nil {
 			panic("Error while scaning routines")
 		}
 		routine.ID = routine_id
 		routine.UserId = user_id
+		routine.Slug = slug
 		routine.Title = title
 		routine.Description = description
 		routine.Mode = routine_mode
@@ -552,4 +595,33 @@ func getRequestData(c echo.Context) map[string]interface{} {
 	} else {
 		return json_map
 	}
+}
+
+func createSlug(str string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		panic(err)
+	}
+	processedString := reg.ReplaceAllString(str, " ")
+	processedString = strings.TrimSpace(processedString)
+	slug := strings.ReplaceAll(processedString, " ", "-")
+	slug = strings.ToLower(slug)
+	return slug
+}
+
+func checkIfSlugAlreadyExists(user_id int64, slug string) bool {
+	// Check if data is already present in database --
+	var user_id_str string = strconv.Itoa(int(user_id))
+	var exsisted_row_id int64
+	var row_exist bool = false
+	err := db.QueryRow("SELECT id FROM routines where user_id = ? and slug = ?", user_id_str, slug).Scan(&exsisted_row_id)
+	switch {
+	case err == sql.ErrNoRows:
+		row_exist = false
+	case err != nil:
+		panic(err)
+	default:
+		row_exist = true
+	}
+	return row_exist
 }

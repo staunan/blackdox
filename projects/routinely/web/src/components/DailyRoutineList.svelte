@@ -3,6 +3,7 @@
 	import { TodayDate } from "lib/js/datetime.js";
 	import { markRoutineAsDone, markRoutineAsNotDone } from "apis/apis.js";
 	import { createEventDispatcher } from "svelte";
+	import { goto } from "$app/navigation";
 
 	export let active = false;
 	export let routines = [];
@@ -10,7 +11,7 @@
 	const dispatch = createEventDispatcher();
 
 	function routineClickedHandler(routine) {
-		console.log(routine);
+		goto("/routine/" + routine.Slug);
 	}
 	async function routineCheckHandler(event, routine) {
 		if (event.detail === true) {
@@ -40,6 +41,20 @@
 			}
 		}
 	}
+
+	function getRoutineTimeString(time) {
+		let time_arr = time.split(":");
+		let zone = "";
+		let hour = 0;
+		if (Number(time_arr[0]) < 12) {
+			zone = "AM";
+			hour = Number(time_arr[0]);
+		} else {
+			zone = "PM";
+			hour = Number(time_arr[0]) - 12;
+		}
+		return hour + ":" + time_arr[1] + " " + zone;
+	}
 </script>
 
 {#if active}
@@ -55,7 +70,9 @@
 					>
 						{routine.Title}
 					</div>
-					<div class="routine_time">{routine.Time}</div>
+					<div class="routine_time">
+						{getRoutineTimeString(routine.Time)}
+					</div>
 				</div>
 				<div class="routine_item_right">
 					<SuccessTick

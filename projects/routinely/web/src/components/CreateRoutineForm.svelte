@@ -331,7 +331,6 @@
 				}
 			}
 		}
-		console.log(routineObj);
 		if (hasError) {
 			return false;
 		} else {

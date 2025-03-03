@@ -7,6 +7,7 @@ select * from routine_entries;
 create table routines (
 	id bigint primary key auto_increment,
     user_id bigint default 1,
+    slug varchar(250),
     routine_title varchar(200) default "",
     routine_description varchar(5000) default "",
     routine_mode varchar(50) default "Daily", -- Daily, Weekly, Monthly or Yearly
