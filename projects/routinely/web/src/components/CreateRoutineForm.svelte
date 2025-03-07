@@ -9,8 +9,8 @@
 	import DayPicker from "components/form/DayPicker.svelte";
 	import DateMonthPicker from "components/form/DateMonthPicker.svelte";
 	import TimePicker from "components/form/TimePicker.svelte";
-	import SubmitButton from "components/form/SubmitButton.svelte";
-	import LinkButton from "components/form/LinkButton.svelte";
+	import SubmitButton from "components/buttons/SubmitButton.svelte";
+	import LinkButton from "components/buttons/LinkButton.svelte";
 	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
 	import RoutineModeDisplayString from "components/RoutineModeDisplayString.svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
@@ -500,7 +500,7 @@
 				<div class="advance_settings_hide">
 					<LinkButton
 						label="Hide Advance Settings"
-						on:tap={(advanceSettings = !advanceSettings)}
+						on:tap={() => (advanceSettings = !advanceSettings)}
 					></LinkButton>
 				</div>
 			</div>

@@ -20,7 +20,7 @@
 	}
 	.btn {
 		position: relative;
-		display: block;
+		display: inline-block;
 		padding: 0;
 		overflow: hidden;
 		border-width: 0;

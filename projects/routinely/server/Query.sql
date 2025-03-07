@@ -28,3 +28,13 @@ create table routine_entries (
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );
+
+create table users (
+	id bigint primary key auto_increment,
+    full_name varchar(50),
+    email varchar(50) unique not null,
+    username varchar(50) unique,
+    secret_password varchar(50) not null,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp on update current_timestamp
+);
