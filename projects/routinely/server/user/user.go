@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -81,6 +80,11 @@ func CreateUser(user User) (int64, error) {
 		return 0, errors.New("secret password is too big")
 	}
 
+	// Check if user already exists --
+	user_exists := checkIfUserAlreadyExists(email)
+	if user_exists {
+		return 0, errors.New("user already exists")
+	}
 	// Execute DB Query --
 	dbResponse, err := insert.Exec(fullname, email, username, secret_password)
 	if err != nil {
@@ -90,6 +94,26 @@ func CreateUser(user User) (int64, error) {
 
 	// Return last inserted ID --
 	return dbResponse.LastInsertId()
+}
+
+func checkIfUserAlreadyExists(email string) bool {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		panic("Unable to connect to db")
+	}
+
+	// Check if data is already present in database --
+	var exsisted_row_id int64
+	query_err := db.QueryRow("SELECT id FROM users where email = ?", email).Scan(&exsisted_row_id)
+	switch {
+	case query_err == sql.ErrNoRows:
+		return false
+	case query_err != nil:
+		panic(query_err)
+	default:
+		return true
+	}
 }
 
 func GetUserDetailsById(user_id int64) (User, error) {
@@ -131,7 +155,7 @@ func mapDBDataToUserDetails(row *sql.Row) (User, error) {
 	return user, nil
 }
 
-func login(c echo.Context) error {
+func Login(c echo.Context) (string, error) {
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
@@ -158,58 +182,40 @@ func login(c echo.Context) error {
 	var fullname string
 	var username string
 	var hashed_password string
-	var user_found bool = false
 	query_err := db.QueryRow("SELECT id, full_name, username, secret_password FROM users where email = ?", email).Scan(&user_id, &fullname, &username, &hashed_password)
 	switch {
 	case query_err == sql.ErrNoRows:
-		user_found = false
+		return "", errors.New("user not found")
 	case query_err != nil:
-		panic(query_err)
+		return "", query_err
 	default:
-		user_found = true
+		if !Verify(hashed_password, password) {
+			return "", errors.New("incorrect password")
+		}
+		// Login user --
+		// Set custom claims
+		claims := &jwtCustomClaims{
+			user_id,
+			fullname,
+			username,
+			email,
+			true,
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+			},
+		}
+		// Create token with claims
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		// Generate encoded token and send it as response.
+		t, err := token.SignedString([]byte(JWT_SIGNING_SECRET))
+		if err != nil {
+			return "", err
+		}
+		return t, nil
+		// return c.JSON(http.StatusOK, echo.Map{
+		// 	"token": t,
+		// })
 	}
-	if !user_found {
-		// Return Response --
-		var response Response
-		response.HasError = true
-		response.Message = "User not found with provided email"
-		response.Data = nil
-		return c.JSON(http.StatusOK, response)
-	}
-
-	if !Verify(hashed_password, password) {
-		// Return Response --
-		var response Response
-		response.HasError = true
-		response.Message = "Incorrect password"
-		response.Data = nil
-		return c.JSON(http.StatusOK, response)
-	}
-
-	// Set custom claims
-	claims := &jwtCustomClaims{
-		user_id,
-		fullname,
-		username,
-		email,
-		true,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
-		},
-	}
-
-	// Create token with claims
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(JWT_SIGNING_SECRET))
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"token": t,
-	})
 }
 
 func Hash(password string) (string, error) {
@@ -222,8 +228,8 @@ func Verify(hashed, password string) bool {
 	return err == nil
 }
 
-func getRequestData(c echo.Context) map[string]interface{} {
-	json_map := make(map[string]interface{})
+func getRequestData(c echo.Context) map[string]any {
+	json_map := make(map[string]any)
 	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
 	if err != nil {
 		return json_map

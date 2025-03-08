@@ -7,6 +7,8 @@
 	import LinkButton from "components/buttons/LinkButton.svelte";
 	import { goto } from "$app/navigation";
 	import { createAccount } from "apis/apis.js";
+	import { createEventDispatcher } from "svelte";
+	const dispatch = createEventDispatcher();
 
 	let username = "";
 	let usernameHasError = "";
@@ -20,6 +22,9 @@
 	let userPassword = "";
 	let userPasswordHasError = "";
 	let userPasswordErrorMessage = "";
+	let confirmPassword = "";
+	let confirmPasswordHasError = "";
+	let confirmPasswordErrorMessage = "";
 
 	function userFullNameChangedHandler(event) {
 		userFullName = event.detail;
@@ -49,16 +54,24 @@
 			userPasswordErrorMessage = "";
 		}
 	}
+	function confirmPasswordChangedHandler(event) {
+		confirmPassword = event.detail;
+		if (confirmPassword && confirmPasswordHasError) {
+			confirmPasswordHasError = false;
+			confirmPasswordErrorMessage = "";
+		}
+	}
+
 	async function createAccountButtonHandler() {
 		let userObj = validateUserData();
 		if (userObj === false) {
 			console.log("Invalid Form");
 			return;
 		}
-		console.log(userObj);
 		try {
 			let response = await createAccount(userObj);
-			console.log(response);
+			let user = response.Data;
+			dispatch("created", user);
 		} catch (error) {
 			console.log(error);
 		}
@@ -109,6 +122,19 @@
 			userPasswordErrorMessage = "";
 			userObj.password = userPassword;
 		}
+		// Confirm Password --
+		if (confirmPassword == "") {
+			hasError = true;
+			confirmPasswordHasError = true;
+			confirmPasswordErrorMessage = "Please confirm your password";
+		} else if (userPassword != confirmPassword) {
+			hasError = true;
+			confirmPasswordHasError = true;
+			confirmPasswordErrorMessage = "Passwords do not match";
+		} else {
+			confirmPasswordHasError = false;
+			confirmPasswordErrorMessage = "";
+		}
 		if (hasError) {
 			return false;
 		} else {
@@ -158,6 +184,16 @@
 				value={userPassword}
 				hasError={userPasswordHasError}
 				errorMessage={userPasswordErrorMessage}
+			></PasswordBox>
+
+			<div class="form_gap"></div>
+			<PasswordBox
+				label="Confirm Password"
+				placeholder="Retype your Password"
+				on:change={confirmPasswordChangedHandler}
+				value={confirmPassword}
+				hasError={confirmPasswordHasError}
+				errorMessage={confirmPasswordErrorMessage}
 			></PasswordBox>
 
 			<div class="form_gap"></div>

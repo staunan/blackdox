@@ -1,6 +1,6 @@
 <script>
 	import CloseButton from "components/buttons/CloseButton.svelte";
-	import SubmitButton from "components/form/SubmitButton.svelte";
+	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onMount } from "svelte";
 	import "animate.css";

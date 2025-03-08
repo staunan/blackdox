@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	"routinely/routine"
 	"routinely/user"
@@ -19,6 +22,8 @@ type Response struct {
 
 func main() {
 	e := echo.New()
+	// Public Folder --
+	e.Static("/images", "images")
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -27,7 +32,7 @@ func main() {
 	}))
 
 	// Create Routine --
-	e.POST("/create_user", func(c echo.Context) error {
+	e.POST("/create_account", func(c echo.Context) error {
 		// Get Request Data --
 		var reqData map[string]any = getRequestData(c)
 
@@ -63,17 +68,61 @@ func main() {
 			var response Response
 			response.HasError = true
 			response.Message = "Unable to create user"
-			response.Data = nil
+			response.Data = err
 			return c.JSON(http.StatusOK, response)
 		}
 		userObj.ID = last_inserted_id
-		user_details = user.GetUserDetailsById(last_inserted_id)
+		user_details, err := user.GetUserDetailsById(last_inserted_id)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Unable to get user details"
+			response.Data = err
+			return c.JSON(http.StatusOK, response)
+		}
+
+		// Authenticate User --
 
 		// Return Response --
 		var response Response
 		response.HasError = false
-		response.Message = "Routine has been created sucessfully"
+		response.Message = "Account has been created sucessfully"
 		response.Data = user_details
+		return c.JSON(http.StatusOK, response)
+	})
+
+	// Change Profile Picture --
+	e.POST("/upload_photo", func(c echo.Context) error {
+		// Source
+		file, err := c.FormFile("file")
+		if err != nil {
+			return err
+		}
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		// Destination
+		dst, err := os.Create("images/user_profile_pictures/" + file.Filename)
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
+		fmt.Printf("%#v\n", dst)
+
+		// Copy
+		if _, err = io.Copy(dst, src); err != nil {
+			return err
+		}
+
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = ""
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	})
 
