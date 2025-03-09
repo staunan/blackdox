@@ -4,7 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"routinely/mysqldb"
@@ -28,12 +33,15 @@ type jwtCustomClaims struct {
 }
 
 type User struct {
-	ID             int64
-	FullName       string
-	Email          string
-	Username       string
-	SecretPassword string
-	CreatedAt      string
+	ID                         int64
+	FullName                   string
+	Email                      string
+	Username                   string
+	SecretPassword             string
+	DisplayPictureName         string
+	RegistrationStepsCompleted int8
+	RegistrationSuccessful     bool
+	CreatedAt                  string
 }
 
 func CreateUser(user User) (int64, error) {
@@ -44,7 +52,7 @@ func CreateUser(user User) (int64, error) {
 	}
 
 	// Preparing SQL statement --
-	query := "INSERT INTO `users` (full_name, email, username, secret_password) VALUES (?, ?, ?, ?);"
+	query := "INSERT INTO `users` (full_name, email, username, secret_password, registration_steps_completed, registration_successful) VALUES (?, ?, ?, ?, ?, ?);"
 	insert, err := db.Prepare(query)
 	if err != nil {
 		return 0, errors.New("unable to prepare query")
@@ -86,7 +94,7 @@ func CreateUser(user User) (int64, error) {
 		return 0, errors.New("user already exists")
 	}
 	// Execute DB Query --
-	dbResponse, err := insert.Exec(fullname, email, username, secret_password)
+	dbResponse, err := insert.Exec(fullname, email, username, secret_password, 1, 0)
 	if err != nil {
 		return 0, errors.New("unable to execute query")
 	}
@@ -94,6 +102,95 @@ func CreateUser(user User) (int64, error) {
 
 	// Return last inserted ID --
 	return dbResponse.LastInsertId()
+}
+
+func GenerateJWTToken(user_details User) (string, error) {
+	// Set custom claims
+	claims := &jwtCustomClaims{
+		user_details.ID,
+		user_details.FullName,
+		user_details.Username,
+		user_details.Email,
+		true,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+		},
+	}
+	// Create token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Generate encoded token and send it as response.
+	return token.SignedString([]byte(JWT_SIGNING_SECRET))
+}
+
+func UpdateDisplayPicture(file *multipart.FileHeader) (bool, error) {
+	var user_id int64 = 1
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, errors.New("unable to connect to db")
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return false, err
+	}
+	defer src.Close()
+
+	var now_time string = time.Now().Format("20060102150405")
+	var file_extension string = getExtensionFromFileName(file.Filename)
+	var user_id_str string = strconv.Itoa(int(user_id))
+	file_name := "dp_" + now_time + file_extension + user_id_str
+
+	// Destination
+	dst, err := os.Create("images/user_profile_pictures/" + file_name)
+	if err != nil {
+		return false, err
+	}
+	defer dst.Close()
+	fmt.Printf("%#v\n", dst)
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return false, err
+	}
+
+	// Delete previous image --
+	var prev_file_name string
+	prev_dp_row := db.QueryRow("SELECT display_picture_name FROM users where id = ?", user_id_str)
+	// Scan fields --
+	scan_err := prev_dp_row.Scan(&prev_file_name)
+	if scan_err != nil {
+		return false, scan_err
+	}
+	if prev_file_name != "" {
+		// Remove image from folder --
+		remove_error := os.Remove("images/user_profile_pictures/" + prev_file_name)
+		if remove_error != nil {
+			return false, remove_error
+		}
+	}
+
+	// Update database --
+	query := "UPDATE users SET display_picture_name = ? WHERE id = ?"
+	update_result, err := db.Exec(query, file_name, user_id_str)
+	if err != nil {
+		return false, err
+	}
+	rows_updated, err := update_result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	if rows_updated > 0 {
+		return true, nil
+	} else {
+		return false, errors.New("something went wrong")
+	}
+}
+
+func getExtensionFromFileName(filename string) string {
+	name_arr := strings.Split(filename, ".")
+	ext := name_arr[len(name_arr)-1]
+	return "." + ext
 }
 
 func checkIfUserAlreadyExists(email string) bool {
@@ -121,12 +218,12 @@ func GetUserDetailsById(user_id int64) (User, error) {
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
-		return user, errors.New("Unable to connect to db")
+		return user, errors.New("unable to connect to db")
 	}
 
 	// Get User Details from DB --
 	var user_id_str string = strconv.Itoa(int(user_id))
-	row := db.QueryRow("SELECT id, full_name, email, username, secret_password, created_at FROM users where id = ?", user_id_str)
+	row := db.QueryRow("SELECT id, full_name, email, username, secret_password, display_picture_name, registration_steps_completed, registration_successful, created_at FROM users where id = ?", user_id_str)
 	return mapDBDataToUserDetails(row)
 }
 
@@ -139,9 +236,12 @@ func mapDBDataToUserDetails(row *sql.Row) (User, error) {
 	var username string
 	var secret_password string
 	var created_at string
+	var display_picture_name string
+	var registration_steps_completed int8
+	var registration_successful int8
 
 	// Scan fields --
-	err := row.Scan(&id, &full_name, &email, &username, &secret_password, &created_at)
+	err := row.Scan(&id, &full_name, &email, &username, &secret_password, &display_picture_name, &registration_steps_completed, &registration_successful, &created_at)
 	if err != nil {
 		return user, err
 	}
@@ -151,6 +251,13 @@ func mapDBDataToUserDetails(row *sql.Row) (User, error) {
 	user.Email = email
 	user.Username = username
 	user.SecretPassword = secret_password
+	user.DisplayPictureName = display_picture_name
+	user.RegistrationStepsCompleted = registration_steps_completed
+	if registration_successful == 0 {
+		user.RegistrationSuccessful = false
+	} else if registration_successful == 1 {
+		user.RegistrationSuccessful = true
+	}
 	user.CreatedAt = created_at
 	return user, nil
 }
@@ -212,9 +319,6 @@ func Login(c echo.Context) (string, error) {
 			return "", err
 		}
 		return t, nil
-		// return c.JSON(http.StatusOK, echo.Map{
-		// 	"token": t,
-		// })
 	}
 }
 

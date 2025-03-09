@@ -24,6 +24,7 @@
 		transition: background-color 0.3s;
 		cursor: pointer;
 		font-size: 14px;
+		font-family: monospace;
 	}
 	.btn > * {
 		position: relative;

@@ -1,5 +1,8 @@
 <script>
-	import { getUserDefaultImage, uploadProfilePhoto } from "apis/apis.js";
+	import { getUserDefaultImage } from "apis/apis.js";
+	import { createEventDispatcher } from "svelte";
+
+	const dispatch = createEventDispatcher();
 	let fileinput;
 	let avatar;
 
@@ -9,8 +12,7 @@
 		reader.readAsDataURL(image);
 		reader.onload = async function (e) {
 			avatar = e.target.result;
-			let data = { file: image };
-			let response = await uploadProfilePhoto(data);
+			dispatch("change", image);
 		};
 	}
 </script>

@@ -2,6 +2,18 @@
 	import { page } from "$app/state";
 	import logo from "$lib/images/svelte-logo.svg";
 	import github from "$lib/images/github.svg";
+	import { goto } from "$app/navigation";
+	import { logoutUser } from "apis/apis.js";
+
+	async function logoutHandler() {
+		let response = await logoutUser();
+		if (!response.HasError) {
+			goto("/login");
+		} else {
+			console.log("Error while logging out");
+			console.log(response);
+		}
+	}
 </script>
 
 <header>
@@ -40,7 +52,10 @@
 	</nav>
 
 	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_missing_attribute -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<a on:click={logoutHandler}>
 			<img src={github} alt="GitHub" />
 		</a>
 	</div>

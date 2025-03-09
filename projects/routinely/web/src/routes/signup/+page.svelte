@@ -56,4 +56,7 @@
 	.navigation_section {
 		padding-top: 25px;
 	}
+	.update_profile_picture {
+		width: 80%;
+	}
 </style>

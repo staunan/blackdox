@@ -10,19 +10,19 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	let username = "";
+	let username = "ssantanuberaa";
 	let usernameHasError = "";
 	let usernameErrorMessage = "";
-	let userFullName = "";
+	let userFullName = "Santanu Bera";
 	let userFullNameHasError = false;
 	let userFullNameErrorMessage = "";
-	let userEmail = "";
+	let userEmail = "ssantanuberaa@gmail.com";
 	let userEmailHasError = false;
 	let userEmailErrorMessage = "";
-	let userPassword = "";
+	let userPassword = "123";
 	let userPasswordHasError = "";
 	let userPasswordErrorMessage = "";
-	let confirmPassword = "";
+	let confirmPassword = "123";
 	let confirmPasswordHasError = "";
 	let confirmPasswordErrorMessage = "";
 

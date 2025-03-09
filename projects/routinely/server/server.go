@@ -2,10 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
+	"time"
 
 	"routinely/routine"
 	"routinely/user"
@@ -27,14 +25,26 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		AllowCredentials: true,
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		AllowHeaders:     []string{echo.HeaderAccessControlAllowHeaders, echo.HeaderAccessControlAllowCredentials, echo.HeaderAccessControlAllowOrigin, echo.HeaderContentType},
 	}))
 
 	// Create Routine --
 	e.POST("/create_account", func(c echo.Context) error {
 		// Get Request Data --
 		var reqData map[string]any = getRequestData(c)
+
+		existed_token, err := readCookie(c, "token")
+		if err == nil && existed_token != "" {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Already signed in"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		}
 
 		// Create User Object
 		var userObj user.User
@@ -68,10 +78,32 @@ func main() {
 			var response Response
 			response.HasError = true
 			response.Message = "Unable to create user"
-			response.Data = err
+			response.Data = err.Error()
 			return c.JSON(http.StatusOK, response)
 		}
 		userObj.ID = last_inserted_id
+
+		// Generate JWT Token for user --
+		token, err := user.GenerateJWTToken(userObj)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Error while generating JWT Token"
+			response.Data = err.Error()
+			return c.JSON(http.StatusOK, response)
+		}
+
+		// Set Cookie --
+		cookie := new(http.Cookie)
+		cookie.Name = "token"
+		cookie.Value = token
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		cookie.SameSite = http.SameSiteNoneMode
+		cookie.Secure = true
+		cookie.Path = "/"
+		c.SetCookie(cookie)
+
 		user_details, err := user.GetUserDetailsById(last_inserted_id)
 		if err != nil {
 			// Return Response --
@@ -82,8 +114,6 @@ func main() {
 			return c.JSON(http.StatusOK, response)
 		}
 
-		// Authenticate User --
-
 		// Return Response --
 		var response Response
 		response.HasError = false
@@ -92,37 +122,49 @@ func main() {
 		return c.JSON(http.StatusOK, response)
 	})
 
+	e.POST("/logout", func(c echo.Context) error {
+		// Logout by setting token to empty string --
+		cookie := new(http.Cookie)
+		cookie.Name = "token"
+		cookie.Value = ""
+		cookie.MaxAge = -1 // Setting negetive value to MaxAge makes the cookie expired, which is another way to delete the cookie
+		c.SetCookie(cookie)
+
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Logged Out!"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	})
+
 	// Change Profile Picture --
 	e.POST("/upload_photo", func(c echo.Context) error {
 		// Source
 		file, err := c.FormFile("file")
 		if err != nil {
-			return err
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Please provide image"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
 		}
-		src, err := file.Open()
+		success, err := user.UpdateDisplayPicture(file)
 		if err != nil {
-			return err
-		}
-		defer src.Close()
-
-		// Destination
-		dst, err := os.Create("images/user_profile_pictures/" + file.Filename)
-		if err != nil {
-			return err
-		}
-		defer dst.Close()
-		fmt.Printf("%#v\n", dst)
-
-		// Copy
-		if _, err = io.Copy(dst, src); err != nil {
-			return err
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Error while updating profile picture"
+			response.Data = err
+			return c.JSON(http.StatusOK, response)
 		}
 
 		// Return Response --
 		var response Response
 		response.HasError = false
-		response.Message = ""
-		response.Data = nil
+		response.Message = "Display picture has been updated"
+		response.Data = success
 		return c.JSON(http.StatusOK, response)
 	})
 
@@ -340,4 +382,12 @@ func getRequestData(c echo.Context) map[string]interface{} {
 	} else {
 		return json_map
 	}
+}
+
+func readCookie(c echo.Context, name string) (string, error) {
+	cookie, err := c.Cookie(name)
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
 }

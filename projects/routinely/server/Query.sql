@@ -2,6 +2,7 @@ use routinely;
 SET SQL_SAFE_UPDATES = 0;
 select * from routines;
 select * from routine_entries;
+select * from users;
 
 -- Create Schema
 create table routines (
@@ -35,6 +36,9 @@ create table users (
     email varchar(50) unique not null,
     username varchar(50) unique,
     secret_password varchar(50) not null,
+    display_picture_name varchar(200) default "",
+    registration_steps_completed tinyint default 0,
+    registration_successful tinyint default 0,
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );
