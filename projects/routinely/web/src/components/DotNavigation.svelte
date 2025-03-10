@@ -40,7 +40,12 @@
 					}}
 				>
 					<!-- svelte-ignore a11y_invalid_attribute -->
-					<div class="dot_item">{dot.title}</div>
+					<div
+						class="dot_item"
+						class:completed={dot.completed == true}
+					>
+						{dot.title}
+					</div>
 				</li>
 			{/each}
 		</ul>
@@ -77,6 +82,10 @@
 	}
 	.dots .active .dot_item:after {
 		height: 100%;
+	}
+	.dot_item.completed {
+		box-shadow: inset 0 0 0 2px #429445 !important;
+		background: #4caf50 !important;
 	}
 	.dots li {
 		position: relative;

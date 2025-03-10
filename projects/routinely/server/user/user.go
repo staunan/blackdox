@@ -139,7 +139,7 @@ func UpdateDisplayPicture(file *multipart.FileHeader) (bool, error) {
 	var now_time string = time.Now().Format("20060102150405")
 	var file_extension string = getExtensionFromFileName(file.Filename)
 	var user_id_str string = strconv.Itoa(int(user_id))
-	file_name := "dp_" + now_time + file_extension + user_id_str
+	file_name := "dp_" + now_time + user_id_str + file_extension
 
 	// Destination
 	dst, err := os.Create("images/user_profile_pictures/" + file_name)
@@ -166,7 +166,6 @@ func UpdateDisplayPicture(file *multipart.FileHeader) (bool, error) {
 		// Remove image from folder --
 		remove_error := os.Remove("images/user_profile_pictures/" + prev_file_name)
 		if remove_error != nil {
-			return false, remove_error
 		}
 	}
 
@@ -339,5 +338,41 @@ func getRequestData(c echo.Context) map[string]any {
 		return json_map
 	} else {
 		return json_map
+	}
+}
+
+func UpdateRegistrationStep(user_id int64, step_number int) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, errors.New("unable to connect to db")
+	}
+
+	query := "UPDATE users SET registration_steps_completed = ?, registration_successful = ? WHERE id = ?"
+	var user_id_str string = strconv.Itoa(int(user_id))
+	if step_number == 0 {
+		return false, errors.New("step 0 not allowed")
+	} else if step_number == 1 {
+		update_result, err := db.Exec(query, step_number, false, user_id_str)
+		if err != nil {
+			return false, err
+		}
+		rows_updated, err := update_result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+		return rows_updated > 0, nil
+	} else if step_number == 2 {
+		update_result, err := db.Exec(query, step_number, 1, user_id_str)
+		if err != nil {
+			return false, err
+		}
+		rows_updated, err := update_result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+		return rows_updated > 0, nil
+	} else {
+		return false, errors.New("invalid step number")
 	}
 }

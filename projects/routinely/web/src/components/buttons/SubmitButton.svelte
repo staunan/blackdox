@@ -1,18 +1,25 @@
 <script>
+	import { createEventDispatcher } from "svelte";
+
 	export let title = "Submit";
 	export let color = "blue";
-	import { createEventDispatcher } from "svelte";
+	export let disabled = false;
+
 	const dispatch = createEventDispatcher();
 	function onClick(event) {
 		dispatch("tap");
 	}
 </script>
 
-<button type="button" class={"btn " + color} on:click={onClick}
+<button type="button" class={"btn " + color} on:click={onClick} {disabled}
 	><span>{title}</span></button
 >
 
 <style>
+	button:disabled {
+		background-color: #ccc;
+		color: #333;
+	}
 	.btn {
 		position: relative;
 		display: block;

@@ -31,7 +31,7 @@ func main() {
 		AllowHeaders:     []string{echo.HeaderAccessControlAllowHeaders, echo.HeaderAccessControlAllowCredentials, echo.HeaderAccessControlAllowOrigin, echo.HeaderContentType},
 	}))
 
-	// Create Routine --
+	// Create User --
 	e.POST("/create_account", func(c echo.Context) error {
 		// Get Request Data --
 		var reqData map[string]any = getRequestData(c)
@@ -122,24 +122,9 @@ func main() {
 		return c.JSON(http.StatusOK, response)
 	})
 
-	e.POST("/logout", func(c echo.Context) error {
-		// Logout by setting token to empty string --
-		cookie := new(http.Cookie)
-		cookie.Name = "token"
-		cookie.Value = ""
-		cookie.MaxAge = -1 // Setting negetive value to MaxAge makes the cookie expired, which is another way to delete the cookie
-		c.SetCookie(cookie)
-
-		// Return Response --
-		var response Response
-		response.HasError = false
-		response.Message = "Logged Out!"
-		response.Data = nil
-		return c.JSON(http.StatusOK, response)
-	})
-
-	// Change Profile Picture --
-	e.POST("/upload_photo", func(c echo.Context) error {
+	// Change Profile Picture in Registration Step --
+	e.POST("/upload_photo_registration_step", func(c echo.Context) error {
+		var user_id int64 = 1
 		// Source
 		file, err := c.FormFile("file")
 		if err != nil {
@@ -155,16 +140,89 @@ func main() {
 			// Return Response --
 			var response Response
 			response.HasError = true
-			response.Message = "Error while updating profile picture"
+			response.Message = err.Error()
 			response.Data = err
 			return c.JSON(http.StatusOK, response)
 		}
+		if success {
+			update_success, err := user.UpdateRegistrationStep(user_id, 2)
+			if err != nil {
+				// Return Response --
+				var response Response
+				response.HasError = true
+				response.Message = err.Error()
+				response.Data = err
+				return c.JSON(http.StatusOK, response)
+			}
+			// Return Response --
+			var response Response
+			response.HasError = update_success
+			response.Message = "Display picture has been updated"
+			response.Data = success
+			return c.JSON(http.StatusOK, response)
+		} else {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Something went wrong!"
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		}
+	})
+
+	// Skip Upload Disply Photo in Registration Step --
+	e.POST("/skip_upload_photo_in_registration_step", func(c echo.Context) error {
+		var user_id int64 = 1
+		update_success, err := user.UpdateRegistrationStep(user_id, 2)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = err.Error()
+			response.Data = err
+			return c.JSON(http.StatusOK, response)
+		}
+		// Return Response --
+		var response Response
+		response.HasError = update_success
+		response.Message = "Successfully skipped the step: 'upload display photo'. registration successful!"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	})
+
+	// Get User Details --
+	e.GET("/user_details", func(c echo.Context) error {
+		var user_id int64 = 1
+		user_details, err := user.GetUserDetailsById(user_id)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = err.Error()
+			response.Data = nil
+			return c.JSON(http.StatusOK, response)
+		}
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Successfully retrieved user details"
+		response.Data = user_details
+		return c.JSON(http.StatusOK, response)
+	})
+
+	e.POST("/logout", func(c echo.Context) error {
+		// Logout by setting token to empty string --
+		cookie := new(http.Cookie)
+		cookie.Name = "token"
+		cookie.Value = ""
+		cookie.MaxAge = -1 // Setting negetive value to MaxAge makes the cookie expired, which is another way to delete the cookie
+		c.SetCookie(cookie)
 
 		// Return Response --
 		var response Response
 		response.HasError = false
-		response.Message = "Display picture has been updated"
-		response.Data = success
+		response.Message = "Logged Out!"
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	})
 

@@ -14,11 +14,6 @@ let reqConfig = {
     credentials: 'include'
 };
 
-export async function createAccount(data){
-    let response = await axios.post(config.api_base_url + 'create_account', data, reqConfig);
-    return response.data;
-}
-
 export async function logoutUser(data){
     let response = await axios.post(config.api_base_url + 'logout', data, reqConfig);
     return response.data;
@@ -58,7 +53,13 @@ export function getUserDefaultImage() {
     return config.api_base_url + "images/user_default_image.jpg";
 }
 
-export async function uploadProfilePhoto(data) {
+// User: Start --
+export async function createAccount(data){
+    let response = await axios.post(config.api_base_url + 'create_account', data, reqConfig);
+    return response.data;
+}
+
+export async function uploadDisplayPhotoInRegistrationStep(data) {
     let formData = new FormData();
     formData.append('file', data.file, data.file.name);
 
@@ -73,6 +74,17 @@ export async function uploadProfilePhoto(data) {
         maxRedirects: 0,
     }
  
-    let response = await axios.post(config.api_base_url + 'upload_photo', formData, req_config);
+    let response = await axios.post(config.api_base_url + 'upload_photo_registration_step', formData, req_config);
     return response.data;
 }
+
+export async function skipUploadDisplayPhotoInRegistrationStep(data){
+    let response = await axios.post(config.api_base_url + 'skip_upload_photo_in_registration_step', data, reqConfig);
+    return response.data;
+}
+
+export async function getUser(){
+    let response = await axios.get(config.api_base_url + 'user_details');
+    return response.data;
+}
+// User: End --

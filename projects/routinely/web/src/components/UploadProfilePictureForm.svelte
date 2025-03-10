@@ -3,18 +3,50 @@
 	import ProfilePicture from "components/form/ProfilePicture.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import LinkButton from "components/buttons/LinkButton.svelte";
-	import { uploadProfilePhoto } from "apis/apis.js";
+	import { createEventDispatcher } from "svelte";
+	import {
+		uploadDisplayPhotoInRegistrationStep,
+		skipUploadDisplayPhotoInRegistrationStep,
+	} from "apis/apis.js";
+	const dispatch = createEventDispatcher();
+	let photo_upload_button_text = "Upload Display Photo";
+	let disable_upload_button = false;
+	let skip_button_text = "Skip this step";
+	let disable_skip_button = false;
 
 	let selectedProfilePhoto = null;
 	function imageChangeHandler(e) {
 		selectedProfilePhoto = e.detail;
 	}
-	function skipStepHandler(e) {
-		alert("will implement");
+	async function skipStepHandler(e) {
+		let data = {};
+		skip_button_text = "Skipping...";
+		disable_skip_button = true;
+		setTimeout(async () => {
+			let response = await skipUploadDisplayPhotoInRegistrationStep(data);
+			if (response.HasError == false) {
+				dispatch("skipped", response.Data);
+			} else {
+				console.log("Some error has occured!");
+			}
+		}, 1000);
 	}
-	async function uploadPhotoHandler() {
+	function uploadPhotoHandler() {
+		if (!selectedProfilePhoto) {
+			console.log("Missing Image");
+			return;
+		}
 		let data = { file: selectedProfilePhoto };
-		let response = await uploadProfilePhoto(data);
+		photo_upload_button_text = "Uploading...";
+		disable_upload_button = true;
+		setTimeout(async () => {
+			let response = await uploadDisplayPhotoInRegistrationStep(data);
+			if (response.HasError == false) {
+				dispatch("uploaded", response.Data);
+			} else {
+				console.log("Some error has occured!");
+			}
+		}, 1000);
 	}
 </script>
 
@@ -24,12 +56,16 @@
 		<ProfilePicture on:change={imageChangeHandler}></ProfilePicture>
 		<div class="upload_photo_button center">
 			<SubmitButton
-				title="Upload Display Photo"
+				disabled={disable_upload_button}
+				title={photo_upload_button_text}
 				on:tap={uploadPhotoHandler}
 			></SubmitButton>
 		</div>
 		<div class="skip_step_container">
-			<LinkButton label="Skip this step" on:tap={skipStepHandler}
+			<LinkButton
+				disabled={disable_skip_button}
+				label={skip_button_text}
+				on:tap={skipStepHandler}
 			></LinkButton>
 		</div>
 	</div>

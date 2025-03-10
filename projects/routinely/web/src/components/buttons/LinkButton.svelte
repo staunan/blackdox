@@ -1,5 +1,6 @@
 <script>
 	export let label = "";
+	export let disabled = false;
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 	function onClick(event) {
@@ -10,7 +11,9 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_missing_attribute -->
-<a class="link_button btn" on:click={onClick}> <span>{label}</span> </a>
+<a class="link_button btn" on:click={onClick} class:disabled>
+	<span>{label}</span>
+</a>
 
 <style>
 	.link_button {
@@ -63,5 +66,10 @@
 		transition:
 			width 0.2s ease-out,
 			padding-top 0.2s ease-out;
+	}
+	.link_button.disabled {
+		cursor: not-allowed;
+		pointer-events: none;
+		color: #9e9e9e !important;
 	}
 </style>
