@@ -223,8 +223,17 @@ func main() {
 		if err != nil {
 			// Return Response --
 			var response Response
-			response.HasError = true
 			response.Message = "Error while validating login data"
+			if err.Error() == "user not found" {
+				response.Message = "User :'" + login_user.Email + "' doesn't exists"
+			} else if err.Error() == "incorrect password" {
+				response.Message = "Your password is incorrect, please check and try again!"
+			} else if err.Error() == "invalid email format" {
+				response.Message = "Email :'" + login_user.Email + "' is invalid, please provide a valid email address!"
+			} else if err.Error() == "invalid password format" {
+				response.Message = "Password format is invalid"
+			}
+			response.HasError = true
 			response.Data = err.Error()
 			return c.JSON(http.StatusOK, response)
 		}

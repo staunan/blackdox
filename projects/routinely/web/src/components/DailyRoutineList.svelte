@@ -1,5 +1,5 @@
 <script>
-	import SuccessTick from "components/checkmark/SuccessTick.svelte";
+	import SuccessTick from "components/animicons/SuccessTick.svelte";
 	import { TodayDate } from "lib/js/datetime.js";
 	import { markRoutineAsDone, markRoutineAsNotDone } from "apis/apis.js";
 	import { createEventDispatcher } from "svelte";

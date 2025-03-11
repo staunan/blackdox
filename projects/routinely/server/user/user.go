@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/mail"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"routinely/mysqldb"
 
@@ -263,12 +265,51 @@ func mapDBDataToUserDetails(row *sql.Row) (User, error) {
 	return user, nil
 }
 
+func isEmailValid(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+func isPasswordValid(password string) bool {
+	var (
+		hasMinLen  = false
+		hasUpper   = false
+		hasLower   = false
+		hasNumber  = false
+		hasSpecial = false
+	)
+	if len(password) >= 8 {
+		hasMinLen = true
+	}
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsNumber(char):
+			hasNumber = true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		}
+	}
+	return hasMinLen && hasUpper && hasLower && hasNumber && hasSpecial
+}
+
 func ValidateLoginUser(user_details User) (User, error) {
 	var result_user User
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
 		return result_user, err
+	}
+
+	// Validate data --
+	if !isEmailValid(user_details.Email) {
+		return result_user, errors.New("invalid email format")
+	}
+	if !isPasswordValid(user_details.SecretPassword) {
+		return result_user, errors.New("invalid password format")
 	}
 
 	// Check if user present in database --

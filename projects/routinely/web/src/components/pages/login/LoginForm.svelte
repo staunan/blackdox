@@ -4,6 +4,7 @@
 	import PasswordBox from "components/form/PasswordBox.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import LinkButton from "components/buttons/LinkButton.svelte";
+	import ErrorModal from "components/modals/ErrorModal.svelte";
 	import { goto } from "$app/navigation";
 	import { loginUser } from "apis/apis.js";
 	import { store } from "store";
@@ -16,6 +17,10 @@
 	let userPasswordErrorMessage = "";
 	let login_button_disabled = false;
 	let login_button_text = "Login to Routinely";
+	let errorModalActive = false;
+	let errorModalTitle = "";
+	let errorModalMessage = "";
+
 	function emailChangedHandler(event) {
 		userEmail = event.detail;
 	}
@@ -41,8 +46,16 @@
 		}
 		try {
 			let response = await loginUser(loginDataObj);
-			setUserDetails.setUserDetails(response.Data);
-			console.log(response.Data);
+			if (response.HasError == true) {
+				errorModalActive = true;
+				errorModalTitle = "Error";
+				errorModalMessage = response.Message;
+				login_button_disabled = false;
+				login_button_text = "Login to Routinely";
+			} else {
+				store.setUserDetails(response.Data);
+				goto("/inbox");
+			}
 		} catch (error) {
 			console.log(error);
 		}
@@ -148,6 +161,14 @@
 				</div>
 			</div>
 		</form>
+		<ErrorModal
+			active={errorModalActive}
+			title={errorModalTitle}
+			message={errorModalMessage}
+			on:close={() => {
+				errorModalActive = false;
+			}}
+		></ErrorModal>
 	</div>
 </Card>
 
