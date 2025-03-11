@@ -1,14 +1,17 @@
 <script>
-	import LoginForm from "components/LoginForm.svelte";
+	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
+	import LoginForm from "components/pages/login/LoginForm.svelte";
 </script>
 
 <svelte:head>
 	<title>Login</title>
 	<meta name="login" content="Login to routinely" />
 </svelte:head>
-<section>
-	<LoginForm></LoginForm>
-</section>
+<RoutinelyPageContainer>
+	<section>
+		<LoginForm></LoginForm>
+	</section>
+</RoutinelyPageContainer>
 
 <style>
 	section {

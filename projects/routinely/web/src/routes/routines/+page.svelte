@@ -1,10 +1,13 @@
 <script>
+	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
 	import CarbonTab from "components/tabs/CarbonTab.svelte";
 	import DailyRoutineList from "components/DailyRoutineList.svelte";
 	import WeeklyRoutineList from "components/WeeklyRoutineList.svelte";
 	import MonthlyRoutineList from "components/MonthlyRoutineList.svelte";
 	import YearlyRoutineList from "components/YearlyRoutineList.svelte";
+	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import { getAllRoutines, getProgress } from "apis/apis.js";
 
 	let daily_routines = [];
@@ -90,6 +93,9 @@
 		});
 		progress = progress.filter((p) => p.ID !== entry.ID);
 	}
+	function createRoutineHandler(event) {
+		goto("/create-routine");
+	}
 </script>
 
 <svelte:head>
@@ -99,27 +105,54 @@
 		content="List of routines"
 	/>
 </svelte:head>
-
-<div class="page">
-	<CarbonTab on:change={tabModeChangedHandler}></CarbonTab>
-	<div class="tab_content">
-		<DailyRoutineList
-			active={currentTabName === "daily"}
-			routines={daily_routines}
-			on:entryadded={entryAddedHandler}
-			on:entryremoved={entryRemovedHandler}
-		></DailyRoutineList>
-		<WeeklyRoutineList active={currentTabName === "weekly"}
-		></WeeklyRoutineList>
-		<MonthlyRoutineList active={currentTabName === "monthly"}
-		></MonthlyRoutineList>
-		<YearlyRoutineList active={currentTabName === "yearly"}
-		></YearlyRoutineList>
+<RoutinelyPageContainer>
+	<div class="page">
+		<div class="page_title_container">
+			<div class="page_title">Routines</div>
+			<div class="create_routine_button">
+				<SubmitButton
+					title="Create Routine"
+					on:tap={createRoutineHandler}
+				></SubmitButton>
+			</div>
+		</div>
+		<CarbonTab on:change={tabModeChangedHandler}></CarbonTab>
+		<div class="tab_content">
+			<DailyRoutineList
+				active={currentTabName === "daily"}
+				routines={daily_routines}
+				on:entryadded={entryAddedHandler}
+				on:entryremoved={entryRemovedHandler}
+			></DailyRoutineList>
+			<WeeklyRoutineList active={currentTabName === "weekly"}
+			></WeeklyRoutineList>
+			<MonthlyRoutineList active={currentTabName === "monthly"}
+			></MonthlyRoutineList>
+			<YearlyRoutineList active={currentTabName === "yearly"}
+			></YearlyRoutineList>
+		</div>
 	</div>
-</div>
+</RoutinelyPageContainer>
 
 <style>
 	.page {
 		width: 100%;
+	}
+	.page_title_container {
+		display: flex;
+		padding-bottom: 10px;
+	}
+	.page_title {
+		font-size: 24px;
+		font-weight: bold;
+		display: flex;
+		justify-content: flex-start;
+		padding: 10px;
+		padding-left: 0;
+		flex: 1;
+	}
+	.create_routine_button {
+		display: flex;
+		align-items: center;
 	}
 </style>

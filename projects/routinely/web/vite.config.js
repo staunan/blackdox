@@ -10,6 +10,7 @@ export default defineConfig({
             components: path.resolve('src/components/'),
             apis: path.resolve('src/apis/'),
             config: path.resolve('src/config/'),
+            store: path.resolve('src/store.js'),
         },
     }
 });

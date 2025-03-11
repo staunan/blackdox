@@ -2,7 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -15,7 +14,6 @@ import (
 	"routinely/mysqldb"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -87,6 +85,10 @@ func CreateUser(user User) (int64, error) {
 	} else if len(secret_password) > 50 {
 		return 0, errors.New("secret password is too big")
 	}
+	hashed_password, err := Hash(secret_password)
+	if err != nil {
+		return 0, err
+	}
 
 	// Check if user already exists --
 	user_exists := checkIfUserAlreadyExists(email)
@@ -94,9 +96,9 @@ func CreateUser(user User) (int64, error) {
 		return 0, errors.New("user already exists")
 	}
 	// Execute DB Query --
-	dbResponse, err := insert.Exec(fullname, email, username, secret_password, 1, 0)
+	dbResponse, err := insert.Exec(fullname, email, username, hashed_password, 1, 0)
 	if err != nil {
-		return 0, errors.New("unable to execute query")
+		return 0, err
 	}
 	insert.Close()
 
@@ -261,63 +263,30 @@ func mapDBDataToUserDetails(row *sql.Row) (User, error) {
 	return user, nil
 }
 
-func Login(c echo.Context) (string, error) {
+func ValidateLoginUser(user_details User) (User, error) {
+	var result_user User
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
-		panic("Unable to connect to db")
-	}
-
-	// Get Request Data --
-	var reqData map[string]any = getRequestData(c)
-	var email string = ""
-	var password string = ""
-	if reqData["email"] == nil {
-		panic("Email is required!")
-	} else {
-		email = reqData["email"].(string)
-	}
-	if reqData["password"] == nil {
-		panic("Password is required!")
-	} else {
-		password = reqData["password"].(string)
+		return result_user, err
 	}
 
 	// Check if user present in database --
 	var user_id int64
-	var fullname string
-	var username string
 	var hashed_password string
-	query_err := db.QueryRow("SELECT id, full_name, username, secret_password FROM users where email = ?", email).Scan(&user_id, &fullname, &username, &hashed_password)
+	query_err := db.QueryRow("SELECT id, secret_password FROM users where email = ?", user_details.Email).Scan(&user_id, &hashed_password)
 	switch {
 	case query_err == sql.ErrNoRows:
-		return "", errors.New("user not found")
+		return result_user, errors.New("user not found")
 	case query_err != nil:
-		return "", query_err
+		return result_user, query_err
 	default:
-		if !Verify(hashed_password, password) {
-			return "", errors.New("incorrect password")
+		if !Verify(hashed_password, user_details.SecretPassword) {
+			return result_user, errors.New("incorrect password")
+		} else {
+			result_user.ID = user_id
+			return result_user, nil
 		}
-		// Login user --
-		// Set custom claims
-		claims := &jwtCustomClaims{
-			user_id,
-			fullname,
-			username,
-			email,
-			true,
-			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
-			},
-		}
-		// Create token with claims
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		// Generate encoded token and send it as response.
-		t, err := token.SignedString([]byte(JWT_SIGNING_SECRET))
-		if err != nil {
-			return "", err
-		}
-		return t, nil
 	}
 }
 
@@ -329,16 +298,6 @@ func Hash(password string) (string, error) {
 func Verify(hashed, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
 	return err == nil
-}
-
-func getRequestData(c echo.Context) map[string]any {
-	json_map := make(map[string]any)
-	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
-	if err != nil {
-		return json_map
-	} else {
-		return json_map
-	}
 }
 
 func UpdateRegistrationStep(user_id int64, step_number int) (bool, error) {

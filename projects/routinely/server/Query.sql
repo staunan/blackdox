@@ -4,6 +4,9 @@ select * from routines;
 select * from routine_entries;
 select * from users;
 
+update users set id = 1;
+delete from users;
+
 -- Create Schema
 create table routines (
 	id bigint primary key auto_increment,
@@ -35,7 +38,7 @@ create table users (
     full_name varchar(50),
     email varchar(50) unique not null,
     username varchar(50) unique,
-    secret_password varchar(50) not null,
+    secret_password varchar(500) not null,
     display_picture_name varchar(200) default "",
     registration_steps_completed tinyint default 0,
     registration_successful tinyint default 0,

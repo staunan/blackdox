@@ -1,13 +1,9 @@
-<script>
-	import CreateRoutineForm from "components/CreateRoutineForm.svelte";
-</script>
-
 <svelte:head>
 	<title>Home</title>
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 <section>
-	<CreateRoutineForm></CreateRoutineForm>
+	<h1>Home Page</h1>
 </section>
 
 <style>

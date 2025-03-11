@@ -95,14 +95,7 @@ func main() {
 		}
 
 		// Set Cookie --
-		cookie := new(http.Cookie)
-		cookie.Name = "token"
-		cookie.Value = token
-		cookie.Expires = time.Now().Add(24 * time.Hour)
-		cookie.SameSite = http.SameSiteNoneMode
-		cookie.Secure = true
-		cookie.Path = "/"
-		c.SetCookie(cookie)
+		setAuthenticationCookie(c, token)
 
 		user_details, err := user.GetUserDetailsById(last_inserted_id)
 		if err != nil {
@@ -209,7 +202,63 @@ func main() {
 		response.Data = user_details
 		return c.JSON(http.StatusOK, response)
 	})
+	// Login --
+	e.POST("/login", func(c echo.Context) error {
+		// Get Request Data --
+		var reqData map[string]any = getRequestData(c)
+		var login_user user.User
+		if reqData["email"] == nil {
+			panic("Email is required!")
+		} else {
+			login_user.Email = reqData["email"].(string)
+		}
+		if reqData["password"] == nil {
+			panic("Password is required!")
+		} else {
+			login_user.SecretPassword = reqData["password"].(string)
+		}
 
+		// Validate Login Data --
+		result_user, err := user.ValidateLoginUser(login_user)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Error while validating login data"
+			response.Data = err.Error()
+			return c.JSON(http.StatusOK, response)
+		}
+		// Get User Details --
+		user_details, err := user.GetUserDetailsById(result_user.ID)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Error while getting user details"
+			response.Data = err.Error()
+			return c.JSON(http.StatusOK, response)
+		}
+		// Generate JWT Token --
+		token, err := user.GenerateJWTToken(user_details)
+		if err != nil {
+			// Return Response --
+			var response Response
+			response.HasError = true
+			response.Message = "Error while generating jwt token for user"
+			response.Data = err.Error()
+			return c.JSON(http.StatusOK, response)
+		}
+		// Store token to cookie --
+		setAuthenticationCookie(c, token)
+
+		// Return Response --
+		var response Response
+		response.HasError = false
+		response.Message = "Logged In!"
+		response.Data = user_details
+		return c.JSON(http.StatusOK, response)
+	})
+	// Logout --
 	e.POST("/logout", func(c echo.Context) error {
 		// Logout by setting token to empty string --
 		cookie := new(http.Cookie)
@@ -448,4 +497,15 @@ func readCookie(c echo.Context, name string) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+func setAuthenticationCookie(c echo.Context, token string) {
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = token
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.SameSite = http.SameSiteNoneMode
+	cookie.Secure = true
+	cookie.Path = "/"
+	c.SetCookie(cookie)
 }

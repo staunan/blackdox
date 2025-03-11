@@ -14,11 +14,6 @@ let reqConfig = {
     credentials: 'include'
 };
 
-export async function logoutUser(data){
-    let response = await axios.post(config.api_base_url + 'logout', data, reqConfig);
-    return response.data;
-}
-
 export async function createRoutine(data){
     let response = await axios.post(config.api_base_url + 'create_routine', data, reqConfig);
     return response.data;
@@ -85,6 +80,16 @@ export async function skipUploadDisplayPhotoInRegistrationStep(data){
 
 export async function getUser(){
     let response = await axios.get(config.api_base_url + 'user_details');
+    return response.data;
+}
+
+export async function loginUser(data){
+    let response = await axios.post(config.api_base_url + 'login', data, reqConfig);
+    return response.data;
+}
+
+export async function logoutUser(data){
+    let response = await axios.post(config.api_base_url + 'logout', data, reqConfig);
     return response.data;
 }
 // User: End --
