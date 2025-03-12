@@ -9,10 +9,10 @@
 	import { loginUser } from "apis/apis.js";
 	import { store } from "store";
 
-	let userEmail = "";
+	let userEmail = "ssantanuberaa@gmail.com";
 	let userEmailHasError = false;
 	let userEmailErrorMessage = "";
-	let userPassword = "";
+	let userPassword = "Santanu@123";
 	let userPasswordHasError = "";
 	let userPasswordErrorMessage = "";
 	let login_button_disabled = false;
@@ -53,8 +53,15 @@
 				login_button_disabled = false;
 				login_button_text = "Login to Routinely";
 			} else {
-				store.setUserDetails(response.Data);
-				goto("/inbox");
+				// Set token to local storage --
+				if (response.Data) {
+					localStorage.setItem("token", response.Data.JWTToken);
+				}
+				// Initialize store --
+				store.initialize();
+				setTimeout(() => {
+					goto("/inbox");
+				}, 500);
 			}
 		} catch (error) {
 			console.log(error);

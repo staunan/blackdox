@@ -41,6 +41,7 @@ type User struct {
 	DisplayPictureName         string
 	RegistrationStepsCompleted int8
 	RegistrationSuccessful     bool
+	JWTToken                   string
 	CreatedAt                  string
 }
 

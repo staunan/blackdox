@@ -79,7 +79,7 @@ export async function skipUploadDisplayPhotoInRegistrationStep(data){
 }
 
 export async function getUser(){
-    let response = await axios.get(config.api_base_url + 'user_details');
+    let response = await axios.get(config.api_base_url + 'user_details', reqConfig);
     return response.data;
 }
 
