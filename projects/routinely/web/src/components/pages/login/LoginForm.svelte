@@ -58,7 +58,6 @@
 					localStorage.setItem("token", response.Data.JWTToken);
 				}
 				// Initialize store --
-				store.initialize();
 				setTimeout(() => {
 					goto("/inbox");
 				}, 500);

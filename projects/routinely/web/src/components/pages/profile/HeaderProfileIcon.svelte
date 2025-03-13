@@ -5,12 +5,6 @@
 
 	export let user;
 
-	$: {
-		if (user && user.ID) {
-			console.log(user);
-		}
-	}
-
 	function tabHandler(event) {
 		dispatch("click");
 	}
@@ -40,11 +34,13 @@
 		align-items: center;
 		border-radius: 50%;
 		border: 1px solid #ccc;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 	}
 	img {
 		border-radius: 50%;
 		cursor: pointer;
-		height: 40px;
-		width: 40px;
+		height: 30px;
+		width: 30px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 	}
 </style>

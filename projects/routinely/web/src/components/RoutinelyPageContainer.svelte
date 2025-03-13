@@ -1,35 +1,44 @@
 <script>
-	import { store } from "store";
+	import { user_details, store } from "store";
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
 
 	let currentPageUrl = "";
-	let user_details = store.user_details;
+	let restricted_routes = ["/create-routine", "/inbox", "/me", "/routines"];
+
+	user_details.subscribe((value) => {
+		if (value && value.ID) {
+			loggedInHandler();
+		} else {
+			// User is not Logged In server --
+			// User should be redirect to login page --
+			notLoggedInHandler();
+		}
+	});
 
 	onMount(async () => {
 		currentPageUrl = $page.url.pathname;
-		if (store.initialized && store.user_details) {
+		if ($user_details && $user_details.ID) {
 			// User Logged In --
-			validatePage();
+			loggedInHandler();
 		} else {
 			// Check if user is logged in server --
-			if (await store.initialize()) {
-				// User logged in server --
-				user_details = store.user_details;
-				if (user_details && user_details.ID) {
-					validatePage();
-				}
-			} else {
+			try {
+				await store.getUser();
+			} catch (err) {
 				// User is not Logged In server --
 				// User should be redirect to login page --
-				if (currentPageUrl == "/inbox") {
-					goto("/login");
-				}
+				notLoggedInHandler();
 			}
 		}
 	});
-	function validatePage() {
+	function notLoggedInHandler() {
+		if (restricted_routes.includes(currentPageUrl)) {
+			goto("/login");
+		}
+	}
+	function loggedInHandler() {
 		if (currentPageUrl == "/login") {
 			// Logged in page should be blocked --
 			goto("/inbox");

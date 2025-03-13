@@ -1,19 +1,34 @@
-import { getUser } from "apis/apis.js";
+import { getUser, getAllRoutines } from "apis/apis.js";
+
+import { writable, derived } from "svelte/store";
+
+export const user_details = writable(null);
+export const routines = writable([]);
+export const inboxes = derived(routines, ($routines) => {
+    console.log("routines", $routines);
+    return routines;
+});
     
 export let store = {
-    initialized: false,
-    user_details: null,
-    initialize: async function () {
-        // get user details --
+    getUser: async function () {
         let response = await getUser();
         if (!response.HasError) {
-            this.user_details = response.Data;
-            this.initialized = true;
-            console.log(this);
+            user_details.set(response.Data)
         }
-        return true;
     },
-    setUserDetails: function (user) {
-        this.user_details = user;
-    }
+    getRoutines: async function () {
+        try {
+            let all_routines_response = await getAllRoutines({ user_id: 1 });
+            if (!all_routines_response.HasError) { 
+                routines.set(all_routines_response.Data);
+            } else {
+                routines.set([]);
+            }
+        } catch (err) {
+            console.log(err);
+            routines.set([]);
+        }
+        
+        
+    },
 };

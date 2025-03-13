@@ -2,15 +2,16 @@
 	import HeaderProfileIcon from "components/pages/profile/HeaderProfileIcon.svelte";
 	import HeaderNav from "components/pages/layouts/HeaderNav.svelte";
 	import logo from "$lib/images/svelte-logo.svg";
+	import { user_details, store } from "store";
 	import { goto } from "$app/navigation";
-	import { store } from "store";
 
-	let user_details = store.user_details;
-	$: {
-		if (user_details && user_details.ID) {
-			console.log(user_details);
+	let user = null;
+	user_details.subscribe((newValue) => {
+		if (newValue && newValue.DisplayPictureName !== "") {
+			user = newValue;
 		}
-	}
+	});
+
 	function goToProfilePageHandler() {
 		goto("/me");
 	}
@@ -24,7 +25,7 @@
 	</div>
 	<HeaderNav></HeaderNav>
 	<div class="profile_display_photo">
-		<HeaderProfileIcon user={user_details} on:click={goToProfilePageHandler}
+		<HeaderProfileIcon {user} on:click={goToProfilePageHandler}
 		></HeaderProfileIcon>
 	</div>
 </header>
@@ -56,7 +57,7 @@
 	}
 	.profile_display_photo {
 		display: flex;
-		width: 60px;
+		width: 45px;
 		height: inherit;
 		align-items: center;
 	}

@@ -40,7 +40,7 @@ export async function markRoutineAsNotDone(data){
 }
 
 export async function getProgress(){
-    let response = await axios.get(config.api_base_url + 'progress');
+    let response = await axios.get(config.api_base_url + 'progress', reqConfig);
     return response.data;
 }
 

@@ -1,17 +1,28 @@
 <script>
 	import SuccessTick from "components/animicons/SuccessTick.svelte";
-	import { TodayDate } from "lib/js/datetime.js";
 	import { markRoutineAsDone, markRoutineAsNotDone } from "apis/apis.js";
 	import { createEventDispatcher } from "svelte";
-	import { goto } from "$app/navigation";
+	import { TodayDate } from "lib/js/datetime.js";
 
-	export let active = false;
-	export let routines = [];
+	export let routine = {};
 
 	const dispatch = createEventDispatcher();
 
 	function routineClickedHandler(routine) {
-		goto("/routine/" + routine.Slug);
+		dispatch("click", routine);
+	}
+	function getRoutineTimeString(time) {
+		let time_arr = time.split(":");
+		let zone = "";
+		let hour = 0;
+		if (Number(time_arr[0]) < 12) {
+			zone = "AM";
+			hour = Number(time_arr[0]);
+		} else {
+			zone = "PM";
+			hour = Number(time_arr[0]) - 12;
+		}
+		return hour + ":" + time_arr[1] + " " + zone;
 	}
 	async function routineCheckHandler(event, routine) {
 		if (event.detail === true) {
@@ -41,55 +52,31 @@
 			}
 		}
 	}
-
-	function getRoutineTimeString(time) {
-		let time_arr = time.split(":");
-		let zone = "";
-		let hour = 0;
-		if (Number(time_arr[0]) < 12) {
-			zone = "AM";
-			hour = Number(time_arr[0]);
-		} else {
-			zone = "PM";
-			hour = Number(time_arr[0]) - 12;
-		}
-		return hour + ":" + time_arr[1] + " " + zone;
-	}
 </script>
 
-{#if active}
-	<div class="routine_container">
-		{#each routines as routine}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div class="routine_item" title={routine.Title}>
-				<div class="routine_item_left">
-					<div
-						class="routine_title"
-						on:click={() => routineClickedHandler(routine)}
-					>
-						{routine.Title}
-					</div>
-					<div class="routine_time">
-						{getRoutineTimeString(routine.Time)}
-					</div>
-				</div>
-				<div class="routine_item_right">
-					<SuccessTick
-						checked={routine.Done === true ? true : false}
-						on:change={(event) =>
-							routineCheckHandler(event, routine)}
-					></SuccessTick>
-				</div>
-			</div>
-		{/each}
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="routine_item" title={routine.Title}>
+	<div class="routine_item_left">
+		<div
+			class="routine_title"
+			on:click={() => routineClickedHandler(routine)}
+		>
+			{routine.Title}
+		</div>
+		<div class="routine_time">
+			{getRoutineTimeString(routine.Time)}
+		</div>
 	</div>
-{/if}
+	<div class="routine_item_right">
+		<SuccessTick
+			checked={routine.Done === true ? true : false}
+			on:change={(event) => routineCheckHandler(event, routine)}
+		></SuccessTick>
+	</div>
+</div>
 
 <style>
-	.routine_container {
-		padding-top: 20px;
-	}
 	.routine_item {
 		display: flex;
 		border-radius: 4px;

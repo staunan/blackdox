@@ -1,5 +1,6 @@
 <script>
 	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
+	import InboxPage from "components/pages/inbox/InboxPage.svelte";
 </script>
 
 <svelte:head>
@@ -7,17 +8,9 @@
 	<meta name="inbox" content="Inbox Page" />
 </svelte:head>
 <RoutinelyPageContainer>
-	<section>
-		<h1>Inbox</h1>
-	</section>
+	<h1>Inbox</h1>
+	<InboxPage></InboxPage>
 </RoutinelyPageContainer>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
 </style>
