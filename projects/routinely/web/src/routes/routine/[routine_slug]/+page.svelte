@@ -2,14 +2,28 @@
 	import { page } from "$app/stores";
 	import { onMount } from "svelte";
 	import { getRoutineDetails } from "apis/apis.js";
+	import RoutineDetailsPage from "components/pages/routine_details/RoutineDetailsPage.svelte";
+	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
+
 	let routine_slug = $page.params.routine_slug;
 	let routine_details = null;
 	onMount(async () => {
-		routine_details = await getRoutineDetails({
+		let res = await getRoutineDetails({
 			routine_slug: routine_slug,
 		});
-		console.log(routine_details);
+		if (res.HasError) {
+			console.log(res);
+		} else {
+			routine_details = res.Data;
+			console.log(routine_details);
+		}
 	});
 </script>
 
-<h1>Routine Details</h1>
+<svelte:head>
+	<title>Routine Details</title>
+	<meta name="routine details" content="Routine details page" />
+</svelte:head>
+<RoutinelyPageContainer title="Routine Details">
+	<RoutineDetailsPage data={routine_details}></RoutineDetailsPage>
+</RoutinelyPageContainer>

@@ -4,6 +4,8 @@
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
 
+	export let title = "";
+
 	let currentPageUrl = "";
 	let restricted_routes = ["/create-routine", "/inbox", "/me", "/routines"];
 
@@ -46,6 +48,36 @@
 	}
 </script>
 
-<div>
-	<slot></slot>
+<div class="page">
+	<div class="page_title">
+		<div class="page_title_left">
+			<div class="page_title_text">{title}</div>
+		</div>
+		<div class="page_title_right">
+			<slot name="title_right"></slot>
+		</div>
+	</div>
+	<div class="page_content">
+		<slot></slot>
+	</div>
 </div>
+
+<style>
+	.page {
+		width: 100%;
+	}
+	.page_title {
+		display: flex;
+		height: 60px;
+	}
+	.page_title_left {
+		flex: 1;
+	}
+	.page_title_text {
+		font-size: 33px;
+		font-weight: bold;
+		display: flex;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+</style>

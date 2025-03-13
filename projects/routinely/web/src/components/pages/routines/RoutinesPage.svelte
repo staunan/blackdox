@@ -1,6 +1,5 @@
 <script>
 	import CarbonTab from "components/tabs/CarbonTab.svelte";
-	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import DailyRoutineList from "components/pages/routines/DailyRoutineList.svelte";
 	import WeeklyRoutineList from "components/pages/routines/WeeklyRoutineList.svelte";
 	import MonthlyRoutineList from "components/pages/routines/MonthlyRoutineList.svelte";
@@ -107,21 +106,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Routines</title>
-	<meta
-		name="List of routines. Explore your routines by daily, weely, monthly or yearly, create groups like 'Morning Routines', 'Evening Routine' in Daily tabs, create group like 'Christmas Routine' in Yearly tab. Check documentation for more info."
-		content="List of routines"
-	/>
-</svelte:head>
-<div class="page">
-	<div class="page_title_container">
-		<div class="page_title">Routines</div>
-		<div class="create_routine_button">
-			<SubmitButton title="Create Routine" on:tap={createRoutineHandler}
-			></SubmitButton>
-		</div>
-	</div>
+<div class="routines_container">
 	<CarbonTab on:change={tabModeChangedHandler}></CarbonTab>
 	<div class="tab_content">
 		<DailyRoutineList
@@ -138,26 +123,3 @@
 		></YearlyRoutineList>
 	</div>
 </div>
-
-<style>
-	.page {
-		width: 100%;
-	}
-	.page_title_container {
-		display: flex;
-		padding-bottom: 10px;
-	}
-	.page_title {
-		font-size: 24px;
-		font-weight: bold;
-		display: flex;
-		justify-content: flex-start;
-		padding: 10px;
-		padding-left: 0;
-		flex: 1;
-	}
-	.create_routine_button {
-		display: flex;
-		align-items: center;
-	}
-</style>
