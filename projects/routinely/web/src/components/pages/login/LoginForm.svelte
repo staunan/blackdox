@@ -4,7 +4,7 @@
 	import PasswordBox from "components/form/PasswordBox.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import LinkButton from "components/buttons/LinkButton.svelte";
-	import ErrorModal from "components/modals/ErrorModal.svelte";
+	import ErrorModal from "components/pages/login/ErrorModal.svelte";
 	import { goto } from "$app/navigation";
 	import { loginUser } from "apis/apis.js";
 	import { store } from "store";

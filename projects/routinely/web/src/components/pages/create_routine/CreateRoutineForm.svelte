@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from "svelte";
-	import Card from "components/Card.svelte";
 	import TextBox from "components/form/TextBox.svelte";
 	import TextArea from "components/form/TextArea.svelte";
 	import Dropdown from "components/form/Dropdown.svelte";
@@ -14,11 +13,16 @@
 	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
 	import RoutineModeDisplayString from "components/RoutineModeDisplayString.svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
-	import SuccessModal from "components/modals/SuccessModal.svelte";
+	import SuccessModal from "components/pages/create_routine/SuccessModal.svelte";
+	import Center from "components/layouts/Center.svelte";
+	import FormInput from "components/layouts/FormInput.svelte";
 	import { createRoutine } from "apis/apis.js";
 
+	// Props --
+	export let disableadvancesettings = false;
+
 	// Form Settings Variable --
-	let advanceSettings = false;
+	let advanceSettings = disableadvancesettings;
 	let routine_title_label = "";
 	let node_routine_mode_display_string;
 	let routine_mode_display_string_has_error;
@@ -375,9 +379,8 @@
 	}
 </script>
 
-<Card>
-	<div class="card_body">
-		<h1 class="center mb10 form_heading">Create Routine</h1>
+<div>
+	<FormInput>
 		<TextBox
 			label={routine_title_label}
 			placeholder="Write a title for your routine..."
@@ -386,9 +389,10 @@
 			hasError={routineTitleHasError}
 			errorMessage={routineTitleErrorMessage}
 		></TextBox>
-		{#if advanceSettings}
-			<div class="advanceSettings">
-				<div class="form_gap"></div>
+	</FormInput>
+	{#if advanceSettings}
+		<div class="advanceSettings">
+			<FormInput>
 				<Dropdown
 					label="Routine Mode"
 					placeholder="Select a execution mode of this routine "
@@ -398,96 +402,86 @@
 					hasError={routineModeHasError}
 					errorMessage={routineModeErrorMessage}
 				/>
-				{#if selected_routine_mode && selected_routine_mode.value === "Daily"}
-					<div class="form_gap"></div>
-					<div class="form_row">
-						<div class="form_column">
-							<DaysSelector
-								value={selected_days}
-								on:change={dailyDaysChangedHandler}
-								label="Select Days"
-							></DaysSelector>
-						</div>
-						<div class="form_column">
-							<TimePicker
-								value={selectedTime}
-								on:change={routineTimeChangedHandler}
-								label="Choose a time (24 Hour Format)"
-								format="24Hours"
-							></TimePicker>
-						</div>
-					</div>
-				{:else if selected_routine_mode && selected_routine_mode.value === "Weekly"}
-					<div class="form_gap"></div>
-					<div class="form_row">
-						<div class="form_column">
-							<WeekDaySelector
-								value={selected_week_day}
-								on:change={weekDayChangedHandler}
-								label="Select a day"
-							></WeekDaySelector>
-						</div>
-						<div class="form_column">
-							<TimePicker
-								value={selectedTime}
-								on:change={routineTimeChangedHandler}
-								label="Choose a time (24 Hour Format)"
-								format="24Hours"
-							></TimePicker>
-						</div>
-					</div>
-				{:else if selected_routine_mode && selected_routine_mode.value === "Monthly"}
-					<div class="form_gap"></div>
-					<div class="form_row">
-						<div class="form_column">
-							<DayPicker
-								value={selected_month_day}
-								on:change={monthDayChangedHandler}
-								label="Choose a Day"
-							></DayPicker>
-						</div>
-						<div class="form_column">
-							<TimePicker
-								value={selectedTime}
-								on:change={routineTimeChangedHandler}
-								label="Choose a time (24 Hour Format)"
-								format="24Hours"
-							></TimePicker>
-						</div>
-					</div>
-				{:else if selected_routine_mode && selected_routine_mode.value === "Yearly"}
-					<div class="form_gap"></div>
-					<div class="form_row">
-						<div class="form_column">
-							<DateMonthPicker
-								value={selected_month_and_date}
-								on:change={yearMonthDateChangedHandler}
-								label="Choose a date (Month-Day)"
-							></DateMonthPicker>
-						</div>
-						<div class="form_column">
-							<TimePicker
-								value={selectedTime}
-								on:change={routineTimeChangedHandler}
-								label="Choose a time (24 Hour Format)"
-								format="24Hours"
-							></TimePicker>
-						</div>
-					</div>
-				{/if}
-				{#if !routine_mode_display_string_has_error}
+			</FormInput>
+			{#if selected_routine_mode && selected_routine_mode.value === "Daily"}
+				<FormInput>
+					<DaysSelector
+						value={selected_days}
+						on:change={dailyDaysChangedHandler}
+						label="Select Days"
+					></DaysSelector>
+				</FormInput>
+				<FormInput>
+					<TimePicker
+						value={selectedTime}
+						on:change={routineTimeChangedHandler}
+						label="Choose a time (24 Hour Format)"
+						format="24Hours"
+					></TimePicker>
+				</FormInput>
+			{:else if selected_routine_mode && selected_routine_mode.value === "Weekly"}
+				<FormInput>
+					<WeekDaySelector
+						value={selected_week_day}
+						on:change={weekDayChangedHandler}
+						label="Select a day"
+					></WeekDaySelector>
+				</FormInput>
+				<FormInput>
+					<TimePicker
+						value={selectedTime}
+						on:change={routineTimeChangedHandler}
+						label="Choose a time (24 Hour Format)"
+						format="24Hours"
+					></TimePicker>
+				</FormInput>
+			{:else if selected_routine_mode && selected_routine_mode.value === "Monthly"}
+				<FormInput>
+					<DayPicker
+						value={selected_month_day}
+						on:change={monthDayChangedHandler}
+						label="Choose a Day"
+					></DayPicker>
+				</FormInput>
+				<FormInput>
+					<TimePicker
+						value={selectedTime}
+						on:change={routineTimeChangedHandler}
+						label="Choose a time (24 Hour Format)"
+						format="24Hours"
+					></TimePicker>
+				</FormInput>
+			{:else if selected_routine_mode && selected_routine_mode.value === "Yearly"}
+				<FormInput>
+					<DateMonthPicker
+						value={selected_month_and_date}
+						on:change={yearMonthDateChangedHandler}
+						label="Choose a date (Month-Day)"
+					></DateMonthPicker>
+				</FormInput>
+				<FormInput>
+					<TimePicker
+						value={selectedTime}
+						on:change={routineTimeChangedHandler}
+						label="Choose a time (24 Hour Format)"
+						format="24Hours"
+					></TimePicker>
+				</FormInput>
+			{/if}
+			{#if !routine_mode_display_string_has_error}
+				<FormInput>
 					<RoutineModeDisplayString
 						message={node_routine_mode_display_string}
 					></RoutineModeDisplayString>
-				{:else}
-					<div class="mode_error_message">
-						<FormErrorMessage
-							message={routine_mode_display_string_error_message}
-						></FormErrorMessage>
-					</div>
-				{/if}
-
-				<div class="form_gap"></div>
+				</FormInput>
+			{:else}
+				<FormInput>
+					<FormErrorMessage
+						message={routine_mode_display_string_error_message}
+					></FormErrorMessage>
+				</FormInput>
+			{/if}
+			<FormInput>
 				<TextArea
 					label="Routine Description [Optional]"
 					placeholder="Write a description for your routine (Optional)..."
@@ -496,32 +490,35 @@
 					hasError={routineDetailsHasError}
 					errorMessage={routineDetailsErrorMessage}
 				></TextArea>
-
-				<div class="advance_settings_hide">
-					<LinkButton
+			</FormInput>
+			{#if !disableadvancesettings}
+				<FormInput
+					><LinkButton
 						label="Hide Advance Settings"
 						on:tap={() => (advanceSettings = !advanceSettings)}
 					></LinkButton>
-				</div>
-			</div>
-		{:else}
-			<div class="advance_settings_trigger">
+				</FormInput>
+			{/if}
+		</div>
+	{:else}
+		<FormInput>
+			<Center>
 				<LinkButton
 					label="Show Advance Settings"
 					on:tap={showAdvanceSettingHandler}
 				></LinkButton>
-				<div class="advance_settings_trigger_icon">
-					<ArrowDown></ArrowDown>
-				</div>
-			</div>
-		{/if}
+			</Center>
+			<Center>
+				<ArrowDown></ArrowDown>
+			</Center>
+		</FormInput>
+	{/if}
 
-		<div class="center mt10 submit_button_container">
-			<SubmitButton title="Create Routine" on:tap={createRoutineHandler}
-			></SubmitButton>
-		</div>
-	</div>
-</Card>
+	<Center>
+		<SubmitButton title="Create Routine" on:tap={createRoutineHandler}
+		></SubmitButton>
+	</Center>
+</div>
 
 <SuccessModal
 	active={is_success_modal_active}
@@ -530,69 +527,3 @@
 	on:createanother={createAnotherRoutineHandler}
 	on:gotolist={goToListHandler}
 ></SuccessModal>
-
-<style>
-	.form_heading {
-		font-family: monospace;
-		font-size: 24px;
-		font-weight: bold;
-		margin-top: 10px;
-		padding-bottom: 40px;
-	}
-	.form_gap {
-		width: 100%;
-		height: 20px;
-	}
-	.card_body {
-		padding: 20px;
-	}
-	.center {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	.advance_settings_trigger {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		flex-direction: column;
-		padding-top: 20px;
-		position: relative;
-	}
-	.advance_settings_trigger_icon {
-		position: relative;
-		bottom: 10px;
-		cursor: pointer;
-	}
-	.advance_settings_hide {
-		padding-top: 40px;
-		padding-bottom: 10px;
-		display: flex;
-	}
-	.submit_button_container {
-		margin-bottom: 10px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding-bottom: 10px;
-	}
-	.form_row {
-		display: flex;
-		flex-wrap: nowrap;
-		box-sizing: border-box;
-		justify-content: space-between;
-	}
-	.form_column {
-		flex-basis: 45%;
-	}
-	.mb10 {
-		margin-bottom: 10px;
-	}
-	.mt10 {
-		margin-top: 10px;
-	}
-	.mode_error_message {
-		padding-top: 5px;
-		padding-bottom: 10px;
-	}
-</style>

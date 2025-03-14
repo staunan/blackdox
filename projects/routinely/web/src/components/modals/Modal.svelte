@@ -66,7 +66,6 @@
 		box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
 		background-color: #fff;
 		border-radius: 8px;
-		padding-bottom: 20px;
 		display: flex;
 		flex-direction: column;
 	}

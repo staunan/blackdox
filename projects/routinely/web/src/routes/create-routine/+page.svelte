@@ -1,8 +1,8 @@
 <script>
 	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
-	import CreateRoutineForm from "components/pages/create_routine/CreateRoutineForm.svelte";
+	import CreateRoutinePage from "components/pages/create_routine/CreateRoutinePage.svelte";
 </script>
 
 <RoutinelyPageContainer>
-	<CreateRoutineForm></CreateRoutineForm>
+	<CreateRoutinePage></CreateRoutinePage>
 </RoutinelyPageContainer>

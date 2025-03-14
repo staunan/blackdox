@@ -1,5 +1,5 @@
 <script>
-	import CloseButton from "components/buttons/CloseButton.svelte";
+	import Modal from "components/modals/Modal.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onMount } from "svelte";
@@ -9,15 +9,6 @@
 	export let overlayclose = false;
 
 	const dispatch = createEventDispatcher();
-	onMount(() => {
-		document.addEventListener("click", function (event) {
-			if (event.target.closest(".modal_overlay")) {
-				if (overlayclose) {
-					dispatch("close");
-				}
-			}
-		});
-	});
 	function closeModal() {
 		dispatch("close");
 	}
@@ -29,80 +20,39 @@
 	}
 </script>
 
-{#if active}
-	<div class="content_modal">
-		<div class="modal_overlay"></div>
-		<div class="content_modal_window">
-			<div class="content_area animate__animated animate__tada">
-				<!-- Success Tick -->
-				<div class="success_tick">
-					<div class="checkmark-circle">
-						<div class="background"></div>
-						<div class="checkmark draw"></div>
-					</div>
-				</div>
-				<div class="success_title">Awesome!</div>
-				<div class="success_message">
-					Your routine has been created successfully.
-				</div>
-				<div class="row">
-					<div class="go_to_list">
-						<SubmitButton
-							title="Go to list"
-							on:tap={goToListHandler}
-							color="red"
-						></SubmitButton>
-					</div>
-					<div class="create_another">
-						<SubmitButton
-							title="Create Another"
-							on:tap={createAnotherHandler}
-							color="blue"
-						></SubmitButton>
-					</div>
-				</div>
+<Modal {active} {overlayclose} on:close={closeModal}>
+	<div class="success_content">
+		<!-- Success Tick -->
+		<div class="success_tick">
+			<div class="checkmark-circle">
+				<div class="background"></div>
+				<div class="checkmark draw"></div>
+			</div>
+		</div>
+		<div class="success_title">Awesome!</div>
+		<div class="success_message">
+			Your routine has been created successfully.
+		</div>
+		<div class="row">
+			<div class="go_to_list">
+				<SubmitButton
+					title="Go to list"
+					on:tap={goToListHandler}
+					color="red"
+				></SubmitButton>
+			</div>
+			<div class="create_another">
+				<SubmitButton
+					title="Create Another"
+					on:tap={createAnotherHandler}
+					color="blue"
+				></SubmitButton>
 			</div>
 		</div>
 	</div>
-{/if}
+</Modal>
 
 <style>
-	.content_modal {
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		width: 100%;
-		height: 100vh;
-		z-index: 1001;
-		font-family: monospace;
-	}
-	.modal_overlay {
-		background: #3f51b5c9;
-		height: inherit;
-		width: inherit;
-	}
-	.content_modal_window {
-		position: fixed !important;
-		top: 50%;
-		left: 50%;
-		width: 500px;
-		height: auto;
-		transform: translate(-50%, -50%);
-		border-radius: 8px;
-		z-index: 10001;
-		animation-delay: 200ms;
-		background: transparent;
-	}
-	.content_area {
-		box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
-		background-color: #fff;
-		border-radius: 8px;
-		padding-bottom: 20px;
-		display: flex;
-		flex-direction: column;
-	}
 	.success_tick {
 		width: 100%;
 		display: flex;

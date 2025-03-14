@@ -4,9 +4,6 @@ select * from routines;
 select * from routine_entries;
 select * from users;
 
-update users set id = 1;
-delete from users;
-
 -- Create Schema
 create table routines (
 	id bigint primary key auto_increment,
@@ -32,7 +29,6 @@ create table routine_entries (
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );
-
 create table users (
 	id bigint primary key auto_increment,
     full_name varchar(50),

@@ -1,15 +1,10 @@
 <script>
-	import Center from "components/layouts/Center.svelte";
 	import CloseButton from "components/buttons/CloseButton.svelte";
-	import SubmitButton from "components/buttons/SubmitButton.svelte";
-	import CircleCross from "components/animicons/CircleCross.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onMount } from "svelte";
 	import "animate.css";
 
 	export let active = false;
-	export let message = "Error Message";
-	export let title = "Title";
 	export let overlayclose = false;
 
 	const dispatch = createEventDispatcher();
@@ -22,7 +17,7 @@
 			}
 		});
 	});
-	function okButtonClickHandler() {
+	function closeModal() {
 		dispatch("close");
 	}
 </script>
@@ -31,28 +26,16 @@
 	<div class="content_modal">
 		<div class="modal_overlay"></div>
 		<div class="content_modal_window">
-			<div class="content_area animate__animated animate__fadeInUp">
-				<!-- Success Tick -->
-				<Center>
-					<CircleCross></CircleCross>
-				</Center>
-				<Center>
-					<div class="success_title">{title}</div>
-				</Center>
-				<Center>
-					<div class="success_message">
-						{message}
-					</div>
-				</Center>
-				<Center>
-					<div class="create_another">
-						<SubmitButton
-							title="Got It"
-							on:tap={okButtonClickHandler}
-							color="blue"
-						></SubmitButton>
-					</div>
-				</Center>
+			<div class="content_area">
+				<div class="modal_header">
+					<slot name="header"></slot>
+				</div>
+				<div class="modal_body">
+					<slot></slot>
+				</div>
+				<div class="modal_footer">
+					<slot name="footer"></slot>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -91,22 +74,25 @@
 		box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
 		background-color: #fff;
 		border-radius: 8px;
-		padding-bottom: 20px;
 		display: flex;
 		flex-direction: column;
-		padding-top: 50px;
+		height: calc(100vh - 100px);
 	}
-	.success_title {
-		padding-top: 20px;
-		font-size: 24px;
-		font-weight: 700;
-		letter-spacing: 10px;
+	.modal_body {
+		flex: 1;
+		overflow-y: auto;
 	}
-	.create_another {
-		padding-top: 30px;
-		padding-bottom: 20px;
+	.modal_header {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 50px;
+		background-color: #e91e63;
+		color: #fff;
+		border-top-left-radius: 8px;
+		border-top-right-radius: 8px;
 	}
-	.success_message {
-		padding-top: 20px;
+	.modal_footer {
+		padding: 10px;
 	}
 </style>

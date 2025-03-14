@@ -1,4 +1,10 @@
-<div class="shadow card"><slot></slot></div>
+<script>
+	export let padding = 0;
+</script>
+
+<div class="shadow card" style={"padding:" + padding * 5 + "px;"}>
+	<slot></slot>
+</div>
 
 <style>
 	.card {
