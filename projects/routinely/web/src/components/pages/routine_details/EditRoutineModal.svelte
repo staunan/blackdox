@@ -6,6 +6,7 @@
 
 	export let active = false;
 	export let overlayclose = false;
+	export let routine = null;
 
 	const dispatch = createEventDispatcher();
 
@@ -17,7 +18,7 @@
 <ContentModal {active} {overlayclose} on:close={closeEditModalHandler}>
 	<FormHeadingTitle slot="header" title="Edit Routine"></FormHeadingTitle>
 	<div class="routine_form">
-		<CreateRoutineForm title="Edit Routine" disableadvancesettings={true}
+		<CreateRoutineForm disableadvancesettings={true} edit={true} {routine}
 		></CreateRoutineForm>
 	</div>
 </ContentModal>

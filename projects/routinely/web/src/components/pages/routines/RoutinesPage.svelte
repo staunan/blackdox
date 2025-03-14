@@ -119,7 +119,9 @@
 		></WeeklyRoutineList>
 		<MonthlyRoutineList active={currentTabName === "monthly"}
 		></MonthlyRoutineList>
-		<YearlyRoutineList active={currentTabName === "yearly"}
+		<YearlyRoutineList
+			routines={yearly_routines}
+			active={currentTabName === "yearly"}
 		></YearlyRoutineList>
 	</div>
 </div>

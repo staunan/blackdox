@@ -8,18 +8,20 @@
 	import DayPicker from "components/form/DayPicker.svelte";
 	import DateMonthPicker from "components/form/DateMonthPicker.svelte";
 	import TimePicker from "components/form/TimePicker.svelte";
+	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import LinkButton from "components/buttons/LinkButton.svelte";
-	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
-	import RoutineModeDisplayString from "components/RoutineModeDisplayString.svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
 	import SuccessModal from "components/pages/create_routine/SuccessModal.svelte";
+	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
 	import Center from "components/layouts/Center.svelte";
 	import FormInput from "components/layouts/FormInput.svelte";
 	import { createRoutine } from "apis/apis.js";
 
 	// Props --
 	export let disableadvancesettings = false;
+	export let edit = false;
+	export let routine = null;
 
 	// Form Settings Variable --
 	let advanceSettings = disableadvancesettings;
@@ -28,6 +30,7 @@
 	let routine_mode_display_string_has_error;
 	let routine_mode_display_string_error_message;
 	let is_success_modal_active = false;
+	let routine_action_button_title = "Create Routine";
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -366,16 +369,41 @@
 		successModalCloseHandler();
 	}
 	function resetForm() {
-		// Set Default Values --
-		routine_title = "";
-		routine_details = "";
-		selected_routine_mode = all_routine_modes[0]; // Daily
-		selected_days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-		selected_week_day = "";
-		selected_month_day = 0;
-		selected_month_and_date = "00-00";
-		selectedTime = "00:00";
-		generateRoutineModeDisplayString();
+		if (edit == true) {
+			routine_action_button_title = "Update Routine";
+			if (routine) {
+				console.log(routine);
+				// Set Default Values --
+				routine_title = routine.Title;
+				routine_details = routine.Description;
+				if (routine.Mode == "Daily") {
+					selected_routine_mode = all_routine_modes[0]; // Daily
+					selected_days = routine.DailyBasisDays.split(",");
+				} else if (routine.Mode == "Weekly") {
+					selected_routine_mode = all_routine_modes[1];
+					selected_week_day = routine.WeeklyBasisWeekDays;
+				} else if (routine.Mode == "Monthly") {
+					selected_routine_mode = all_routine_modes[2];
+					selected_month_day = routine.MonthlyBasisDate;
+				} else if (routine.Mode == "Yearly") {
+					selected_routine_mode = all_routine_modes[3];
+					selected_month_and_date = routine.YearlyBasisMonthDate;
+				}
+				selectedTime = routine.Time.substr(0, 5);
+				generateRoutineModeDisplayString();
+			}
+		} else {
+			// Set Default Values --
+			routine_title = "";
+			routine_details = "";
+			selected_routine_mode = all_routine_modes[0]; // Daily
+			selected_days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+			selected_week_day = "";
+			selected_month_day = 0;
+			selected_month_and_date = "00-00";
+			selectedTime = "00:00";
+			generateRoutineModeDisplayString();
+		}
 	}
 </script>
 
@@ -515,7 +543,9 @@
 	{/if}
 
 	<Center>
-		<SubmitButton title="Create Routine" on:tap={createRoutineHandler}
+		<SubmitButton
+			title={routine_action_button_title}
+			on:tap={createRoutineHandler}
 		></SubmitButton>
 	</Center>
 </div>

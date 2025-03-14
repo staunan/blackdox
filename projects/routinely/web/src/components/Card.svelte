@@ -1,8 +1,17 @@
 <script>
 	export let padding = 0;
+	export let background = "";
 </script>
 
-<div class="shadow card" style={"padding:" + padding * 5 + "px;"}>
+<div
+	class="shadow card"
+	style={"padding:" +
+		(padding ? padding * 5 : 0) +
+		"px;" +
+		"background:" +
+		(background ? background : "transparent") +
+		";"}
+>
 	<slot></slot>
 </div>
 
