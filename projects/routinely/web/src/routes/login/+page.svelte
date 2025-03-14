@@ -8,17 +8,5 @@
 	<meta name="login" content="Login to routinely" />
 </svelte:head>
 <RoutinelyPageContainer>
-	<section>
-		<LoginForm></LoginForm>
-	</section>
+	<LoginForm></LoginForm>
 </RoutinelyPageContainer>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-</style>

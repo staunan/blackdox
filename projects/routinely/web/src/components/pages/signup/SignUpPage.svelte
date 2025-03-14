@@ -60,11 +60,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Sign Up</title>
-	<meta name="login" content="Create new account" />
-</svelte:head>
-<section>
+<section class="signup_page_container">
 	<div class="navigation_content_area">
 		{#if selected_dot.id == 1}
 			<SignUpForm on:created={userCreatedHandler}></SignUpForm>

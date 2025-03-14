@@ -49,14 +49,16 @@
 </script>
 
 <div class="page">
-	<div class="page_title">
-		<div class="page_title_left">
-			<div class="page_title_text">{title}</div>
+	{#if title != ""}
+		<div class="page_title">
+			<div class="page_title_left">
+				<div class="page_title_text">{title}</div>
+			</div>
+			<div class="page_title_right">
+				<slot name="title_right"></slot>
+			</div>
 		</div>
-		<div class="page_title_right">
-			<slot name="title_right"></slot>
-		</div>
-	</div>
+	{/if}
 	<div class="page_content">
 		<slot></slot>
 	</div>

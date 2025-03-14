@@ -4,21 +4,9 @@
 </script>
 
 <svelte:head>
-	<title>Login</title>
-	<meta name="login" content="Login to routinely" />
+	<title>Signup</title>
+	<meta name="register" content="Create a new account" />
 </svelte:head>
 <RoutinelyPageContainer>
-	<section>
-		<SignUpPage></SignUpPage>
-	</section>
+	<SignUpPage></SignUpPage>
 </RoutinelyPageContainer>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-</style>

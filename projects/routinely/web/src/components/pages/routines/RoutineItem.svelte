@@ -54,11 +54,6 @@
 	.routine_item_left {
 		flex: 1;
 	}
-	.routine_item_right {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
 	.routine_title {
 		font-size: 26px;
 		font-weight: bold;
