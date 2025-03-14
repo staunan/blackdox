@@ -19,6 +19,16 @@ export async function createRoutine(data){
     return response.data;
 }
 
+export async function updateRoutine(data){
+    let response = await axios.post(config.api_base_url + 'update_routine', data, reqConfig);
+    return response.data;
+}
+
+export async function verifyRoutineTitle(data){
+    let response = await axios.post(config.api_base_url + 'verify_routine_title', data, reqConfig);
+    return response.data;
+}
+
 export async function getAllRoutines(data){
     let response = await axios.post(config.api_base_url + 'all_routines', data, reqConfig);
     return response.data;

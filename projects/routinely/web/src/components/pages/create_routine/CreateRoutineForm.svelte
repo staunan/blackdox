@@ -16,7 +16,11 @@
 	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
 	import Center from "components/layouts/Center.svelte";
 	import FormInput from "components/layouts/FormInput.svelte";
-	import { createRoutine } from "apis/apis.js";
+	import {
+		createRoutine,
+		updateRoutine,
+		verifyRoutineTitle,
+	} from "apis/apis.js";
 
 	// Props --
 	export let disableadvancesettings = false;
@@ -31,6 +35,7 @@
 	let routine_mode_display_string_error_message;
 	let is_success_modal_active = false;
 	let routine_action_button_title = "Create Routine";
+	let temp_prev_search_title = "";
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -74,7 +79,11 @@
 			routineTitleHasError = false;
 			routineTitleErrorMessage = "";
 		}
+        detectWordChangeAndVerifyTitle(routine_title);
 	}
+    detectWordChangeAndVerifyTitle(t){
+        if(temp_prev_search_title != t)
+    }
 	function routineDetailsChangeHandler(event) {
 		routine_details = event.detail;
 		if (routine_details && routineDetailsHasError) {
@@ -345,17 +354,32 @@
 		}
 	}
 	async function createRoutineHandler(event) {
-		let routineObj = validateRoutineForm();
-		if (routineObj === false) {
-			console.log("Invalid Form");
-			return;
-		}
-		try {
-			let response = await createRoutine(routineObj);
-			console.log(response);
-			is_success_modal_active = true;
-		} catch (error) {
-			console.log(error);
+		if (edit == true && routine.ID > 0) {
+			let routineObj = validateRoutineForm();
+			if (routineObj === false) {
+				console.log("Invalid Form");
+				return;
+			}
+			try {
+				let response = await updateRoutine(routineObj);
+				console.log(response);
+				is_success_modal_active = true;
+			} catch (error) {
+				console.log(error);
+			}
+		} else {
+			let routineObj = validateRoutineForm();
+			if (routineObj === false) {
+				console.log("Invalid Form");
+				return;
+			}
+			try {
+				let response = await createRoutine(routineObj);
+				console.log(response);
+				is_success_modal_active = true;
+			} catch (error) {
+				console.log(error);
+			}
 		}
 	}
 	function successModalCloseHandler() {
@@ -372,7 +396,6 @@
 		if (edit == true) {
 			routine_action_button_title = "Update Routine";
 			if (routine) {
-				console.log(routine);
 				// Set Default Values --
 				routine_title = routine.Title;
 				routine_details = routine.Description;
