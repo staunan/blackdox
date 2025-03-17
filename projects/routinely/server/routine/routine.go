@@ -3,6 +3,7 @@ package routine
 import (
 	"database/sql"
 	"errors"
+	_ "fmt"
 	"regexp"
 	"slices"
 	"strconv"
@@ -45,39 +46,39 @@ func CreateRoutine(routine Routine) (int64, error) {
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
-		panic("Unable to connect to db")
+		return 0, err
 	}
 	// Preparing SQL statement --
 	query := "INSERT INTO `routines` (user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 	insert, err := db.Prepare(query)
 	if err != nil {
-		panic("Unable to prepare query")
+		return 0, err
 	}
 
 	// Finalizing DB Column values --
 	// User ID --
 	var user_id int64 = routine.UserId
 	if user_id == 0 {
-		panic("UserID should be present")
+		return 0, errors.New("user id should be present")
 	}
 	// Title --
 	var title string = routine.Title
 	if title == "" {
-		panic("Routine title should be present")
+		return 0, errors.New("Routine title should be present")
 	} else if len(title) > 200 {
-		panic("Routine title is too big")
+		return 0, errors.New("Routine title is too big")
 	}
 	// Slug --
 	var slug string = createSlug(title)
 	// Check if slug already exists --
 	var slug_exists bool = checkIfSlugAlreadyExists(user_id, slug)
 	if slug_exists {
-		panic("Duplicate routine slug")
+		return 0, errors.New("duplicate routine slug")
 	}
 	// Description --
 	var description string = routine.Description
 	if len(description) > 5000 {
-		panic("Routine description is too big")
+		return 0, errors.New("Routine description is too big")
 	}
 	// Mode --
 	var mode string = routine.Mode
@@ -152,6 +153,175 @@ func CreateRoutine(routine Routine) (int64, error) {
 
 	// Return last inserted ID --
 	return dbResponse.LastInsertId()
+}
+
+func UpdateRoutine(routine Routine) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Get routine details --
+	routine_details := GetRoutineDetailsById(routine.ID)
+
+	// User ID --
+	var user_id int64 = routine.UserId
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_details.UserId != routine.UserId {
+		return false, errors.New("access denied")
+	}
+	// Title --
+	var title string = routine.Title
+	if title == "" {
+		return false, errors.New("Routine title should be present")
+	} else if len(title) > 200 {
+		return false, errors.New("Routine title is too big")
+	}
+	// Slug --
+	var slug string = createSlug(title)
+	if slug != routine_details.Slug {
+		// Check if slug already exists --
+		var slug_exists bool = checkIfSlugAlreadyExists(user_id, slug)
+		if slug_exists {
+			return false, errors.New("duplicate routine slug")
+		}
+	}
+	// Description --
+	var description string = routine.Description
+	if len(description) > 5000 {
+		return false, errors.New("Routine description is too big")
+	}
+
+	if routine_details.Description != routine.Description {
+		// Update description --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set routine_description = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.Description, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	if routine_details.DailyBasisDays != routine.DailyBasisDays {
+		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+		days := strings.Split(routine.DailyBasisDays, ",")
+		for _, d := range days {
+			if !slices.Contains(Days, d) {
+				return false, errors.New("invalid days value")
+			}
+		}
+		// Update DailyBasisDays --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set daily_basis_days = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.DailyBasisDays, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	if routine_details.WeeklyBasisWeekDays != routine.WeeklyBasisWeekDays {
+		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+		if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
+			return false, errors.New("invalid days value")
+		}
+		// Update WeeklyBasisWeekDays --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set weekly_basis_weekday = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.WeeklyBasisWeekDays, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	if routine_details.MonthlyBasisDate != routine.MonthlyBasisDate {
+		// Update MonthlyBasisDate --
+		if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
+			return false, errors.New("invalid date index")
+		}
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set monthly_basis_date = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.MonthlyBasisDate, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	if routine_details.YearlyBasisMonthDate != routine.YearlyBasisMonthDate {
+		// Update YearlyBasisMonthDate --
+		arr := strings.Split(routine.YearlyBasisMonthDate, "-")
+		for _, value := range arr {
+			i, err := strconv.ParseInt(value, 10, 32)
+			if err != nil {
+				return false, errors.New("invalid date format for yearly month date")
+			}
+			if int8(i) < 0 || int8(i) > 31 {
+				return false, errors.New("month should be between 1 to 31")
+			}
+		}
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set yearly_basis_month_date = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.YearlyBasisMonthDate, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	if routine_details.Time != routine.Time {
+		// Update Time --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set routine_time = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.Time, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	return true, nil
+}
+
+func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
+	// Slug --
+	var slug string = createSlug(title)
+	// Check if slug already exists --
+	var slug_exists bool = checkIfSlugAlreadyExists(user_id, slug)
+	if slug_exists {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 
 func GetRoutines(user_id int64) []Routine {

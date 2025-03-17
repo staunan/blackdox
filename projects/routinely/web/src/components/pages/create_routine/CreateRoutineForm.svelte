@@ -12,7 +12,8 @@
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import LinkButton from "components/buttons/LinkButton.svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
-	import SuccessModal from "components/pages/create_routine/SuccessModal.svelte";
+	import CreateSuccessModal from "components/pages/create_routine/CreateSuccessModal.svelte";
+	import UpdateSuccessModal from "components/pages/create_routine/UpdateSuccessModal.svelte";
 	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
 	import Center from "components/layouts/Center.svelte";
 	import FormInput from "components/layouts/FormInput.svelte";
@@ -33,9 +34,12 @@
 	let node_routine_mode_display_string;
 	let routine_mode_display_string_has_error;
 	let routine_mode_display_string_error_message;
-	let is_success_modal_active = false;
+	let is_create_success_modal_active = false;
 	let routine_action_button_title = "Create Routine";
-	let temp_prev_search_title = "";
+	let titleVerifyTimer = null;
+	let slug_exists = false;
+	let createRoutineButtonDisabled = false;
+	let is_update_success_modal_active = false;
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -79,11 +83,50 @@
 			routineTitleHasError = false;
 			routineTitleErrorMessage = "";
 		}
-        detectWordChangeAndVerifyTitle(routine_title);
+		if (edit == true && routine_title.trim() == routine.Title) {
+			// Ignore --
+		} else {
+			clearTimeout(titleVerifyTimer);
+			titleVerifyTimer = setTimeout(() => {
+				verifyRoutineTitleDelay(routine_title);
+			}, 1000);
+		}
 	}
-    detectWordChangeAndVerifyTitle(t){
-        if(temp_prev_search_title != t)
-    }
+	async function verifyRoutineTitleDelay(routine_title) {
+		try {
+			let formData = {
+				title: routine_title,
+				edit: edit,
+			};
+			let response = await verifyRoutineTitle(formData);
+			slug_exists = response.Data;
+			console.log(slug_exists);
+			if (
+				edit &&
+				routine &&
+				routine.Title &&
+				routine.Title == routine_title &&
+				slug_exists
+			) {
+				// Ignore --
+				routineTitleHasError = false;
+				routineTitleErrorMessage = "";
+				createRoutineButtonDisabled = false;
+			} else {
+				if (slug_exists) {
+					// Taken --
+					routineTitleHasError = true;
+					routineTitleErrorMessage =
+						"This routine already exists, try changing the title!";
+					createRoutineButtonDisabled = true;
+				} else {
+					createRoutineButtonDisabled = false;
+				}
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
 	function routineDetailsChangeHandler(event) {
 		routine_details = event.detail;
 		if (routine_details && routineDetailsHasError) {
@@ -360,10 +403,15 @@
 				console.log("Invalid Form");
 				return;
 			}
+			routineObj.id = routine.ID;
+			console.log(routineObj);
+			if (slug_exists === true) {
+				console.log("Title slug exists");
+				return;
+			}
 			try {
 				let response = await updateRoutine(routineObj);
-				console.log(response);
-				is_success_modal_active = true;
+				is_update_success_modal_active = true;
 			} catch (error) {
 				console.log(error);
 			}
@@ -375,22 +423,24 @@
 			}
 			try {
 				let response = await createRoutine(routineObj);
-				console.log(response);
-				is_success_modal_active = true;
+				is_create_success_modal_active = true;
 			} catch (error) {
 				console.log(error);
 			}
 		}
 	}
-	function successModalCloseHandler() {
-		is_success_modal_active = false;
+	function createSuccessModalCloseHandler() {
+		is_create_success_modal_active = false;
+	}
+	function updateSuccessModalCloseHandler() {
+		is_update_success_modal_active = false;
 	}
 	function createAnotherRoutineHandler() {
-		successModalCloseHandler();
+		createSuccessModalCloseHandler();
 		resetForm();
 	}
 	function goToListHandler() {
-		successModalCloseHandler();
+		createSuccessModalCloseHandler();
 	}
 	function resetForm() {
 		if (edit == true) {
@@ -567,16 +617,23 @@
 
 	<Center>
 		<SubmitButton
+			disabled={createRoutineButtonDisabled}
 			title={routine_action_button_title}
 			on:tap={createRoutineHandler}
 		></SubmitButton>
 	</Center>
 </div>
 
-<SuccessModal
-	active={is_success_modal_active}
+<CreateSuccessModal
+	active={is_create_success_modal_active}
 	overlayclose={false}
-	on:close={successModalCloseHandler}
+	on:close={createSuccessModalCloseHandler}
 	on:createanother={createAnotherRoutineHandler}
 	on:gotolist={goToListHandler}
-></SuccessModal>
+></CreateSuccessModal>
+
+<UpdateSuccessModal
+	active={is_update_success_modal_active}
+	overlayclose={false}
+	on:close={updateSuccessModalCloseHandler}
+></UpdateSuccessModal>

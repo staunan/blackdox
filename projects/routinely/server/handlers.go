@@ -23,6 +23,10 @@ const (
 	JWT_SIGNING_SECRET = "STAUNAN@ROUTINELY"
 )
 
+func anyToInt64(value any) int64 {
+	return int64(value.(float64))
+}
+
 func getRequestData(c echo.Context) map[string]interface{} {
 	json_map := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
@@ -468,6 +472,100 @@ func CreateRoutineHandler(c echo.Context) error {
 	response.HasError = false
 	response.Message = "Routine has been created sucessfully"
 	response.Data = routine_details
+	return c.JSON(http.StatusOK, response)
+}
+
+func UpdateRoutineHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+
+	// Create Routine Object
+	var routineObj routine.Routine
+	routineObj.UserId = getLoggedInUserId(c)
+	if reqData["id"] == nil {
+		routineObj.ID = 0
+	} else {
+		routineObj.ID = anyToInt64(reqData["id"])
+	}
+	if reqData["title"] == nil {
+		routineObj.Title = ""
+	} else {
+		routineObj.Title = reqData["title"].(string)
+	}
+	if reqData["description"] == nil {
+		routineObj.Description = ""
+	} else {
+		routineObj.Description = reqData["description"].(string)
+	}
+	if reqData["mode"] == nil {
+		routineObj.Mode = ""
+	} else {
+		routineObj.Mode = reqData["mode"].(string)
+	}
+	if reqData["days"] == nil {
+		routineObj.DailyBasisDays = ""
+	} else {
+		routineObj.DailyBasisDays = reqData["days"].(string)
+	}
+	if reqData["weekday"] == nil {
+		routineObj.WeeklyBasisWeekDays = ""
+	} else {
+		routineObj.WeeklyBasisWeekDays = reqData["weekday"].(string)
+	}
+	if reqData["monthday"] == nil {
+		routineObj.MonthlyBasisDate = 0
+	} else {
+		routineObj.MonthlyBasisDate = reqData["monthday"].(int8)
+	}
+	if reqData["yearlymonthdate"] == nil {
+		routineObj.YearlyBasisMonthDate = ""
+	} else {
+		routineObj.YearlyBasisMonthDate = reqData["yearlymonthdate"].(string)
+	}
+	if reqData["time"] == nil {
+		routineObj.Time = ""
+	} else {
+		routineObj.Time = reqData["time"].(string)
+	}
+	success, err := routine.UpdateRoutine(routineObj)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Unable to create routine"
+		response.Data = err.Error()
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Routine has been updated sucessfully"
+	response.Data = success
+	return c.JSON(http.StatusOK, response)
+}
+
+func VerifyRoutineTitleHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+	var title string = reqData["title"].(string)
+	user_id := getLoggedInUserId(c)
+
+	slug_exists, err := routine.VerifyRoutineTitle(title, user_id)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Something went wrong!"
+		response.Data = err.Error()
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = ""
+	response.Data = slug_exists
 	return c.JSON(http.StatusOK, response)
 }
 

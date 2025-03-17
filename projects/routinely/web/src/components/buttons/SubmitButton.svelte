@@ -17,8 +17,8 @@
 
 <style>
 	button:disabled {
-		background-color: #ccc;
-		color: #333;
+		background-color: #ccc !important;
+		color: #333 !important;
 	}
 	.btn {
 		position: relative;
