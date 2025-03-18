@@ -13,12 +13,19 @@
 	function closeEditModalHandler() {
 		dispatch("close");
 	}
+	function routineUpdatedHandler(event) {
+		dispatch("updated", event.detail);
+	}
 </script>
 
 <ContentModal {active} {overlayclose} on:close={closeEditModalHandler}>
 	<FormHeadingTitle slot="header" title="Edit Routine"></FormHeadingTitle>
 	<div class="routine_form">
-		<CreateRoutineForm disableadvancesettings={true} edit={true} {routine}
+		<CreateRoutineForm
+			disableadvancesettings={true}
+			edit={true}
+			{routine}
+			on:updated={routineUpdatedHandler}
 		></CreateRoutineForm>
 	</div>
 </ContentModal>

@@ -64,9 +64,9 @@ func CreateRoutine(routine Routine) (int64, error) {
 	// Title --
 	var title string = routine.Title
 	if title == "" {
-		return 0, errors.New("Routine title should be present")
+		return 0, errors.New("routine title should be present")
 	} else if len(title) > 200 {
-		return 0, errors.New("Routine title is too big")
+		return 0, errors.New("routine title is too big")
 	}
 	// Slug --
 	var slug string = createSlug(title)
@@ -78,7 +78,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 	// Description --
 	var description string = routine.Description
 	if len(description) > 5000 {
-		return 0, errors.New("Routine description is too big")
+		return 0, errors.New("routine description is too big")
 	}
 	// Mode --
 	var mode string = routine.Mode
@@ -86,7 +86,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 	if mode == "" {
 		mode = DEFAULT_ROUTINE_MODE
 	} else if !slices.Contains(Modes, mode) {
-		panic("Invalid routine mode provided")
+		return 0, errors.New("invalid routine mode provided")
 	}
 	var daily_basis_days string = ""
 	var weekly_basis_weekday string = ""
@@ -101,7 +101,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 			days := strings.Split(routine.DailyBasisDays, ",")
 			for _, d := range days {
 				if !slices.Contains(Days, d) {
-					panic("Invalid days value")
+					return 0, errors.New("invalid days value")
 				}
 			}
 			daily_basis_days = routine.DailyBasisDays
@@ -112,14 +112,14 @@ func CreateRoutine(routine Routine) (int64, error) {
 			weekly_basis_weekday = ""
 		} else {
 			if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
-				panic("Invalid weekday value")
+				return 0, errors.New("invalid weekday value")
 			}
 			weekly_basis_weekday = routine.DailyBasisDays
 		}
 	} else if mode == "Monthly" {
 		// Weekly Basis --
 		if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
-			panic("Invalid date index")
+			return 0, errors.New("invalid date index")
 		}
 		monthly_basis_date = routine.MonthlyBasisDate
 	} else if mode == "Yearly" {
@@ -127,10 +127,10 @@ func CreateRoutine(routine Routine) (int64, error) {
 		for _, value := range arr {
 			i, err := strconv.ParseInt(value, 10, 32)
 			if err != nil {
-				panic("Invalid date format for yearly month date")
+				return 0, errors.New("invalid date format for yearly month date")
 			}
 			if int8(i) < 0 || int8(i) > 31 {
-				panic("Month should be between 0 to 12 in yearly month date")
+				return 0, errors.New("month should be between 0 to 12 in yearly month date")
 			}
 		}
 		yearly_basis_month_date = routine.YearlyBasisMonthDate
@@ -147,7 +147,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 	// Execute DB Query --
 	dbResponse, err := insert.Exec(user_id, slug, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, is_trash)
 	if err != nil {
-		panic("Unable to execute query")
+		return 0, errors.New("unable to execute query")
 	}
 	insert.Close()
 
@@ -155,11 +155,11 @@ func CreateRoutine(routine Routine) (int64, error) {
 	return dbResponse.LastInsertId()
 }
 
-func UpdateRoutine(routine Routine) (bool, error) {
+func UpdateRoutine(routine Routine) (Routine, error) {
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
-		return false, err
+		return routine, err
 	}
 
 	// Get routine details --
@@ -168,17 +168,17 @@ func UpdateRoutine(routine Routine) (bool, error) {
 	// User ID --
 	var user_id int64 = routine.UserId
 	if user_id == 0 {
-		return false, errors.New("user id should be present")
+		return routine, errors.New("user id should be present")
 	}
 	if routine_details.UserId != routine.UserId {
-		return false, errors.New("access denied")
+		return routine, errors.New("access denied")
 	}
 	// Title --
 	var title string = routine.Title
 	if title == "" {
-		return false, errors.New("Routine title should be present")
+		return routine, errors.New("routine title should be present")
 	} else if len(title) > 200 {
-		return false, errors.New("Routine title is too big")
+		return routine, errors.New("routine title is too big")
 	}
 	// Slug --
 	var slug string = createSlug(title)
@@ -186,36 +186,53 @@ func UpdateRoutine(routine Routine) (bool, error) {
 		// Check if slug already exists --
 		var slug_exists bool = checkIfSlugAlreadyExists(user_id, slug)
 		if slug_exists {
-			return false, errors.New("duplicate routine slug")
+			return routine, errors.New("duplicate routine slug")
 		}
 	}
 	// Description --
 	var description string = routine.Description
 	if len(description) > 5000 {
-		return false, errors.New("Routine description is too big")
+		return routine, errors.New("routine description is too big")
 	}
-
+	// Update Title and slug --
+	if routine_details.Title != routine.Title {
+		// Update description --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set slug = ?, routine_title = ?  where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return routine, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(slug, routine.Title, routine.ID)
+		if err != nil {
+			return routine, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+	// Update Description --
 	if routine_details.Description != routine.Description {
 		// Update description --
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set routine_description = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.Description, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
+	// Update Daily Basis Days --
 	if routine_details.DailyBasisDays != routine.DailyBasisDays {
 		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 		days := strings.Split(routine.DailyBasisDays, ",")
 		for _, d := range days {
 			if !slices.Contains(Days, d) {
-				return false, errors.New("invalid days value")
+				return routine, errors.New("invalid days value")
 			}
 		}
 		// Update DailyBasisDays --
@@ -223,93 +240,98 @@ func UpdateRoutine(routine Routine) (bool, error) {
 		query := "UPDATE `routines` set daily_basis_days = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.DailyBasisDays, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
+	// Update Weekly Basis Days --
 	if routine_details.WeeklyBasisWeekDays != routine.WeeklyBasisWeekDays {
 		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 		if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
-			return false, errors.New("invalid days value")
+			return routine, errors.New("invalid days value")
 		}
 		// Update WeeklyBasisWeekDays --
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set weekly_basis_weekday = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.WeeklyBasisWeekDays, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
+	// Update Monthly Basis Days --
 	if routine_details.MonthlyBasisDate != routine.MonthlyBasisDate {
 		// Update MonthlyBasisDate --
 		if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
-			return false, errors.New("invalid date index")
+			return routine, errors.New("invalid date index")
 		}
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set monthly_basis_date = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.MonthlyBasisDate, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
+	// Update Yearly Basis Days --
 	if routine_details.YearlyBasisMonthDate != routine.YearlyBasisMonthDate {
 		// Update YearlyBasisMonthDate --
 		arr := strings.Split(routine.YearlyBasisMonthDate, "-")
 		for _, value := range arr {
 			i, err := strconv.ParseInt(value, 10, 32)
 			if err != nil {
-				return false, errors.New("invalid date format for yearly month date")
+				return routine, errors.New("invalid date format for yearly month date")
 			}
 			if int8(i) < 0 || int8(i) > 31 {
-				return false, errors.New("month should be between 1 to 31")
+				return routine, errors.New("month should be between 1 to 31")
 			}
 		}
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set yearly_basis_month_date = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.YearlyBasisMonthDate, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
+	// Update Time --
 	if routine_details.Time != routine.Time {
 		// Update Time --
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set routine_time = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
 		if err != nil {
-			return false, err
+			return routine, err
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(routine.Time, routine.ID)
 		if err != nil {
-			return false, errors.New("unable to execute query")
+			return routine, errors.New("unable to execute query")
 		}
 		updateQuery.Close()
 	}
-	return true, nil
+	fresh_routine_details := GetRoutineDetailsById(routine.ID)
+	return fresh_routine_details, nil
 }
 
 func VerifyRoutineTitle(title string, user_id int64) (bool, error) {

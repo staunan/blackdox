@@ -21,11 +21,11 @@
 	.column_left {
 		display: flex;
 		justify-content: flex-start;
-		align-items: flex-start;
+		align-items: center;
 	}
 	.column_right {
 		display: flex;
-		justify-content: flex-start;
-		align-items: flex-start;
+		justify-content: flex-end;
+		align-items: center;
 	}
 </style>

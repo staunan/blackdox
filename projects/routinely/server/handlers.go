@@ -414,7 +414,7 @@ func CreateRoutineHandler(c echo.Context) error {
 
 	// Create Routine Object
 	var routineObj routine.Routine
-	routineObj.UserId = 1
+	routineObj.UserId = getLoggedInUserId(c)
 	if reqData["title"] == nil {
 		routineObj.Title = ""
 	} else {
@@ -461,7 +461,7 @@ func CreateRoutineHandler(c echo.Context) error {
 		// Return Response --
 		var response Response
 		response.HasError = true
-		response.Message = "Unable to create routine"
+		response.Message = err.Error()
 		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
@@ -497,11 +497,6 @@ func UpdateRoutineHandler(c echo.Context) error {
 	} else {
 		routineObj.Description = reqData["description"].(string)
 	}
-	if reqData["mode"] == nil {
-		routineObj.Mode = ""
-	} else {
-		routineObj.Mode = reqData["mode"].(string)
-	}
 	if reqData["days"] == nil {
 		routineObj.DailyBasisDays = ""
 	} else {
@@ -527,13 +522,13 @@ func UpdateRoutineHandler(c echo.Context) error {
 	} else {
 		routineObj.Time = reqData["time"].(string)
 	}
-	success, err := routine.UpdateRoutine(routineObj)
+	updated_routine_details, err := routine.UpdateRoutine(routineObj)
 	if err != nil {
 		// Return Response --
 		var response Response
 		response.HasError = true
-		response.Message = "Unable to create routine"
-		response.Data = err.Error()
+		response.Message = err.Error()
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
 
@@ -541,7 +536,7 @@ func UpdateRoutineHandler(c echo.Context) error {
 	var response Response
 	response.HasError = false
 	response.Message = "Routine has been updated sucessfully"
-	response.Data = success
+	response.Data = updated_routine_details
 	return c.JSON(http.StatusOK, response)
 }
 

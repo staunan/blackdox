@@ -1,4 +1,8 @@
 <script>
+	import { page } from "$app/stores";
+	import { onMount } from "svelte";
+	import { createEventDispatcher } from "svelte";
+	import { getRoutineDetails } from "apis/apis.js";
 	import CarbonTab from "components/tabs/CarbonTab.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import RoutineDetailsTab from "components/pages/routine_details/RoutineDetailsTab.svelte";
@@ -7,10 +11,24 @@
 	import Right from "components/layouts/Right.svelte";
 	import Card from "components/Card.svelte";
 
-	export let data = null;
+	const dispatch = createEventDispatcher();
+	let routine_slug = $page.params.routine_slug;
 	let editRoutineModalActive = false;
 	let editRoutineModalOverlayClose = true;
 	let currentTabName = "about";
+	let routine_details = null;
+
+	onMount(async () => {
+		let res = await getRoutineDetails({
+			routine_slug: routine_slug,
+		});
+		if (res.HasError) {
+			console.log(res);
+		} else {
+			routine_details = res.Data;
+			console.log(routine_details);
+		}
+	});
 
 	function editRoutineHandler(event) {
 		editRoutineModalActive = true;
@@ -21,19 +39,20 @@
 	}
 	function detailsTabChangedHandler(event) {
 		currentTabName = event.detail;
-		if (currentTabName == "about") {
-			generateRoutineModeDisplayString(data);
-		}
+	}
+	function routineUpdatedHandler(event) {
+		routine_details = event.detail;
+		console.log(routine_details);
 	}
 </script>
 
 <div class="routine_details">
-	{#if data}
+	{#if routine_details}
 		<RoutineDetailsTab on:change={detailsTabChangedHandler}
 		></RoutineDetailsTab>
 		{#if currentTabName == "about"}
 			<div class="about_tab">
-				<AboutSection routine={data}></AboutSection>
+				<AboutSection routine={routine_details}></AboutSection>
 			</div>
 		{:else if currentTabName == "progress"}
 			<h1>Implementation Pending</h1>
@@ -79,8 +98,9 @@
 		<EditRoutineModal
 			active={editRoutineModalActive}
 			overlayclose={editRoutineModalOverlayClose}
-			routine={data}
+			routine={routine_details}
 			on:close={closeEditRoutineMoalHandler}
+			on:updated={routineUpdatedHandler}
 		></EditRoutineModal>
 	{/if}
 </div>

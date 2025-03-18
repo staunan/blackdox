@@ -1,6 +1,6 @@
 import { getUser, getAllRoutines } from "apis/apis.js";
 
-import { writable, derived } from "svelte/store";
+import { get, writable, derived } from "svelte/store";
 
 export const user_details = writable(null);
 export const routines = writable([]);
@@ -21,14 +21,35 @@ export let store = {
             let all_routines_response = await getAllRoutines({ user_id: 1 });
             if (!all_routines_response.HasError) { 
                 routines.set(all_routines_response.Data);
+                this.isRoutineDirty = false;
             } else {
+                this.isRoutineDirty = false;
                 routines.set([]);
             }
         } catch (err) {
             console.log(err);
             routines.set([]);
         }
-        
-        
     },
+    addRoutine: function (routine) {
+        let all_routines = get(routines);
+        if (all_routines.length > 0) {
+            routines.set([...all_routines, routine]);
+        }
+    },
+    updateRoutine: function (routine) {
+        let all_routines = get(routines);
+        if (all_routines.length > 0) { 
+            let temp_arr = all_routines.map((r) => {
+                if (r.ID == routine.ID) {
+                    console.log(routine);
+                    return routine;
+                } else {
+                    return r;
+                }
+            });
+            console.log(temp_arr);
+            routines.set(temp_arr);
+        }
+    }
 };

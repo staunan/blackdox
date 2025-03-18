@@ -14,9 +14,13 @@
 	import ArrowDown from "components/svg/ArrowDown.svelte";
 	import CreateSuccessModal from "components/pages/create_routine/CreateSuccessModal.svelte";
 	import UpdateSuccessModal from "components/pages/create_routine/UpdateSuccessModal.svelte";
+	import ErrorModal from "components/modals/ErrorModal.svelte";
 	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
 	import Center from "components/layouts/Center.svelte";
 	import FormInput from "components/layouts/FormInput.svelte";
+	import { createEventDispatcher } from "svelte";
+	import { store } from "store";
+
 	import {
 		createRoutine,
 		updateRoutine,
@@ -29,17 +33,20 @@
 	export let routine = null;
 
 	// Form Settings Variable --
+	const dispatch = createEventDispatcher();
 	let advanceSettings = disableadvancesettings;
 	let routine_title_label = "";
 	let node_routine_mode_display_string;
 	let routine_mode_display_string_has_error;
 	let routine_mode_display_string_error_message;
-	let is_create_success_modal_active = false;
 	let routine_action_button_title = "Create Routine";
 	let titleVerifyTimer = null;
 	let slug_exists = false;
 	let createRoutineButtonDisabled = false;
+	let is_create_success_modal_active = false;
 	let is_update_success_modal_active = false;
+	let is_error_modal_active = false;
+	let error_modal_message = "";
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -100,7 +107,6 @@
 			};
 			let response = await verifyRoutineTitle(formData);
 			slug_exists = response.Data;
-			console.log(slug_exists);
 			if (
 				edit &&
 				routine &&
@@ -404,14 +410,20 @@
 				return;
 			}
 			routineObj.id = routine.ID;
-			console.log(routineObj);
 			if (slug_exists === true) {
 				console.log("Title slug exists");
 				return;
 			}
 			try {
 				let response = await updateRoutine(routineObj);
-				is_update_success_modal_active = true;
+				if (response.HasError) {
+					error_modal_message = response.Message;
+					is_error_modal_active = true;
+				} else {
+					is_update_success_modal_active = true;
+					store.updateRoutine(response.Data);
+					dispatch("updated", response.Data);
+				}
 			} catch (error) {
 				console.log(error);
 			}
@@ -423,7 +435,14 @@
 			}
 			try {
 				let response = await createRoutine(routineObj);
-				is_create_success_modal_active = true;
+				if (response.HasError) {
+					error_modal_message = response.Message;
+					is_error_modal_active = true;
+				} else {
+					is_create_success_modal_active = true;
+					store.addRoutine(response.Data);
+					dispatch("created", response.Data);
+				}
 			} catch (error) {
 				console.log(error);
 			}
@@ -431,16 +450,10 @@
 	}
 	function createSuccessModalCloseHandler() {
 		is_create_success_modal_active = false;
+		resetForm();
 	}
 	function updateSuccessModalCloseHandler() {
 		is_update_success_modal_active = false;
-	}
-	function createAnotherRoutineHandler() {
-		createSuccessModalCloseHandler();
-		resetForm();
-	}
-	function goToListHandler() {
-		createSuccessModalCloseHandler();
 	}
 	function resetForm() {
 		if (edit == true) {
@@ -495,6 +508,7 @@
 		<div class="advanceSettings">
 			<FormInput>
 				<Dropdown
+					disabled={edit}
 					label="Routine Mode"
 					placeholder="Select a execution mode of this routine "
 					items={all_routine_modes}
@@ -626,14 +640,21 @@
 
 <CreateSuccessModal
 	active={is_create_success_modal_active}
-	overlayclose={false}
 	on:close={createSuccessModalCloseHandler}
-	on:createanother={createAnotherRoutineHandler}
-	on:gotolist={goToListHandler}
 ></CreateSuccessModal>
 
 <UpdateSuccessModal
 	active={is_update_success_modal_active}
-	overlayclose={false}
 	on:close={updateSuccessModalCloseHandler}
 ></UpdateSuccessModal>
+
+<ErrorModal
+	active={is_error_modal_active}
+	overlayclose={false}
+	title="Error"
+	message={error_modal_message}
+	buttonname="Got it"
+	on:close={() => {
+		is_error_modal_active = false;
+	}}
+></ErrorModal>
