@@ -198,11 +198,7 @@
 			} else {
 				days_str = "Every <b>" + selected_days.join(", ") + "</b> ";
 			}
-			if (selectedTime === "00:00") {
-				str = days_str + "at <b>Anytime</b>";
-			} else {
-				str = days_str + "at <b>" + selectedTime + "</b>";
-			}
+			str = days_str + " at " + getRoutineTimeString(selectedTime);
 			routine_mode_display_string_has_error = false;
 		} else if (selected_routine_mode.value == "Weekly") {
 			let days_str = "";
@@ -211,11 +207,7 @@
 			} else {
 				days_str = "Anyday of the week ";
 			}
-			if (selectedTime === "00:00") {
-				str = days_str + "at <b>Anytime</b>";
-			} else {
-				str = days_str + "at <b>" + selectedTime + "</b>";
-			}
+			str = days_str + " at " + getRoutineTimeString(selectedTime);
 			routine_mode_display_string_has_error = false;
 		} else if (selected_routine_mode.value == "Monthly") {
 			let days_str = "";
@@ -242,11 +234,7 @@
 			} else {
 				days_str = "Anyday of the month ";
 			}
-			if (selectedTime === "00:00") {
-				str = days_str + "at <b>Anytime</b>";
-			} else {
-				str = days_str + "at <b>" + selectedTime + "</b>";
-			}
+			str = days_str + " at " + getRoutineTimeString(selectedTime);
 			routine_mode_display_string_has_error = false;
 		} else if (selected_routine_mode.value == "Yearly") {
 			let Months = [
@@ -294,14 +282,26 @@
 			} else {
 				days_str = "Anyday of the year ";
 			}
-			if (selectedTime === "00:00") {
-				str = days_str + "at <b>Anytime</b>";
-			} else {
-				str = days_str + "at <b>" + selectedTime + "</b>";
-			}
+			str = days_str + " at " + getRoutineTimeString(selectedTime);
 			routine_mode_display_string_has_error = false;
 		}
 		node_routine_mode_display_string = str;
+	}
+	function getRoutineTimeString(time) {
+		if (time == "00:00") {
+			return "Anytime";
+		}
+		let time_arr = time.split(":");
+		let zone = "";
+		let hour = 0;
+		if (Number(time_arr[0]) < 12) {
+			zone = "AM";
+			hour = Number(time_arr[0]);
+		} else {
+			zone = "PM";
+			hour = Number(time_arr[0]) - 12;
+		}
+		return hour + ":" + time_arr[1] + " " + zone;
 	}
 	function showAdvanceSettingHandler() {
 		advanceSettings = !advanceSettings;
@@ -531,7 +531,7 @@
 						value={selectedTime}
 						on:change={routineTimeChangedHandler}
 						label="Choose a time (24 Hour Format)"
-						format="24Hours"
+						format="12Hours"
 					></TimePicker>
 				</FormInput>
 			{:else if selected_routine_mode && selected_routine_mode.value === "Weekly"}
@@ -547,7 +547,7 @@
 						value={selectedTime}
 						on:change={routineTimeChangedHandler}
 						label="Choose a time (24 Hour Format)"
-						format="24Hours"
+						format="12Hours"
 					></TimePicker>
 				</FormInput>
 			{:else if selected_routine_mode && selected_routine_mode.value === "Monthly"}
@@ -563,7 +563,7 @@
 						value={selectedTime}
 						on:change={routineTimeChangedHandler}
 						label="Choose a time (24 Hour Format)"
-						format="24Hours"
+						format="12Hours"
 					></TimePicker>
 				</FormInput>
 			{:else if selected_routine_mode && selected_routine_mode.value === "Yearly"}
@@ -579,7 +579,7 @@
 						value={selectedTime}
 						on:change={routineTimeChangedHandler}
 						label="Choose a time (24 Hour Format)"
-						format="24Hours"
+						format="12Hours"
 					></TimePicker>
 				</FormInput>
 			{/if}

@@ -8,12 +8,14 @@
 	import RoutineDetailsTab from "components/pages/routine_details/RoutineDetailsTab.svelte";
 	import EditRoutineModal from "components/pages/routine_details/EditRoutineModal.svelte";
 	import AboutSection from "components/pages/routine_details/AboutSection.svelte";
+	import ConfirmDeleteModal from "components/pages/routine_details/ConfirmDeleteModal.svelte";
 	import Right from "components/layouts/Right.svelte";
 	import Card from "components/Card.svelte";
 
 	const dispatch = createEventDispatcher();
 	let routine_slug = $page.params.routine_slug;
 	let editRoutineModalActive = false;
+	let is_confirm_delete_modal_active = true;
 	let editRoutineModalOverlayClose = true;
 	let currentTabName = "about";
 	let routine_details = null;
@@ -33,9 +35,11 @@
 	function editRoutineHandler(event) {
 		editRoutineModalActive = true;
 	}
-
 	function closeEditRoutineMoalHandler(event) {
 		editRoutineModalActive = false;
+	}
+	function deleteRoutineHandler(event) {
+		is_confirm_delete_modal_active = true;
 	}
 	function detailsTabChangedHandler(event) {
 		currentTabName = event.detail;
@@ -88,7 +92,7 @@
 							<SubmitButton
 								color="red"
 								title="Delete Routine"
-								on:tap={editRoutineHandler}
+								on:tap={deleteRoutineHandler}
 							></SubmitButton>
 						</Right>
 					</Card>
@@ -102,6 +106,14 @@
 			on:close={closeEditRoutineMoalHandler}
 			on:updated={routineUpdatedHandler}
 		></EditRoutineModal>
+
+		<ConfirmDeleteModal
+			active={is_confirm_delete_modal_active}
+			routine={routine_details}
+			on:close={() => {
+				is_confirm_delete_modal_active = false;
+			}}
+		></ConfirmDeleteModal>
 	{/if}
 </div>
 

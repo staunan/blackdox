@@ -455,7 +455,7 @@ func CreateRoutineHandler(c echo.Context) error {
 	} else {
 		routineObj.Time = reqData["time"].(string)
 	}
-	routineObj.IsTrash = 0
+	routineObj.Status = routine.ROUTINE_STATUS_ACTIVE
 	last_inserted_id, err := routine.CreateRoutine(routineObj)
 	if err != nil {
 		// Return Response --
@@ -537,6 +537,43 @@ func UpdateRoutineHandler(c echo.Context) error {
 	response.HasError = false
 	response.Message = "Routine has been updated sucessfully"
 	response.Data = updated_routine_details
+	return c.JSON(http.StatusOK, response)
+}
+
+func UpdateRoutineStatusHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+
+	// Create Routine Object
+	var routineObj routine.Routine
+	routineObj.UserId = getLoggedInUserId(c)
+
+	if reqData["id"] == nil {
+		routineObj.ID = 0
+	} else {
+		routineObj.ID = anyToInt64(reqData["id"])
+	}
+	if reqData["status"] == nil {
+		routineObj.Status = routine.ROUTINE_STATUS_ACTIVE
+	} else {
+		routineObj.Status = reqData["status"].(string)
+	}
+
+	success, err := routine.UpdateRoutineStatus(routineObj)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Status Updated!"
+	response.Data = success
 	return c.JSON(http.StatusOK, response)
 }
 

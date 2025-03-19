@@ -38,6 +38,7 @@ func main() {
 	e.POST("/create_routine", CreateRoutineHandler)
 	e.POST("/verify_routine_title", VerifyRoutineTitleHandler)
 	e.POST("/update_routine", UpdateRoutineHandler)
+	e.POST("/update_routine_status", UpdateRoutineStatusHandler)
 	e.POST("/routine_details", RoutineDetailsHandler)
 	e.POST("/all_routines", GetAllRoutinesHandler)
 	e.POST("/mark_routine_as_done", MarkRoutineAsDoneHandler)

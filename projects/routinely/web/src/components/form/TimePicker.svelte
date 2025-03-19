@@ -23,9 +23,14 @@
 		{ label: "50", value: 50 },
 		{ label: "55", value: 55 },
 	];
+	let Zone = [
+		{ label: "AM", value: "AM" },
+		{ label: "PM", value: "PM" },
+	];
 
 	let selectedHour = null;
 	let selectedMinute = null;
+	let selectedZone = Zone[0];
 
 	onMount(() => {
 		if (format === "24Hours") {
@@ -69,7 +74,6 @@
 				{ label: "09", value: 9 },
 				{ label: "10", value: 10 },
 				{ label: "11", value: 11 },
-				{ label: "12", value: 12 },
 			];
 		}
 	});
@@ -78,8 +82,29 @@
 		if (value) {
 			let arr = value.split(":");
 			try {
-				selectedHour = Hours.filter((h) => h.label == arr[0])[0];
-				selectedMinute = Minutes.filter((m) => m.label == arr[1])[0];
+				if (format == "24Hours") {
+					selectedHour = Hours.filter((h) => h.label == arr[0])[0];
+					selectedMinute = Minutes.filter(
+						(m) => m.label == arr[1]
+					)[0];
+				} else if (format == "12Hours") {
+					let temp_h = Number(arr[0]);
+					if (temp_h <= 11) {
+						selectedZone = Zone[0];
+						selectedHour = Hours.filter(
+							(h) => h.label == arr[0]
+						)[0];
+					} else {
+						temp_h = temp_h - 12;
+						selectedZone = Zone[1];
+						selectedHour = Hours.filter(
+							(h) => Number(h.label) == temp_h
+						)[0];
+					}
+					selectedMinute = Minutes.filter(
+						(m) => m.label == arr[1]
+					)[0];
+				}
 			} catch (err) {
 				console.log("Error while parsing time input");
 				console.log(err);
@@ -89,15 +114,42 @@
 
 	function hourChangeHandler(event) {
 		selectedHour = event.detail;
-		calculateTime(event.detail.label, selectedMinute.label);
+		calculateTime(
+			event.detail.label,
+			selectedMinute.label,
+			selectedZone.label
+		);
 	}
 	function minuteChangeHandler(event) {
 		selectedMinute = event.detail;
-		calculateTime(selectedHour.label, event.detail.label);
+		calculateTime(
+			selectedHour.label,
+			event.detail.label,
+			selectedZone.label
+		);
 	}
-	function calculateTime(hour, minute) {
-		let time = hour + ":" + minute;
-		dispatch("change", time);
+	function zoneChangeHandler(event) {
+		selectedZone = event.detail;
+		calculateTime(
+			selectedHour.label,
+			selectedMinute.label,
+			event.detail.label
+		);
+	}
+	function calculateTime(hour, minute, zone) {
+		if (format == "24Hours") {
+			let time = hour + ":" + minute;
+			dispatch("change", time);
+		} else {
+			if (zone === "AM") {
+				let time = hour + ":" + minute;
+				dispatch("change", time);
+			} else if (zone === "PM") {
+				let h = Number(hour) + 12;
+				let time = h + ":" + minute;
+				dispatch("change", time);
+			}
+		}
 	}
 </script>
 
@@ -122,6 +174,16 @@
 				on:change={minuteChangeHandler}
 			/>
 		</div>
+		{#if format === "12Hours"}
+			<div class="timezone_input">
+				<Dropdown
+					placeholder="Zone"
+					items={Zone}
+					currentitem={selectedZone}
+					on:change={zoneChangeHandler}
+				/>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -133,5 +195,8 @@
 	.hour_input,
 	.minute_input {
 		flex: 1;
+	}
+	.timezone_input {
+		width: 200px;
 	}
 </style>

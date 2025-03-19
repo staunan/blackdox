@@ -17,6 +17,9 @@ const (
 	DEFAULT_ROUTINE_MODE = "Daily"
 	DEFAULT_ROUTINE_TIME = "00:00:00"
 	JWT_SIGNING_SECRET   = "STAUNAN@ROUTINELY"
+
+	ROUTINE_STATUS_ACTIVE  = "active"
+	ROUTINE_STATUS_DELETED = "deleted"
 )
 
 type Routine struct {
@@ -31,7 +34,7 @@ type Routine struct {
 	MonthlyBasisDate     int8
 	YearlyBasisMonthDate string
 	Time                 string
-	IsTrash              int8
+	Status               string
 	CreatedAt            string
 }
 type RoutineEntry struct {
@@ -49,7 +52,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 		return 0, err
 	}
 	// Preparing SQL statement --
-	query := "INSERT INTO `routines` (user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+	query := "INSERT INTO `routines` (user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 	insert, err := db.Prepare(query)
 	if err != nil {
 		return 0, err
@@ -142,10 +145,10 @@ func CreateRoutine(routine Routine) (int64, error) {
 		time = DEFAULT_ROUTINE_TIME
 	}
 	// Is Trash --
-	var is_trash int8 = routine.IsTrash
+	var routine_status string = ROUTINE_STATUS_ACTIVE
 
 	// Execute DB Query --
-	dbResponse, err := insert.Exec(user_id, slug, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, is_trash)
+	dbResponse, err := insert.Exec(user_id, slug, title, description, mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, time, routine_status)
 	if err != nil {
 		return 0, errors.New("unable to execute query")
 	}
@@ -226,94 +229,102 @@ func UpdateRoutine(routine Routine) (Routine, error) {
 		}
 		updateQuery.Close()
 	}
-	// Update Daily Basis Days --
-	if routine_details.DailyBasisDays != routine.DailyBasisDays {
-		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
-		days := strings.Split(routine.DailyBasisDays, ",")
-		for _, d := range days {
-			if !slices.Contains(Days, d) {
+	if routine_details.Mode == "Daily" {
+		// Update Daily Basis Days --
+		if routine_details.DailyBasisDays != routine.DailyBasisDays {
+			Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+			days := strings.Split(routine.DailyBasisDays, ",")
+			for _, d := range days {
+				if !slices.Contains(Days, d) {
+					return routine, errors.New("invalid days value")
+				}
+			}
+			// Update DailyBasisDays --
+			// Preparing SQL statement --
+			query := "UPDATE `routines` set daily_basis_days = ? where id = ?"
+			updateQuery, err := db.Prepare(query)
+			if err != nil {
+				return routine, err
+			}
+			// Execute DB Query --
+			_, err = updateQuery.Exec(routine.DailyBasisDays, routine.ID)
+			if err != nil {
+				return routine, errors.New("unable to execute query")
+			}
+			updateQuery.Close()
+		}
+	} else if routine_details.Mode == "Weekly" {
+		// Update Weekly Basis Days --
+		if routine_details.WeeklyBasisWeekDays != routine.WeeklyBasisWeekDays {
+			Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+			if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
 				return routine, errors.New("invalid days value")
 			}
-		}
-		// Update DailyBasisDays --
-		// Preparing SQL statement --
-		query := "UPDATE `routines` set daily_basis_days = ? where id = ?"
-		updateQuery, err := db.Prepare(query)
-		if err != nil {
-			return routine, err
-		}
-		// Execute DB Query --
-		_, err = updateQuery.Exec(routine.DailyBasisDays, routine.ID)
-		if err != nil {
-			return routine, errors.New("unable to execute query")
-		}
-		updateQuery.Close()
-	}
-	// Update Weekly Basis Days --
-	if routine_details.WeeklyBasisWeekDays != routine.WeeklyBasisWeekDays {
-		Days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
-		if !slices.Contains(Days, routine.WeeklyBasisWeekDays) {
-			return routine, errors.New("invalid days value")
-		}
-		// Update WeeklyBasisWeekDays --
-		// Preparing SQL statement --
-		query := "UPDATE `routines` set weekly_basis_weekday = ? where id = ?"
-		updateQuery, err := db.Prepare(query)
-		if err != nil {
-			return routine, err
-		}
-		// Execute DB Query --
-		_, err = updateQuery.Exec(routine.WeeklyBasisWeekDays, routine.ID)
-		if err != nil {
-			return routine, errors.New("unable to execute query")
-		}
-		updateQuery.Close()
-	}
-	// Update Monthly Basis Days --
-	if routine_details.MonthlyBasisDate != routine.MonthlyBasisDate {
-		// Update MonthlyBasisDate --
-		if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
-			return routine, errors.New("invalid date index")
-		}
-		// Preparing SQL statement --
-		query := "UPDATE `routines` set monthly_basis_date = ? where id = ?"
-		updateQuery, err := db.Prepare(query)
-		if err != nil {
-			return routine, err
-		}
-		// Execute DB Query --
-		_, err = updateQuery.Exec(routine.MonthlyBasisDate, routine.ID)
-		if err != nil {
-			return routine, errors.New("unable to execute query")
-		}
-		updateQuery.Close()
-	}
-	// Update Yearly Basis Days --
-	if routine_details.YearlyBasisMonthDate != routine.YearlyBasisMonthDate {
-		// Update YearlyBasisMonthDate --
-		arr := strings.Split(routine.YearlyBasisMonthDate, "-")
-		for _, value := range arr {
-			i, err := strconv.ParseInt(value, 10, 32)
+			// Update WeeklyBasisWeekDays --
+			// Preparing SQL statement --
+			query := "UPDATE `routines` set weekly_basis_weekday = ? where id = ?"
+			updateQuery, err := db.Prepare(query)
 			if err != nil {
-				return routine, errors.New("invalid date format for yearly month date")
+				return routine, err
 			}
-			if int8(i) < 0 || int8(i) > 31 {
-				return routine, errors.New("month should be between 1 to 31")
+			// Execute DB Query --
+			_, err = updateQuery.Exec(routine.WeeklyBasisWeekDays, routine.ID)
+			if err != nil {
+				return routine, errors.New("unable to execute query")
 			}
+			updateQuery.Close()
 		}
-		// Preparing SQL statement --
-		query := "UPDATE `routines` set yearly_basis_month_date = ? where id = ?"
-		updateQuery, err := db.Prepare(query)
-		if err != nil {
-			return routine, err
+	} else if routine_details.Mode == "Monthly" {
+		// Update Monthly Basis Days --
+		if routine_details.MonthlyBasisDate != routine.MonthlyBasisDate {
+			// Update MonthlyBasisDate --
+			if routine.MonthlyBasisDate < 0 || routine.MonthlyBasisDate > 33 {
+				return routine, errors.New("invalid date index")
+			}
+			// Preparing SQL statement --
+			query := "UPDATE `routines` set monthly_basis_date = ? where id = ?"
+			updateQuery, err := db.Prepare(query)
+			if err != nil {
+				return routine, err
+			}
+			// Execute DB Query --
+			_, err = updateQuery.Exec(routine.MonthlyBasisDate, routine.ID)
+			if err != nil {
+				return routine, errors.New("unable to execute query")
+			}
+			updateQuery.Close()
 		}
-		// Execute DB Query --
-		_, err = updateQuery.Exec(routine.YearlyBasisMonthDate, routine.ID)
-		if err != nil {
-			return routine, errors.New("unable to execute query")
+	} else if routine_details.Mode == "Yearly" {
+		// Update Yearly Basis Days --
+		if routine_details.YearlyBasisMonthDate != routine.YearlyBasisMonthDate {
+			// Update YearlyBasisMonthDate --
+			arr := strings.Split(routine.YearlyBasisMonthDate, "-")
+			for _, value := range arr {
+				i, err := strconv.ParseInt(value, 10, 32)
+				if err != nil {
+					return routine, errors.New("invalid date format for yearly month date")
+				}
+				if int8(i) < 0 || int8(i) > 31 {
+					return routine, errors.New("month should be between 1 to 31")
+				}
+			}
+			// Preparing SQL statement --
+			query := "UPDATE `routines` set yearly_basis_month_date = ? where id = ?"
+			updateQuery, err := db.Prepare(query)
+			if err != nil {
+				return routine, err
+			}
+			// Execute DB Query --
+			_, err = updateQuery.Exec(routine.YearlyBasisMonthDate, routine.ID)
+			if err != nil {
+				return routine, errors.New("unable to execute query")
+			}
+			updateQuery.Close()
 		}
-		updateQuery.Close()
+	} else {
+		return routine, errors.New("mode not recognized")
 	}
+
 	// Update Time --
 	if routine_details.Time != routine.Time {
 		// Update Time --
@@ -332,6 +343,44 @@ func UpdateRoutine(routine Routine) (Routine, error) {
 	}
 	fresh_routine_details := GetRoutineDetailsById(routine.ID)
 	return fresh_routine_details, nil
+}
+
+func UpdateRoutineStatus(routine Routine) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Get routine details --
+	routine_details := GetRoutineDetailsById(routine.ID)
+	// User ID --
+	var user_id int64 = routine.UserId
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_details.UserId != routine.UserId {
+		return false, errors.New("access denied")
+	}
+
+	// Update Title and slug --
+	if routine_details.Status != routine.Status {
+		// Update description --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set routine_status = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.Status, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+	}
+
+	return true, nil
 }
 
 func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
@@ -356,7 +405,7 @@ func GetRoutines(user_id int64) []Routine {
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
 
-	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ?", user_id_str)
+	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where user_id = ?", user_id_str)
 	if err != nil {
 		panic("Unable to retrieve routine list from Database")
 	}
@@ -397,7 +446,7 @@ func GetRoutineDetailsById(routine_id int64) Routine {
 
 	// Get Routine Details from DB --
 	var routine_id_str string = strconv.Itoa(int(routine_id))
-	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where id = ?", routine_id_str)
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where id = ?", routine_id_str)
 	return mapDBDataToRoutineDetails(row)
 }
 
@@ -410,7 +459,7 @@ func GetRoutineDetailsBySlug(user_id int64, routine_slug string) Routine {
 
 	var user_id_str string = strconv.Itoa(int(user_id))
 	// Get Routine Details from DB --
-	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, is_trash, created_at FROM routines where user_id = ? and slug = ?", user_id_str, routine_slug)
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where user_id = ? and slug = ?", user_id_str, routine_slug)
 	return mapDBDataToRoutineDetails(row)
 }
 
@@ -427,11 +476,11 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	var monthly_basis_date int8
 	var yearly_basis_month_date string
 	var routine_time string
-	var is_trash int8
+	var routine_status string
 	var created_at string
 
 	// Scan fields --
-	err := row.Scan(&routine_id, &user_id, &slug, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at)
+	err := row.Scan(&routine_id, &user_id, &slug, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &created_at)
 	if err != nil {
 		panic(err)
 	}
@@ -449,7 +498,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	routine.MonthlyBasisDate = monthly_basis_date
 	routine.YearlyBasisMonthDate = yearly_basis_month_date
 	routine.Time = routine_time
-	routine.IsTrash = int8(is_trash)
+	routine.Status = routine_status
 	routine.CreatedAt = created_at
 	return routine
 }
@@ -467,12 +516,12 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	var monthly_basis_date int8
 	var yearly_basis_month_date string
 	var routine_time string
-	var is_trash int8
+	var routine_status string
 	var created_at string
 
 	for rows.Next() {
 		var routine Routine
-		if err := rows.Scan(&routine_id, &user_id, &slug, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &is_trash, &created_at); err != nil {
+		if err := rows.Scan(&routine_id, &user_id, &slug, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &created_at); err != nil {
 			panic("Error while scaning routines")
 		}
 		routine.ID = routine_id
@@ -486,7 +535,7 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 		routine.MonthlyBasisDate = monthly_basis_date
 		routine.YearlyBasisMonthDate = yearly_basis_month_date
 		routine.Time = routine_time
-		routine.IsTrash = is_trash
+		routine.Status = routine_status
 		routine.CreatedAt = created_at
 		routines = append(routines, routine)
 	}

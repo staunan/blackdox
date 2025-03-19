@@ -24,6 +24,11 @@ export async function updateRoutine(data){
     return response.data;
 }
 
+export async function updateRoutineStatus(data){
+    let response = await axios.post(config.api_base_url + 'update_routine_status', data, reqConfig);
+    return response.data;
+}
+
 export async function verifyRoutineTitle(data){
     let response = await axios.post(config.api_base_url + 'verify_routine_title', data, reqConfig);
     return response.data;
