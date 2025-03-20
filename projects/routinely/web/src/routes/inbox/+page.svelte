@@ -7,6 +7,6 @@
 	<title>Inbox</title>
 	<meta name="inbox" content="Inbox Page" />
 </svelte:head>
-<RoutinelyPageContainer title="Inbox">
+<RoutinelyPageContainer>
 	<InboxPage></InboxPage>
 </RoutinelyPageContainer>

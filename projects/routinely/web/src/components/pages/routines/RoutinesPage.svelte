@@ -1,127 +1,148 @@
 <script>
-	import CarbonTab from "components/tabs/CarbonTab.svelte";
-	import DailyRoutineList from "components/pages/routines/DailyRoutineList.svelte";
-	import WeeklyRoutineList from "components/pages/routines/WeeklyRoutineList.svelte";
-	import MonthlyRoutineList from "components/pages/routines/MonthlyRoutineList.svelte";
-	import YearlyRoutineList from "components/pages/routines/YearlyRoutineList.svelte";
-
+	import PanelRoutines from "./PanelRoutines.svelte";
+	import PanelTrash from "./PanelTrash.svelte";
+	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
-	import { goto } from "$app/navigation";
-	import { getProgress } from "apis/apis.js";
-	import { routines, store } from "store";
+	import { routines } from "store";
 
-	let all_routines = [];
-	let daily_routines = [];
-	let weekly_routines = [];
-	let monthly_routines = [];
-	let yearly_routines = [];
-	let progress = [];
-	let currentTabName = "daily";
+	let currentPanel = "routines";
+	let show_panel_dropdown = false;
+	let total_items_in_trash = 0;
 
 	routines.subscribe((v) => {
-		if (v == null) {
-			all_routines = [];
-		} else {
-			all_routines = v;
-		}
-		routinesChanged();
+		let deleted_routines = v.filter((item) => item.Status == "deleted");
+		total_items_in_trash = deleted_routines.length;
 	});
 
-	onMount(async () => {
-		try {
-			// Get Routines --
-			if ($routines == null || $routines.length == 0) {
-				await store.getRoutines();
+	onMount(() => {
+		document.addEventListener("click", function (event) {
+			console.log("Event Listening");
+			if (event.target.closest(".routine_panel_menu")) {
+				show_panel_dropdown = true;
+			} else {
+				show_panel_dropdown = false;
 			}
-
-			let progress_response = await getProgress({ user_id: 1 });
-			if (!progress_response.HasError) {
-				if (progress_response.Data == null) {
-					progress = [];
-				} else {
-					progress = progress_response.Data;
-				}
-			}
-		} catch (error) {
-			console.log(error);
-		}
+		});
 	});
-	function routinesChanged() {
-		let daily_routine_list = all_routines.filter((r) => r.Mode === "Daily");
-		daily_routine_list.forEach((routine) => {
-			let entry = null;
-			if (progress) {
-				for (let i = 0; i < progress.length; i++) {
-					if (progress[i].RoutineID === routine.ID) {
-						entry = progress[i];
-						break;
-					}
-				}
-			}
-			if (entry) {
-				routine.Done = true;
-				routine.DoneData = entry;
-			} else {
-				routine.Done = false;
-				routine.DoneData = null;
-			}
-		});
-		daily_routines = daily_routine_list;
-		weekly_routines = all_routines.filter((r) => r.Mode === "Weekly");
-		monthly_routines = all_routines.filter((r) => r.Mode === "Monthly");
-		yearly_routines = all_routines.filter((r) => r.Mode === "Yearly");
-	}
-	function tabModeChangedHandler(event) {
-		currentTabName = event.detail;
-		if (event.detail == "daily") {
-		} else if (event.detail == "weekly") {
-		} else if (event.detail == "monthly") {
-		} else if (event.detail == "yearly") {
-		}
-	}
-	function entryAddedHandler(event) {
-		let entry = event.detail;
-		daily_routines = daily_routines.map(function (dr) {
-			if (dr.ID === entry.RoutineID) {
-				return { ...dr, Done: true, DoneData: entry };
-			} else {
-				return dr;
-			}
-		});
-		progress.push(entry);
-	}
-	function entryRemovedHandler(event) {
-		let entry = event.detail;
-		daily_routines = daily_routines.map(function (dr) {
-			if (dr.ID === entry.RoutineID) {
-				return { ...dr, Done: false, DoneData: null };
-			} else {
-				return dr;
-			}
-		});
-		progress = progress.filter((p) => p.ID !== entry.ID);
-	}
-	function createRoutineHandler(event) {
-		goto("/create-routine");
+
+	function panelMenuClickHandler(event) {
+		show_panel_dropdown = true;
 	}
 </script>
 
-<div class="routines_container">
-	<CarbonTab on:change={tabModeChangedHandler}></CarbonTab>
-	<div class="tab_content">
-		<DailyRoutineList
-			active={currentTabName === "daily"}
-			routines={daily_routines}
-			on:entryadded={entryAddedHandler}
-			on:entryremoved={entryRemovedHandler}
-		></DailyRoutineList>
-		<WeeklyRoutineList active={currentTabName === "weekly"}
-		></WeeklyRoutineList>
-		<MonthlyRoutineList active={currentTabName === "monthly"}
-		></MonthlyRoutineList>
-		<YearlyRoutineList
-			routines={yearly_routines}
-			active={currentTabName === "yearly"}
-		></YearlyRoutineList>
+<div class="routines_page">
+	<div class="panel_title">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="routine_panel_menu" on:click={panelMenuClickHandler}>
+			<SpaceBetweenThreeItems>
+				<div slot="left" class="red_petal"></div>
+				<div slot="center" class="green_petal"></div>
+				<div slot="right" class="blue_petal"></div>
+			</SpaceBetweenThreeItems>
+			<SpaceBetweenThreeItems>
+				<div slot="left" class="green_petal"></div>
+				<div slot="center" class="red_petal"></div>
+				<div slot="right" class="blue_petal"></div>
+			</SpaceBetweenThreeItems>
+			<SpaceBetweenThreeItems>
+				<div slot="left" class="red_petal"></div>
+				<div slot="center" class="blue_petal"></div>
+				<div slot="right" class="green_petal"></div>
+			</SpaceBetweenThreeItems>
+			{#if show_panel_dropdown}
+				<div class="routine_panel_dropdown">
+					<div
+						class="panel_dropdown_list_item"
+						on:click={() => {
+							currentPanel = "routines";
+							show_panel_dropdown = false;
+						}}
+					>
+						Routines
+					</div>
+					<div
+						class="panel_dropdown_list_item"
+						on:click={() => {
+							currentPanel = "trash";
+							show_panel_dropdown = false;
+						}}
+					>
+						Trash ({total_items_in_trash})
+					</div>
+				</div>
+			{/if}
+		</div>
+		<div class="panel_title_text">
+			{#if currentPanel == "routines"}
+				<span>Routines</span>
+			{:else if currentPanel == "trash"}
+				<span>Trash</span>
+			{/if}
+		</div>
+	</div>
+	<div class="panel_body">
+		{#if currentPanel == "routines"}
+			<PanelRoutines></PanelRoutines>
+		{:else if currentPanel == "trash"}
+			<PanelTrash></PanelTrash>
+		{/if}
 	</div>
 </div>
+
+<style>
+	.routine_panel_dropdown {
+		position: absolute;
+		top: 110%;
+		left: 0;
+		background-color: #fff;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+		min-height: 50px;
+		z-index: 10000001;
+		width: 150px;
+	}
+	.panel_title {
+		padding-bottom: 20px;
+		display: flex;
+	}
+	.panel_title_text {
+		font-size: 37px;
+		font-weight: bold;
+		padding-left: 20px;
+	}
+	.routine_panel_menu {
+		display: flex;
+		flex-direction: column;
+		height: 30px;
+		width: 30px;
+		cursor: pointer;
+		position: relative;
+		top: 10px;
+	}
+	.red_petal {
+		width: 5px;
+		height: 5px;
+		background-color: red;
+	}
+	.green_petal {
+		width: 5px;
+		height: 5px;
+		background-color: green;
+	}
+	.blue_petal {
+		width: 5px;
+		height: 5px;
+		background-color: blue;
+	}
+	.panel_dropdown_list_item {
+		padding: 15px;
+		display: flex;
+		justify-content: flex-start;
+		font-size: 20px;
+		font-weight: bold;
+		cursor: pointer;
+	}
+	.panel_dropdown_list_item:hover {
+		background-color: #ddd;
+	}
+</style>

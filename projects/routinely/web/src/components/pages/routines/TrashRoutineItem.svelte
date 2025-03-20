@@ -1,25 +1,11 @@
 <script>
-	import { createEventDispatcher } from "svelte";
+	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { TodayDate } from "lib/js/datetime.js";
 
 	export let routine = {};
 
-	const dispatch = createEventDispatcher();
-	function routineClickedHandler(routine) {
-		dispatch("click", routine);
-	}
-	function getRoutineTimeString(time) {
-		let time_arr = time.split(":");
-		let zone = "";
-		let hour = 0;
-		if (Number(time_arr[0]) < 12) {
-			zone = "AM";
-			hour = Number(time_arr[0]);
-		} else {
-			zone = "PM";
-			hour = Number(time_arr[0]) - 12;
-		}
-		return hour + ":" + time_arr[1] + " " + zone;
+	function restoreRoutineHandler(event) {
+		console.log("Hello");
 	}
 </script>
 
@@ -27,14 +13,23 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="routine_item" title={routine.Title}>
 	<div class="routine_item_left">
-		<div
-			class="routine_title"
-			on:click={() => routineClickedHandler(routine)}
-		>
+		<div class="routine_title">
 			{routine.Title}
 		</div>
 		<div class="routine_time">
-			{getRoutineTimeString(routine.Time)}
+			{routine.Description}
+		</div>
+		<div>
+			<SubmitButton
+				title="Restore"
+				color="red"
+				on:tap={restoreRoutineHandler}
+			></SubmitButton>
+			<SubmitButton
+				title="Restore"
+				color="red"
+				on:tap={restoreRoutineHandler}
+			></SubmitButton>
 		</div>
 	</div>
 </div>
