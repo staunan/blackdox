@@ -4,11 +4,18 @@
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import WarningSkull from "components/svg/WarningSkull.svelte";
 	import SpaceBetweenTwoItem from "components/layouts/SpaceBetweenTwoItem.svelte";
+	import ErrorModal from "components/modals/ErrorModal.svelte";
+	import DeleteSuccessModal from "components/pages/routine_details/DeleteSuccessModal.svelte";
 	import { createEventDispatcher } from "svelte";
 	import "animate.css";
+	import { updateRoutineStatus } from "apis/apis.js";
 
 	export let active = false;
 	export let routine = null;
+
+	let is_error_modal_active = false;
+	let is_delete_success_modal_active = false;
+	let error_modal_message = "";
 	let overlayclose = false;
 	let title = "Confirm Delete";
 	let message = "Are you sure you want to delete this routine?";
@@ -17,20 +24,18 @@
 	function closeModal() {
 		dispatch("close");
 	}
-	async function updateRoutineStatus() {
+	async function updateRoutineStatusHandler() {
 		try {
 			let formData = {
 				id: routine.ID,
 				status: "deleted",
 			};
-			let response = await updateRoutine(formData);
+			let response = await updateRoutineStatus(formData);
 			if (response.HasError) {
 				error_modal_message = response.Message;
 				is_error_modal_active = true;
 			} else {
-				is_update_success_modal_active = true;
-				store.updateRoutine(response.Data);
-				dispatch("updated", response.Data);
+				is_delete_success_modal_active = true;
 			}
 		} catch (error) {
 			console.log(error);
@@ -62,13 +67,27 @@
 				<SubmitButton
 					slot="right"
 					title="Yes Delete it"
-					on:tap={deleteRoutine}
+					on:tap={updateRoutineStatusHandler}
 					color="red"
 				></SubmitButton>
 			</SpaceBetweenTwoItem>
 		</div>
 	</div>
 </Modal>
+<ErrorModal
+	active={is_error_modal_active}
+	overlayclose={false}
+	title="Error"
+	message={error_modal_message}
+	buttonname="Got it"
+	on:close={() => {
+		is_error_modal_active = false;
+		closeModal();
+	}}
+></ErrorModal>
+
+<DeleteSuccessModal active={is_delete_success_modal_active}
+></DeleteSuccessModal>
 
 <style>
 	.success_title {
