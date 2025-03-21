@@ -47,7 +47,9 @@
 		}
 	});
 	function routinesChanged() {
-		let daily_routine_list = all_routines.filter((r) => r.Mode === "Daily");
+		let daily_routine_list = all_routines.filter(
+			(r) => r.Mode === "Daily" && r.IsTrash === 0
+		);
 		daily_routine_list.forEach((routine) => {
 			let entry = null;
 			if (progress) {
@@ -67,9 +69,15 @@
 			}
 		});
 		daily_routines = daily_routine_list;
-		weekly_routines = all_routines.filter((r) => r.Mode === "Weekly");
-		monthly_routines = all_routines.filter((r) => r.Mode === "Monthly");
-		yearly_routines = all_routines.filter((r) => r.Mode === "Yearly");
+		weekly_routines = all_routines.filter(
+			(r) => r.Mode === "Weekly" && r.IsTrash === 0
+		);
+		monthly_routines = all_routines.filter(
+			(r) => r.Mode === "Monthly" && r.IsTrash === 0
+		);
+		yearly_routines = all_routines.filter(
+			(r) => r.Mode === "Yearly" && r.IsTrash === 0
+		);
 	}
 	function tabModeChangedHandler(event) {
 		currentTabName = event.detail;

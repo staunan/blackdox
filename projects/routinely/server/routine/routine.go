@@ -35,6 +35,7 @@ type Routine struct {
 	YearlyBasisMonthDate string
 	Time                 string
 	Status               string
+	IsTrash              int8
 	CreatedAt            string
 }
 type RoutineEntry struct {
@@ -383,6 +384,92 @@ func UpdateRoutineStatus(routine Routine) (bool, error) {
 	return true, nil
 }
 
+func MoveToTrash(routine Routine) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Get routine details --
+	if routine.ID == 0 {
+		return false, errors.New("routine id not present")
+	}
+	routine_details := GetRoutineDetailsById(routine.ID)
+	// User ID --
+	var user_id int64 = routine.UserId
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_details.UserId != routine.UserId {
+		return false, errors.New("access denied")
+	}
+
+	// Update Title and slug --
+	if routine_details.IsTrash == 0 {
+		// Update description --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set is_trash = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(1, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+
+		return true, nil
+	} else {
+		return false, errors.New("already in trash")
+	}
+}
+
+func RestoreFromTrash(routine Routine) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Get routine details --
+	if routine.ID == 0 {
+		return false, errors.New("routine id not present")
+	}
+	routine_details := GetRoutineDetailsById(routine.ID)
+	// User ID --
+	var user_id int64 = routine.UserId
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_details.UserId != routine.UserId {
+		return false, errors.New("access denied")
+	}
+
+	// Update Title and slug --
+	if routine_details.IsTrash == 1 {
+		// Update description --
+		// Preparing SQL statement --
+		query := "UPDATE `routines` set is_trash = ? where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(0, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+
+		return true, nil
+	} else {
+		return false, errors.New("item not in trash")
+	}
+}
+
 func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
 	// Slug --
 	var slug string = createSlug(title)
@@ -405,7 +492,7 @@ func GetRoutines(user_id int64) []Routine {
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
 
-	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where user_id = ?", user_id_str)
+	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, is_trash, created_at FROM routines where user_id = ?", user_id_str)
 	if err != nil {
 		panic("Unable to retrieve routine list from Database")
 	}
@@ -446,7 +533,7 @@ func GetRoutineDetailsById(routine_id int64) Routine {
 
 	// Get Routine Details from DB --
 	var routine_id_str string = strconv.Itoa(int(routine_id))
-	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where id = ?", routine_id_str)
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, is_trash, created_at FROM routines where id = ?", routine_id_str)
 	return mapDBDataToRoutineDetails(row)
 }
 
@@ -459,7 +546,7 @@ func GetRoutineDetailsBySlug(user_id int64, routine_slug string) Routine {
 
 	var user_id_str string = strconv.Itoa(int(user_id))
 	// Get Routine Details from DB --
-	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, created_at FROM routines where user_id = ? and slug = ?", user_id_str, routine_slug)
+	row := db.QueryRow("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, is_trash, created_at FROM routines where user_id = ? and slug = ?", user_id_str, routine_slug)
 	return mapDBDataToRoutineDetails(row)
 }
 
@@ -477,10 +564,11 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	var yearly_basis_month_date string
 	var routine_time string
 	var routine_status string
+	var is_trash int8
 	var created_at string
 
 	// Scan fields --
-	err := row.Scan(&routine_id, &user_id, &slug, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &created_at)
+	err := row.Scan(&routine_id, &user_id, &slug, &routine_title, &routine_description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &is_trash, &created_at)
 	if err != nil {
 		panic(err)
 	}
@@ -499,6 +587,7 @@ func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	routine.YearlyBasisMonthDate = yearly_basis_month_date
 	routine.Time = routine_time
 	routine.Status = routine_status
+	routine.IsTrash = is_trash
 	routine.CreatedAt = created_at
 	return routine
 }
@@ -517,11 +606,12 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 	var yearly_basis_month_date string
 	var routine_time string
 	var routine_status string
+	var is_trash int8
 	var created_at string
 
 	for rows.Next() {
 		var routine Routine
-		if err := rows.Scan(&routine_id, &user_id, &slug, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &created_at); err != nil {
+		if err := rows.Scan(&routine_id, &user_id, &slug, &title, &description, &routine_mode, &daily_basis_days, &weekly_basis_weekday, &monthly_basis_date, &yearly_basis_month_date, &routine_time, &routine_status, &is_trash, &created_at); err != nil {
 			panic("Error while scaning routines")
 		}
 		routine.ID = routine_id
@@ -536,6 +626,7 @@ func mapDBDataToRoutineList(rows *sql.Rows) []Routine {
 		routine.YearlyBasisMonthDate = yearly_basis_month_date
 		routine.Time = routine_time
 		routine.Status = routine_status
+		routine.IsTrash = is_trash
 		routine.CreatedAt = created_at
 		routines = append(routines, routine)
 	}

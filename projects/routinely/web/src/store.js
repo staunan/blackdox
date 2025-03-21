@@ -42,13 +42,37 @@ export let store = {
         if (all_routines.length > 0) { 
             let temp_arr = all_routines.map((r) => {
                 if (r.ID == routine.ID) {
-                    console.log(routine);
                     return routine;
                 } else {
                     return r;
                 }
             });
-            console.log(temp_arr);
+            routines.set(temp_arr);
+        }
+    },
+    moveRoutineToTrash: function (routine) {
+        let all_routines = get(routines);
+        if (all_routines.length > 0) { 
+            let temp_arr = all_routines.map((r) => {
+                if (r.ID == routine.ID) {
+                    return { ...r, IsTrash: 1 };
+                } else {
+                    return r;
+                }
+            });
+            routines.set(temp_arr);
+        }
+    },
+    restoreRoutineFromTrash: function (routine) {
+        let all_routines = get(routines);
+        if (all_routines.length > 0) { 
+            let temp_arr = all_routines.map((r) => {
+                if (r.ID == routine.ID) {
+                    return { ...r, IsTrash: 0 };
+                } else {
+                    return r;
+                }
+            });
             routines.set(temp_arr);
         }
     }

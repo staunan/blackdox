@@ -29,6 +29,16 @@ export async function updateRoutineStatus(data){
     return response.data;
 }
 
+export async function moveToTrash(data){
+    let response = await axios.post(config.api_base_url + 'move_to_trash', data, reqConfig);
+    return response.data;
+}
+
+export async function restoreFromTrash(data){
+    let response = await axios.post(config.api_base_url + 'restore_from_trash', data, reqConfig);
+    return response.data;
+}
+
 export async function verifyRoutineTitle(data){
     let response = await axios.post(config.api_base_url + 'verify_routine_title', data, reqConfig);
     return response.data;

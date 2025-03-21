@@ -44,7 +44,8 @@
 		letter-spacing: 10px;
 	}
 	.success_message {
-		padding-top: 20px;
+		padding: 20px;
+		text-align: center;
 	}
 	.button_container {
 		padding-bottom: 20px;

@@ -5,43 +5,48 @@
 	import WarningSkull from "components/svg/WarningSkull.svelte";
 	import SpaceBetweenTwoItem from "components/layouts/SpaceBetweenTwoItem.svelte";
 	import ErrorModal from "components/modals/ErrorModal.svelte";
-	import DeleteSuccessModal from "components/pages/routine_details/DeleteSuccessModal.svelte";
+	import RestoreSuccessModal from "components/pages/routines/trash/RestoreSuccessModal.svelte";
 	import { createEventDispatcher } from "svelte";
-	import { moveToTrash } from "apis/apis.js";
+	import { restoreFromTrash } from "apis/apis.js";
 	import { store } from "store";
 
 	export let active = false;
 	export let routine = null;
 
 	let is_error_modal_active = false;
-	let is_delete_success_modal_active = false;
+	let is_restore_success_modal_active = false;
 	let error_modal_message = "";
 	let overlayclose = false;
-	let title = "Confirm Delete";
-	let message = "Are you sure you want to delete this routine?";
+	let title = "Confirm Restore";
+	let message =
+		"Are you sure you want to restore this routine from your trash?";
 
 	const dispatch = createEventDispatcher();
 	function closeModal() {
 		dispatch("close");
 	}
-	async function moveToTrashHandler() {
+	async function confirmRestoreHandler() {
 		try {
 			let formData = {
 				id: routine.ID,
 			};
-			let response = await moveToTrash(formData);
+			let response = await restoreFromTrash(formData);
 			if (response.HasError) {
 				error_modal_message = response.Message;
 				is_error_modal_active = true;
 			} else {
 				// Show Success --
-				is_delete_success_modal_active = true;
-				// Update Routines --
-				store.moveRoutineToTrash(routine);
+				is_restore_success_modal_active = true;
+				// Update Routine --
+				store.restoreRoutineFromTrash(routine);
 			}
 		} catch (error) {
 			console.log(error);
 		}
+	}
+	function onRestoreSuccessModalCloseHandler(event) {
+		is_restore_success_modal_active = false;
+		closeModal();
 	}
 </script>
 
@@ -68,8 +73,8 @@
 				></SubmitButton>
 				<SubmitButton
 					slot="right"
-					title="Yes, Move to trash"
-					on:tap={moveToTrashHandler}
+					title="Yes, Restore it"
+					on:tap={confirmRestoreHandler}
 					color="red"
 				></SubmitButton>
 			</SpaceBetweenTwoItem>
@@ -88,8 +93,10 @@
 	}}
 ></ErrorModal>
 
-<DeleteSuccessModal active={is_delete_success_modal_active}
-></DeleteSuccessModal>
+<RestoreSuccessModal
+	active={is_restore_success_modal_active}
+	on:close={onRestoreSuccessModalCloseHandler}
+></RestoreSuccessModal>
 
 <style>
 	.success_title {
@@ -99,8 +106,9 @@
 		letter-spacing: 10px;
 	}
 	.success_message {
-		padding-top: 20px;
+		padding: 20px;
 		font-size: 16px;
+		text-align: center;
 	}
 	.button_group {
 		padding-left: 20px;

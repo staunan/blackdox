@@ -1,6 +1,6 @@
 <script>
 	import PanelRoutines from "./PanelRoutines.svelte";
-	import PanelTrash from "./PanelTrash.svelte";
+	import PanelTrash from "./trash/PanelTrash.svelte";
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
 	import { routines } from "store";
@@ -10,7 +10,7 @@
 	let total_items_in_trash = 0;
 
 	routines.subscribe((v) => {
-		let deleted_routines = v.filter((item) => item.Status == "deleted");
+		let deleted_routines = v.filter((item) => item.IsTrash === 1);
 		total_items_in_trash = deleted_routines.length;
 	});
 
@@ -77,7 +77,7 @@
 			{#if currentPanel == "routines"}
 				<span>Routines</span>
 			{:else if currentPanel == "trash"}
-				<span>Trash</span>
+				<span>Trash ({total_items_in_trash})</span>
 			{/if}
 		</div>
 	</div>

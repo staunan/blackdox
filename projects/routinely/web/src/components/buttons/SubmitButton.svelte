@@ -64,6 +64,7 @@
 			padding-top 0.2s ease-out;
 	}
 	/* Colors */
+	/* Blue */
 	.btn.blue {
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 		background-color: #673ab7;
@@ -73,13 +74,66 @@
 	.btn.blue:focus {
 		background-color: #3f51b5;
 	}
+	/* Red */
 	.btn.red {
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-		background-color: #f44336;
+		background: #fe8c00; /* fallback for old browsers */
+		background: -webkit-linear-gradient(
+			to right,
+			#f83600,
+			#fe8c00
+		); /* Chrome 10-25, Safari 5.1-6 */
+		background: linear-gradient(
+			to right,
+			#f83600,
+			#fe8c00
+		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 		color: #fff;
 	}
 	.btn.red:hover,
 	.btn.red:focus {
-		background-color: #e91e63;
+		background: #fe8c00; /* fallback for old browsers */
+		background: -webkit-linear-gradient(
+			to right,
+			#f83600,
+			#fe8c00
+		); /* Chrome 10-25, Safari 5.1-6 */
+		background: linear-gradient(
+			to right,
+			#f83600,
+			#fe8c00
+		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	}
+	/* Green */
+	.btn.green {
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+		background: #52c234; /* fallback for old browsers */
+		background: -webkit-linear-gradient(
+			to right,
+			#061700,
+			#52c234
+		); /* Chrome 10-25, Safari 5.1-6 */
+		background: linear-gradient(
+			to right,
+			#061700,
+			#52c234
+		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+		color: #fff;
+	}
+	.btn.green:hover,
+	.btn.green:focus {
+		background: #52c234; /* fallback for old browsers */
+		background: -webkit-linear-gradient(
+			to right,
+			#061700,
+			#52c234
+		); /* Chrome 10-25, Safari 5.1-6 */
+		background: linear-gradient(
+			to right,
+			#061700,
+			#52c234
+		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 	}
 </style>

@@ -41,6 +41,10 @@ func main() {
 	e.POST("/update_routine_status", UpdateRoutineStatusHandler)
 	e.POST("/routine_details", RoutineDetailsHandler)
 	e.POST("/all_routines", GetAllRoutinesHandler)
+	e.POST("/move_to_trash", MoveToTrashHandler)
+	e.POST("/restore_from_trash", RestoreFromTrashHandler)
+
+	// Routine Entries
 	e.POST("/mark_routine_as_done", MarkRoutineAsDoneHandler)
 	e.POST("/mark_routine_as_not_done", MarkRoutineAsNotDoneHandler)
 
