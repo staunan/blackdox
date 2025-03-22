@@ -39,6 +39,11 @@ export async function restoreFromTrash(data){
     return response.data;
 }
 
+export async function deleteRoutineForever(data){
+    let response = await axios.post(config.api_base_url + 'delete_routine_forever', data, reqConfig);
+    return response.data;
+}
+
 export async function verifyRoutineTitle(data){
     let response = await axios.post(config.api_base_url + 'verify_routine_title', data, reqConfig);
     return response.data;

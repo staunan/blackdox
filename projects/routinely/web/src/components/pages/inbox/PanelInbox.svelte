@@ -1,5 +1,6 @@
 <script>
 	import InboxItem from "components/pages/inbox/InboxItem.svelte";
+	import NoItemInInbox from "components/pages/inbox/NoItemInInbox.svelte";
 	import { store, inboxes, routines } from "store";
 
 	let all_inbox_items = [];
@@ -19,9 +20,7 @@
 				<InboxItem item={inboxItem}></InboxItem>
 			{/each}
 		{:else}
-			<div class="no_item_in_inbox">
-				<h1>No Items in Inbox</h1>
-			</div>
+			<NoItemInInbox></NoItemInInbox>
 		{/if}
 	</div>
 </div>

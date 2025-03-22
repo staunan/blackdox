@@ -405,9 +405,8 @@ func MoveToTrash(routine Routine) (bool, error) {
 		return false, errors.New("access denied")
 	}
 
-	// Update Title and slug --
+	// Update is_trash to 1 --
 	if routine_details.IsTrash == 0 {
-		// Update description --
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set is_trash = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
@@ -448,9 +447,8 @@ func RestoreFromTrash(routine Routine) (bool, error) {
 		return false, errors.New("access denied")
 	}
 
-	// Update Title and slug --
+	// Update is_trash to 0 --
 	if routine_details.IsTrash == 1 {
-		// Update description --
 		// Preparing SQL statement --
 		query := "UPDATE `routines` set is_trash = ? where id = ?"
 		updateQuery, err := db.Prepare(query)
@@ -459,6 +457,61 @@ func RestoreFromTrash(routine Routine) (bool, error) {
 		}
 		// Execute DB Query --
 		_, err = updateQuery.Exec(0, routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+		updateQuery.Close()
+
+		return true, nil
+	} else {
+		return false, errors.New("item not in trash")
+	}
+}
+
+func DeleteRoutineForever(routine Routine) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Get routine details --
+	if routine.ID == 0 {
+		return false, errors.New("routine id not present")
+	}
+	routine_details := GetRoutineDetailsById(routine.ID)
+	// User ID --
+	var user_id int64 = routine.UserId
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_details.UserId != routine.UserId {
+		return false, errors.New("access denied")
+	}
+
+	if routine_details.IsTrash == 1 {
+		// Delete all entries --
+		// Preparing SQL statement --
+		routine_entry_query := "DELETE FROM `routine_entries` where routine_id = ?"
+		routine_entry_updateQuery, err := db.Prepare(routine_entry_query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = routine_entry_updateQuery.Exec(routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+
+		// Delete Routine --
+		// Preparing SQL statement --
+		query := "DELETE FROM `routines` where id = ?"
+		updateQuery, err := db.Prepare(query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = updateQuery.Exec(routine.ID)
 		if err != nil {
 			return false, errors.New("unable to execute query")
 		}

@@ -58,6 +58,7 @@
 
 	<ConfirmDeleteModal
 		active={confirmDeleteModalActive}
+		{routine}
 		on:close={closeConfirmDeleteModalHandler}
 	></ConfirmDeleteModal>
 </div>

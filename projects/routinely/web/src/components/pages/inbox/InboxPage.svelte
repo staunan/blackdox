@@ -1,6 +1,6 @@
 <script>
-	import PanelInbox from "./PanelInbox.svelte";
-	import SpaceBetweenThreeItems from "../../layouts/SpaceBetweenThreeItems.svelte";
+	import PanelInbox from "components/pages/inbox/PanelInbox.svelte";
+	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
 
 	let currentPanel = "inbox";
@@ -26,7 +26,11 @@
 	<div class="panel_title">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="panel_menu" on:click={panelMenuClickHandler}>
+		<div
+			style="display: none;"
+			class="panel_menu"
+			on:click={panelMenuClickHandler}
+		>
 			<SpaceBetweenThreeItems>
 				<div slot="left" class="red_petal"></div>
 				<div slot="center" class="green_petal"></div>
@@ -76,7 +80,6 @@
 	.panel_title_text {
 		font-size: 37px;
 		font-weight: bold;
-		padding-left: 20px;
 	}
 	.panel_menu {
 		display: flex;

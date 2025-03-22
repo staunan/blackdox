@@ -43,6 +43,7 @@ func main() {
 	e.POST("/all_routines", GetAllRoutinesHandler)
 	e.POST("/move_to_trash", MoveToTrashHandler)
 	e.POST("/restore_from_trash", RestoreFromTrashHandler)
+	e.POST("/delete_routine_forever", DeleteRoutineForeverHandler)
 
 	// Routine Entries
 	e.POST("/mark_routine_as_done", MarkRoutineAsDoneHandler)

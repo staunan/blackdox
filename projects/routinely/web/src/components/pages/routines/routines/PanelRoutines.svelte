@@ -1,9 +1,9 @@
 <script>
 	import CarbonTab from "components/tabs/CarbonTab.svelte";
-	import DailyRoutineList from "components/pages/routines/DailyRoutineList.svelte";
-	import WeeklyRoutineList from "components/pages/routines/WeeklyRoutineList.svelte";
-	import MonthlyRoutineList from "components/pages/routines/MonthlyRoutineList.svelte";
-	import YearlyRoutineList from "components/pages/routines/YearlyRoutineList.svelte";
+	import DailyRoutineList from "components/pages/routines/routines/DailyRoutineList.svelte";
+	import WeeklyRoutineList from "components/pages/routines/routines/WeeklyRoutineList.svelte";
+	import MonthlyRoutineList from "components/pages/routines/routines/MonthlyRoutineList.svelte";
+	import YearlyRoutineList from "components/pages/routines/routines/YearlyRoutineList.svelte";
 
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";

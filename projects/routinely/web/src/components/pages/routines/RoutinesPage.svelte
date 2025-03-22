@@ -1,6 +1,7 @@
 <script>
-	import PanelRoutines from "./PanelRoutines.svelte";
+	import PanelRoutines from "./routines/PanelRoutines.svelte";
 	import PanelTrash from "./trash/PanelTrash.svelte";
+	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
 	import { routines } from "store";
@@ -10,8 +11,10 @@
 	let total_items_in_trash = 0;
 
 	routines.subscribe((v) => {
-		let deleted_routines = v.filter((item) => item.IsTrash === 1);
-		total_items_in_trash = deleted_routines.length;
+		if (v) {
+			let deleted_routines = v.filter((item) => item.IsTrash === 1);
+			total_items_in_trash = deleted_routines.length;
+		}
 	});
 
 	onMount(() => {
@@ -27,6 +30,9 @@
 
 	function panelMenuClickHandler(event) {
 		show_panel_dropdown = true;
+	}
+	function goToCreateRoutinesHandler(event) {
+		goto("create-routine");
 	}
 </script>
 
@@ -53,7 +59,7 @@
 			{#if show_panel_dropdown}
 				<div class="routine_panel_dropdown">
 					<div
-						class="panel_dropdown_list_item"
+						class="panel_dropdown_list_item routine"
 						on:click={() => {
 							currentPanel = "routines";
 							show_panel_dropdown = false;
@@ -62,7 +68,7 @@
 						Routines
 					</div>
 					<div
-						class="panel_dropdown_list_item"
+						class="panel_dropdown_list_item trash"
 						on:click={() => {
 							currentPanel = "trash";
 							show_panel_dropdown = false;
@@ -73,13 +79,23 @@
 				</div>
 			{/if}
 		</div>
-		<div class="panel_title_text">
-			{#if currentPanel == "routines"}
-				<span>Routines</span>
-			{:else if currentPanel == "trash"}
+
+		{#if currentPanel == "routines"}
+			<div class="panel_title_text">
+				<div class="page_title">Routines</div>
+				<div class="right_panel">
+					<SubmitButton
+						title="Create Routine"
+						on:tap={goToCreateRoutinesHandler}
+						color="blue"
+					></SubmitButton>
+				</div>
+			</div>
+		{:else if currentPanel == "trash"}
+			<div class="panel_title_text">
 				<span>Trash ({total_items_in_trash})</span>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 	<div class="panel_body">
 		{#if currentPanel == "routines"}
@@ -109,6 +125,8 @@
 		font-size: 37px;
 		font-weight: bold;
 		padding-left: 20px;
+		display: flex;
+		width: 100%;
 	}
 	.routine_panel_menu {
 		display: flex;
@@ -144,5 +162,10 @@
 	}
 	.panel_dropdown_list_item:hover {
 		background-color: #ddd;
+	}
+	.right_panel {
+		flex: 1;
+		display: flex;
+		justify-content: flex-end;
 	}
 </style>

@@ -1,5 +1,5 @@
 <script>
-	import RoutineItem from "components/pages/routines/RoutineItem.svelte";
+	import RoutineItem from "components/pages/routines/routines/RoutineItem.svelte";
 	import { goto } from "$app/navigation";
 
 	export let active = false;

@@ -5,10 +5,10 @@
 	import WarningSkull from "components/svg/WarningSkull.svelte";
 	import SpaceBetweenTwoItem from "components/layouts/SpaceBetweenTwoItem.svelte";
 	import ErrorModal from "components/modals/ErrorModal.svelte";
-	import DeleteSuccessModal from "components/pages/routine_details/DeleteSuccessModal.svelte";
+	import DeleteSuccessModal from "components/pages/routines/trash/DeleteSuccessModal.svelte";
 	import { createEventDispatcher } from "svelte";
-	import "animate.css";
-	import { updateRoutineStatus } from "apis/apis.js";
+	import { deleteRoutineForever } from "apis/apis.js";
+	import { store } from "store";
 
 	export let active = false;
 	export let routine = null;
@@ -29,16 +29,23 @@
 			let formData = {
 				id: routine.ID,
 			};
-			let response = await updateRoutineStatus(formData);
+			let response = await deleteRoutineForever(formData);
 			if (response.HasError) {
 				error_modal_message = response.Message;
 				is_error_modal_active = true;
 			} else {
+				// Show success --
 				is_delete_success_modal_active = true;
 			}
 		} catch (error) {
 			console.log(error);
 		}
+	}
+	function onDeleteSuccessModalCloseHandler(event) {
+		// Update Store --
+		store.deleteRoutineForever(routine);
+		is_delete_success_modal_active = false;
+		closeModal();
 	}
 </script>
 
@@ -85,7 +92,9 @@
 	}}
 ></ErrorModal>
 
-<DeleteSuccessModal active={is_delete_success_modal_active}
+<DeleteSuccessModal
+	active={is_delete_success_modal_active}
+	on:close={onDeleteSuccessModalCloseHandler}
 ></DeleteSuccessModal>
 
 <style>

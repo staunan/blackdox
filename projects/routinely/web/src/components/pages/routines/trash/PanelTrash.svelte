@@ -6,7 +6,9 @@
 
 	let deleted_routines = [];
 	routines.subscribe((v) => {
-		deleted_routines = v.filter((item) => item.IsTrash === 1);
+		if (v) {
+			deleted_routines = v.filter((item) => item.IsTrash === 1);
+		}
 	});
 </script>
 

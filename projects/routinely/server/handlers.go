@@ -641,6 +641,38 @@ func RestoreFromTrashHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+func DeleteRoutineForeverHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+
+	// Create Routine Object
+	var routineObj routine.Routine
+	routineObj.UserId = getLoggedInUserId(c)
+
+	if reqData["id"] == nil {
+		routineObj.ID = 0
+	} else {
+		routineObj.ID = anyToInt64(reqData["id"])
+	}
+
+	success, err := routine.DeleteRoutineForever(routineObj)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Routine has been successfully removed!"
+	response.Data = success
+	return c.JSON(http.StatusOK, response)
+}
+
 func VerifyRoutineTitleHandler(c echo.Context) error {
 	// Get Request Data --
 	var reqData map[string]any = getRequestData(c)

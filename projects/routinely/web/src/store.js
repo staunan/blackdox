@@ -75,5 +75,18 @@ export let store = {
             });
             routines.set(temp_arr);
         }
+    },
+    deleteRoutineForever: function (routine) {
+        let all_routines = get(routines);
+        if (all_routines.length > 0) { 
+            let temp_arr = all_routines.filter((r) => {
+                if (r.ID == routine.ID) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            routines.set(temp_arr);
+        }
     }
 };
