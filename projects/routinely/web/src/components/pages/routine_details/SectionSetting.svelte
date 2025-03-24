@@ -20,8 +20,7 @@
 		is_confirm_delete_modal_active = true;
 	}
 	function routineUpdatedHandler(event) {
-		routine_details = event.detail;
-		console.log(routine_details);
+		dispatch("updated", event.detail);
 	}
 	function closeEditRoutineMoalHandler(event) {
 		editRoutineModalActive = false;

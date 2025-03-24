@@ -19,14 +19,19 @@
 	});
 
 	onMount(() => {
-		document.addEventListener("click", function (event) {
-			console.log("Event Listening");
+		const funcRef = (event) => {
 			if (event.target.closest(".routine_panel_menu")) {
 				show_panel_dropdown = true;
 			} else {
 				show_panel_dropdown = false;
 			}
-		});
+		};
+		window.addEventListener("click", funcRef);
+
+		// Called when component is destroyed --
+		return () => {
+			window.removeEventListener("click", funcRef);
+		};
 	});
 
 	function panelMenuClickHandler(event) {

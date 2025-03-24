@@ -777,14 +777,15 @@ func MarkRoutineAsDoneHandler(c echo.Context) error {
 	var reqData map[string]any = getRequestData(c)
 
 	var routine_entry routine.RoutineEntry
-	routine_entry.UserID = 1
+	routine_entry.UserID = getLoggedInUserId(c)
+
 	if reqData["routine_id"] == nil {
-		panic("Routine ID is required!")
+		routine_entry.RoutineID = 0
 	} else {
 		routine_entry.RoutineID = int64(reqData["routine_id"].(float64))
 	}
 	if reqData["checked_on_date"] == nil {
-		panic("Checked On Date is required!")
+		routine_entry.CheckedOnDate = ""
 	} else {
 		routine_entry.CheckedOnDate = reqData["checked_on_date"].(string)
 	}
@@ -808,28 +809,29 @@ func MarkRoutineAsDoneHandler(c echo.Context) error {
 }
 
 func MarkRoutineAsNotDoneHandler(c echo.Context) error {
-	var routine_entry routine.RoutineEntry
-
 	// Get Request Data --
 	var reqData map[string]any = getRequestData(c)
-	routine_entry.UserID = 1
+
+	var routine_entry routine.RoutineEntry
+	routine_entry.UserID = getLoggedInUserId(c)
+
 	if reqData["routine_id"] == nil {
-		panic("Routine ID is required!")
+		routine_entry.RoutineID = 0
 	} else {
 		routine_entry.RoutineID = int64(reqData["routine_id"].(float64))
 	}
 	if reqData["checked_on_date"] == nil {
-		panic("Checked On Date is required!")
+		routine_entry.CheckedOnDate = ""
 	} else {
 		routine_entry.CheckedOnDate = reqData["checked_on_date"].(string)
 	}
-	success, err := routine.MarkRoutineAsNotDone(routine_entry)
+	result, err := routine.MarkRoutineAsNotDone(routine_entry)
 	if err != nil {
 		// Return Response --
 		var response Response
 		response.HasError = true
-		response.Message = "Unable to mark the routine as not done"
-		response.Data = err
+		response.Message = err.Error()
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
 
@@ -837,7 +839,7 @@ func MarkRoutineAsNotDoneHandler(c echo.Context) error {
 	var response Response
 	response.HasError = false
 	response.Message = "Routine has been marked as not done"
-	response.Data = success
+	response.Data = result
 	return c.JSON(http.StatusOK, response)
 }
 

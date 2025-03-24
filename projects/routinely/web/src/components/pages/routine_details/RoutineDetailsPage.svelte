@@ -30,6 +30,9 @@
 	function detailsTabChangedHandler(event) {
 		currentTabName = event.detail;
 	}
+	function onRoutineUpdatedHandler(event) {
+		routine_details = event.detail;
+	}
 </script>
 
 <div class="routine_details">
@@ -46,7 +49,10 @@
 			<SectionHistory routine={routine_details}></SectionHistory>
 		{:else if currentTabName == "settings"}
 			<div class="settings_tab">
-				<SectionSetting routine={routine_details}></SectionSetting>
+				<SectionSetting
+					routine={routine_details}
+					on:updated={onRoutineUpdatedHandler}
+				></SectionSetting>
 			</div>
 		{/if}
 	{/if}

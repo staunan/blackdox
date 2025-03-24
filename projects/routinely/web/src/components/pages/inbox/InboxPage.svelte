@@ -2,19 +2,26 @@
 	import PanelInbox from "components/pages/inbox/PanelInbox.svelte";
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
+	import { onDestroy } from "svelte";
 
 	let currentPanel = "inbox";
 	let show_panel_dropdown = false;
+	let event_listener = null;
 
 	onMount(() => {
-		document.addEventListener("click", function (event) {
-			console.log("Event Listening");
+		const funcRef = (event) => {
 			if (event.target.closest(".panel_menu")) {
 				show_panel_dropdown = true;
 			} else if (!event.target.closest(".panel_dropdown")) {
 				show_panel_dropdown = false;
 			}
-		});
+		};
+		window.addEventListener("click", funcRef);
+
+		// Called when component is destroyed --
+		return () => {
+			window.removeEventListener("click", funcRef);
+		};
 	});
 
 	function panelMenuClickHandler(event) {

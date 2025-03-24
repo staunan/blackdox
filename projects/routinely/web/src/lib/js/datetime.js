@@ -40,3 +40,8 @@ export function TodayDate(){
     now = year+"-"+month+"-"+date;
     return now;
 }
+export function TodayDayName() {
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let current_datetime = new Date();
+    return days[current_datetime.getDay()];
+}

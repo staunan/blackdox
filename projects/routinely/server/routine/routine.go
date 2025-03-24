@@ -111,6 +111,9 @@ func CreateRoutine(routine Routine) (int64, error) {
 			daily_basis_days = ""
 		} else {
 			days := strings.Split(routine.DailyBasisDays, ",")
+			if len(days) == 0 {
+				return 0, errors.New("select at least one day")
+			}
 			for _, d := range days {
 				if !slices.Contains(Days, d) {
 					return 0, errors.New("invalid days value")
@@ -646,6 +649,117 @@ func GetRoutineHistories(user_id int64, routine_id int64) ([]RoutineHistory, err
 	return histories, nil
 }
 
+func MarkRoutineAsDone(routine_entry RoutineEntry) (RoutineEntry, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return routine_entry, errors.New("unable to connect to db")
+	}
+
+	// Get routine details --
+	routine_details := GetRoutineDetailsById(routine_entry.RoutineID)
+
+	// User ID --
+	var user_id int64 = routine_entry.UserID
+	if user_id == 0 {
+		return routine_entry, errors.New("user id should be present")
+	}
+	if routine_details.UserId != user_id {
+		return routine_entry, errors.New("access denied")
+	}
+
+	// Check if data is already present in database --
+	var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
+	var checked_on_date_str string = routine_entry.CheckedOnDate
+	var user_id_str string = strconv.Itoa(int(routine_entry.UserID))
+	var exsisted_row_id int64
+	err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
+	switch {
+	case err == sql.ErrNoRows:
+		// Insert an entry --
+		query := "INSERT INTO `routine_entries` (user_id, routine_id, checked_on_date) VALUES (?, ?, ?);"
+		insert, err := db.Prepare(query)
+		if err != nil {
+			return routine_entry, errors.New("unable to prepare query")
+		}
+
+		dbResponse, err := insert.Exec(user_id_str, routine_id_str, checked_on_date_str)
+		if err != nil {
+			return routine_entry, err
+		}
+		// Return last inserted ID --
+		lastInsertId, err := dbResponse.LastInsertId()
+		if err != nil {
+			return routine_entry, errors.New("unable to retrieve last inserted id")
+		}
+		routine_entry.ID = lastInsertId
+		routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+		// Create history --
+		success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Checked", "You have completed this routine")
+		if err != nil {
+			return routine_entry, err
+		}
+		if success {
+			return routine_entry, nil
+		} else {
+			return routine_entry, errors.New("unable to create history")
+		}
+
+	case err != nil:
+		return routine_entry, err
+	default:
+		return routine_entry, errors.New("row exists")
+	}
+}
+
+func MarkRoutineAsNotDone(routine_entry RoutineEntry) (RoutineEntry, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return routine_entry, errors.New("unable to connect to db")
+	}
+
+	// Get routine details --
+	routine_details := GetRoutineDetailsById(routine_entry.RoutineID)
+
+	// User ID --
+	var user_id int64 = routine_entry.UserID
+	if user_id == 0 {
+		return routine_entry, errors.New("user id should be present")
+	}
+	if routine_details.UserId != user_id {
+		return routine_entry, errors.New("access denied")
+	}
+
+	var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
+	var checked_on_date_str string = routine_entry.CheckedOnDate
+	var exsisted_row_id int64
+	err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
+	switch {
+	case err == sql.ErrNoRows:
+		return routine_entry, errors.New("entry not found")
+	case err != nil:
+		return routine_entry, err
+	default:
+		_, err := db.Exec(`DELETE FROM routine_entries WHERE id = ?`, exsisted_row_id)
+		if err != nil {
+			return routine_entry, err
+		}
+
+		// Create history --
+		success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Unchecked", "You have marked this routine as not completed")
+		if err != nil {
+			return routine_entry, err
+		}
+		if success {
+			return routine_entry, nil
+		} else {
+			return routine_entry, errors.New("unable to create history")
+		}
+	}
+}
+
 func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	// Declaring variable --
 	var routine_id int64
@@ -814,72 +928,6 @@ func checkIfSlugAlreadyExists(user_id int64, slug string) bool {
 		row_exist = true
 	}
 	return row_exist
-}
-
-func MarkRoutineAsDone(routine_entry RoutineEntry) (RoutineEntry, error) {
-	// Connect to db --
-	db, err := mysqldb.ConnectMySQL()
-	if err != nil {
-		return routine_entry, errors.New("unable to connect to db")
-	}
-
-	// Check if data is already present in database --
-	var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
-	var checked_on_date_str string = routine_entry.CheckedOnDate
-	var user_id_str string = strconv.Itoa(int(routine_entry.UserID))
-	var exsisted_row_id int64
-	err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
-	switch {
-	case err == sql.ErrNoRows:
-		// Insert an entry --
-		query := "INSERT INTO `routine_entries` (user_id, routine_id, checked_on_date) VALUES (?, ?, ?);"
-		insert, err := db.Prepare(query)
-		if err != nil {
-			return routine_entry, errors.New("unable to prepare query")
-		}
-
-		dbResponse, err := insert.Exec(user_id_str, routine_id_str, checked_on_date_str)
-		if err != nil {
-			return routine_entry, err
-		}
-		// Return last inserted ID --
-		lastInsertId, err := dbResponse.LastInsertId()
-		if err != nil {
-			return routine_entry, errors.New("unable to retrieve last inserted id")
-		}
-		routine_entry.ID = lastInsertId
-		routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-		return routine_entry, nil
-	case err != nil:
-		return routine_entry, err
-	default:
-		return routine_entry, errors.New("row exists")
-	}
-}
-
-func MarkRoutineAsNotDone(routine_entry RoutineEntry) (bool, error) {
-	// Connect to db --
-	db, err := mysqldb.ConnectMySQL()
-	if err != nil {
-		return false, errors.New("unable to connect to db")
-	}
-
-	var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
-	var checked_on_date_str string = routine_entry.CheckedOnDate
-	var exsisted_row_id int64
-	err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
-	switch {
-	case err == sql.ErrNoRows:
-		return false, errors.New("entry not found")
-	case err != nil:
-		return false, err
-	default:
-		_, err := db.Exec(`DELETE FROM routine_entries WHERE id = ?`, exsisted_row_id)
-		if err != nil {
-			return false, err
-		}
-		return true, nil
-	}
 }
 
 func createRoutineHistory(user_id int64, routine_id int64, history_type string, history_content string) (bool, error) {

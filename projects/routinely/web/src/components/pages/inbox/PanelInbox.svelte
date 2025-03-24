@@ -2,14 +2,38 @@
 	import InboxItem from "components/pages/inbox/InboxItem.svelte";
 	import NoItemInInbox from "components/pages/inbox/NoItemInInbox.svelte";
 	import { store, inboxes, routines } from "store";
+	import { TodayDayName } from "lib/js/datetime.js";
 
 	let all_inbox_items = [];
 	routines.subscribe((r) => {
-		console.log("Inbox Items", r);
-		all_inbox_items = r;
+		all_inbox_items = generateInboxItems(r);
 	});
 	if ($routines && $routines.length == 0) {
 		store.getRoutines();
+	}
+	function generateInboxItems(routines) {
+		let inbox_items = [];
+		for (let i = 0; i < routines.length; i++) {
+			if (routines[i].Mode == "Daily") {
+				if (validateDailyRoutine(routines[i])) {
+					inbox_items.push(routines[i]);
+				}
+			}
+		}
+		return inbox_items;
+	}
+	function validateDailyRoutine(routine) {
+		if (routine.IsTrash == 1) {
+			return false;
+		}
+		if (routine.Status != "active") {
+			return false;
+		}
+		let routine_days = routine.DailyBasisDays.split(",");
+		if (!routine_days.includes(TodayDayName())) {
+			return false;
+		}
+		return true;
 	}
 </script>
 
