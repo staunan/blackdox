@@ -59,6 +59,11 @@ export async function getRoutineDetails(data){
     return response.data;
 }
 
+export async function getRoutineHistory(data){
+    let response = await axios.post(config.api_base_url + 'routine_history', data, reqConfig);
+    return response.data;
+}
+
 export async function markRoutineAsDone(data){
     let response = await axios.post(config.api_base_url + 'mark_routine_as_done', data, reqConfig);
     return response.data;

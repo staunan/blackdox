@@ -2,6 +2,7 @@ use routinely;
 SET SQL_SAFE_UPDATES = 0;
 select * from routines;
 select * from routine_entries;
+select * from routine_history;
 select * from users;
 
 -- Create Schema
@@ -26,6 +27,15 @@ create table routine_entries (
     user_id bigint not null,
     routine_id bigint not null,
     checked_on_date date,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp on update current_timestamp
+);
+create table routine_history (
+	id bigint primary key auto_increment,
+    user_id bigint,
+    routine_id bigint,
+    history_type varchar(50),
+    history_content varchar(500),
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );

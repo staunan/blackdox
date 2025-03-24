@@ -1,5 +1,6 @@
 <script>
-	import RoutineItem from "components/pages/routines/RoutineItem.svelte";
+	import RoutineItem from "components/pages/routines/routines/RoutineItem.svelte";
+	import NoItemRoutineList from "components/pages/routines/routines/NoItemRoutineList.svelte";
 	import { goto } from "$app/navigation";
 
 	export let active = false;
@@ -13,10 +14,14 @@
 
 {#if active}
 	<div class="routine_container">
-		{#each routines as routine}
-			<RoutineItem {routine} on:click={routineClickedHandler}
-			></RoutineItem>
-		{/each}
+		{#if routines && routines.length == 0}
+			<NoItemRoutineList></NoItemRoutineList>
+		{:else}
+			{#each routines as routine}
+				<RoutineItem {routine} on:click={routineClickedHandler}
+				></RoutineItem>
+			{/each}
+		{/if}
 	</div>
 {/if}
 

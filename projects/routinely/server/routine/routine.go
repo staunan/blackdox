@@ -45,6 +45,14 @@ type RoutineEntry struct {
 	CheckedOnDate string
 	CreatedAt     string
 }
+type RoutineHistory struct {
+	ID             int64
+	UserID         int64
+	RoutineID      int64
+	HistoryType    string
+	HistoryContent string
+	CreatedAt      string
+}
 
 func CreateRoutine(routine Routine) (int64, error) {
 	// Connect to db --
@@ -155,8 +163,20 @@ func CreateRoutine(routine Routine) (int64, error) {
 	}
 	insert.Close()
 
+	// Create History --
+	lastInsertedId, err := dbResponse.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	success, err := createRoutineHistory(user_id, lastInsertedId, "Routine Created", "You have created this routine")
+	if err != nil {
+		return 0, err
+	}
+	if !success {
+		return 0, errors.New("unable to create history")
+	}
 	// Return last inserted ID --
-	return dbResponse.LastInsertId()
+	return lastInsertedId, nil
 }
 
 func UpdateRoutine(routine Routine) (Routine, error) {
@@ -603,6 +623,29 @@ func GetRoutineDetailsBySlug(user_id int64, routine_slug string) Routine {
 	return mapDBDataToRoutineDetails(row)
 }
 
+func GetRoutineHistories(user_id int64, routine_id int64) ([]RoutineHistory, error) {
+	var histories []RoutineHistory
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return histories, errors.New("unable to connect to mysqldb")
+	}
+
+	// Prepare statement for reading data
+	var user_id_str string = strconv.Itoa(int(user_id))
+	var routine_id_str string = strconv.Itoa(int(routine_id))
+	rows, err := db.Query("SELECT id, user_id, routine_id, history_type, history_content, created_at FROM routine_history where user_id = ? and routine_id = ?", user_id_str, routine_id_str)
+	if err != nil {
+		return histories, errors.New("unable to retrieve routine list from Database")
+	}
+	defer rows.Close()
+
+	// Map to Routine List --
+	histories = mapDBDataToRoutineHistoryList(rows)
+
+	return histories, nil
+}
+
 func mapDBDataToRoutineDetails(row *sql.Row) Routine {
 	// Declaring variable --
 	var routine_id int64
@@ -711,6 +754,33 @@ func mapDBDataToRoutineEntryList(rows *sql.Rows) []RoutineEntry {
 	return routine_entries
 }
 
+func mapDBDataToRoutineHistoryList(rows *sql.Rows) []RoutineHistory {
+	var histories []RoutineHistory
+
+	var id int64
+	var user_id int64
+	var routine_id int64
+	var history_type string
+	var history_content string
+	var created_at string
+
+	for rows.Next() {
+		if err := rows.Scan(&id, &user_id, &routine_id, &history_type, &history_content, &created_at); err != nil {
+			panic("Error while scaning routine history")
+		}
+		var history RoutineHistory
+		history.ID = id
+		history.UserID = user_id
+		history.RoutineID = routine_id
+		history.HistoryType = history_type
+		history.HistoryContent = history_content
+		history.CreatedAt = created_at
+		histories = append(histories, history)
+	}
+
+	return histories
+}
+
 func createSlug(str string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
@@ -809,5 +879,49 @@ func MarkRoutineAsNotDone(routine_entry RoutineEntry) (bool, error) {
 			return false, err
 		}
 		return true, nil
+	}
+}
+
+func createRoutineHistory(user_id int64, routine_id int64, history_type string, history_content string) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Validation --
+	if user_id == 0 {
+		return false, errors.New("user id should be present")
+	}
+	if routine_id == 0 {
+		return false, errors.New("routine id should be present")
+	}
+	if history_type == "" {
+		return false, errors.New("history type should be present")
+	}
+	if history_content == "" {
+		return false, errors.New("history content should be present")
+	}
+	// Preparing SQL statement --
+	query := "INSERT INTO `routine_history` (user_id, routine_id, history_type, history_content) VALUES (?, ?, ?, ?);"
+	insert, err := db.Prepare(query)
+	if err != nil {
+		return false, err
+	}
+
+	dbResponse, err := insert.Exec(user_id, routine_id, history_type, history_content)
+	if err != nil {
+		return false, errors.New("unable to execute query")
+	}
+	insert.Close()
+
+	lastInsertedId, err := dbResponse.LastInsertId()
+	if err != nil {
+		return false, err
+	}
+	if lastInsertedId > 0 {
+		return true, nil
+	} else {
+		return false, errors.New("unable to retrieve last inserted id")
 	}
 }

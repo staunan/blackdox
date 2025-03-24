@@ -39,8 +39,8 @@
 	img {
 		border-radius: 50%;
 		cursor: pointer;
-		height: 30px;
-		width: 30px;
+		height: 45px;
+		width: 45px;
 		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 	}
 </style>

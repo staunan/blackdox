@@ -27,28 +27,28 @@
 					<g stroke-linecap="round" stroke-width="3">
 						<polyline
 							class="check__stroke-offset check__stroke-offset--1"
-							stroke="var(--purple)"
+							stroke="hsl(270, 90%, 60%)"
 							points="-30 -30,-42 -42"
 							stroke-dasharray="17 17"
 							stroke-dashoffset="17"
 						/>
 						<polyline
 							class="check__stroke-offset check__stroke-offset--2"
-							stroke="var(--primary)"
+							stroke="hsl(223, 90%, 50%)"
 							points="38 -38,54 -54"
 							stroke-dasharray="22.63 22.63"
 							stroke-dashoffset="22.63"
 						/>
 						<polyline
 							class="check__stroke-offset check__stroke-offset--3"
-							stroke="var(--green)"
+							stroke="hsl(150, 90%, 40%)"
 							points="-28 28,-40 40"
 							stroke-dasharray="17 17"
 							stroke-dashoffset="17"
 						/>
 						<polyline
 							class="check__stroke-offset check__stroke-offset--4"
-							stroke="var(--red)"
+							stroke="hsl(0, 90%, 50%)"
 							points="32 32,44 44"
 							stroke-dasharray="17 17"
 							stroke-dashoffset="17"
@@ -57,7 +57,7 @@
 					<g>
 						<circle
 							class="check__move-fade check__move-fade--1"
-							fill="var(--red)"
+							fill="hsl(0, 90%, 50%)"
 							r="3"
 							cx="4"
 							cy="-44"
@@ -65,7 +65,7 @@
 						/>
 						<circle
 							class="check__move-fade check__move-fade--2"
-							fill="var(--primary)"
+							fill="hsl(223, 90%, 50%)"
 							r="3"
 							cx="-44"
 							cy="-8"
@@ -73,7 +73,7 @@
 						/>
 						<circle
 							class="check__move-fade check__move-fade--3"
-							fill="var(--green)"
+							fill="hsl(150, 90%, 40%)"
 							r="3"
 							cx="52"
 							cy="12"
@@ -81,7 +81,7 @@
 						/>
 						<circle
 							class="check__move-fade check__move-fade--4"
-							fill="var(--purple)"
+							fill="hsl(270, 90%, 60%)"
 							r="2"
 							cx="-2"
 							cy="40"
@@ -89,7 +89,7 @@
 						/>
 						<circle
 							class="check__move-fade check__move-fade--5"
-							fill="var(--primary)"
+							fill="hsl(223, 90%, 50%)"
 							r="3"
 							cx="-12"
 							cy="46"
@@ -99,7 +99,7 @@
 					<g
 						class="check__scale-out"
 						fill="none"
-						stroke="var(--check-outline)"
+						stroke="hsl(223, 10%, 35%)"
 						stroke-width="2"
 					>
 						<circle r="30" />
@@ -110,18 +110,18 @@
 					<g class="check__fade" opacity="0">
 						<circle
 							class="check__scale-in check__scale-in--1"
-							fill="var(--check-bubble)"
+							fill="hsl(223, 10%, 85%)"
 							r="30.9"
 						/>
 						<circle
 							class="check__scale-in check__scale-in--2"
-							fill="var(--primary)"
+							fill="hsl(223, 90%, 50%)"
 							r="31"
 						/>
 						<polygon
 							class="check__scale-in check__scale-in--3"
-							fill="var(--white)"
-							stroke="var(--primary)"
+							fill="hsl(0, 0%, 100%)"
+							stroke="hsl(223, 90%, 50%)"
 							stroke-width="2"
 							points="-10 -4,-16 2,-4 14,16 -6,10 -12,-4 2"
 						/>
@@ -134,25 +134,6 @@
 </div>
 
 <style>
-	:root {
-		--hue: 223;
-		--sat: 10%;
-		--bg: hsl(var(--hue), var(--sat), 90%);
-		--fg: hsl(var(--hue), var(--sat), 10%);
-		--primary: hsl(var(--hue), 90%, 50%);
-		--green: hsl(150, 90%, 40%);
-		--red: hsl(0, 90%, 50%);
-		--purple: hsl(270, 90%, 60%);
-		--white: hsl(0, 0%, 100%);
-		--light-gray1: hsl(var(--hue), var(--sat), 85%);
-		--light-gray2: hsl(var(--hue), var(--sat), 65%);
-		--dark-gray1: hsl(var(--hue), var(--sat), 35%);
-		--dark-gray2: hsl(var(--hue), var(--sat), 15%);
-		--check-bubble: var(--light-gray1);
-		--check-outline: var(--light-gray2);
-		--trans-dur: 0.3s;
-		font-size: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);
-	}
 	.check {
 		overflow: visible;
 		pointer-events: none;
@@ -166,8 +147,8 @@
 	.check circle,
 	.check polygon {
 		transition:
-			fill var(--trans-dur),
-			stroke var(--trans-dur);
+			fill 0.3s,
+			stroke 0.3s;
 	}
 	.check__move-fade,
 	.check__scale-in,
@@ -178,7 +159,7 @@
 		animation-fill-mode: forwards;
 	}
 	.check__fade {
-		transition: opacity var(--trans-dur);
+		transition: opacity 0.3s;
 	}
 	.check__move-fade {
 		animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
@@ -253,16 +234,6 @@
 		position: absolute;
 		width: 1px;
 		height: 1px;
-	}
-
-	/* Dark theme */
-	@media (prefers-color-scheme: dark) {
-		:root {
-			--bg: hsl(var(--hue), var(--sat), 10%);
-			--fg: hsl(var(--hue), var(--sat), 90%);
-			--check-bubble: var(--dark-gray2);
-			--check-outline: var(--dark-gray1);
-		}
 	}
 	/* Animations */
 	@keyframes move-fade1 {

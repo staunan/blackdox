@@ -58,6 +58,8 @@
 		color: #fff;
 		height: 60px;
 		cursor: pointer;
+		font-size: 18px;
+		font-weight: bold;
 	}
 	.glider {
 		width: 25%;

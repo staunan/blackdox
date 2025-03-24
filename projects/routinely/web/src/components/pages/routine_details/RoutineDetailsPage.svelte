@@ -9,6 +9,7 @@
 
 	import SectionAbout from "components/pages/routine_details/SectionAbout.svelte";
 	import SectionSetting from "components/pages/routine_details/SectionSetting.svelte";
+	import SectionHistory from "components/pages/routine_details/SectionHistory.svelte";
 
 	let routine_slug = $page.params.routine_slug;
 
@@ -42,7 +43,7 @@
 		{:else if currentTabName == "progress"}
 			<h1>Implementation Pending</h1>
 		{:else if currentTabName == "history"}
-			<h1>Implementation Pending</h1>
+			<SectionHistory routine={routine_details}></SectionHistory>
 		{:else if currentTabName == "settings"}
 			<div class="settings_tab">
 				<SectionSetting routine={routine_details}></SectionSetting>

@@ -5,6 +5,7 @@
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
 	import { routines } from "store";
+	import { goto } from "$app/navigation";
 
 	let currentPanel = "routines";
 	let show_panel_dropdown = false;

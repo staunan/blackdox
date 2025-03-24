@@ -38,9 +38,12 @@ func main() {
 	e.POST("/create_routine", CreateRoutineHandler)
 	e.POST("/verify_routine_title", VerifyRoutineTitleHandler)
 	e.POST("/update_routine", UpdateRoutineHandler)
-	e.POST("/update_routine_status", UpdateRoutineStatusHandler)
-	e.POST("/routine_details", RoutineDetailsHandler)
 	e.POST("/all_routines", GetAllRoutinesHandler)
+
+	// Routine Details --
+	e.POST("/routine_details", RoutineDetailsHandler)
+	e.POST("/routine_history", RoutineHistoryHandler)
+	e.POST("/update_routine_status", UpdateRoutineStatusHandler)
 	e.POST("/move_to_trash", MoveToTrashHandler)
 	e.POST("/restore_from_trash", RestoreFromTrashHandler)
 	e.POST("/delete_routine_forever", DeleteRoutineForeverHandler)

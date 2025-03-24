@@ -698,7 +698,7 @@ func VerifyRoutineTitleHandler(c echo.Context) error {
 }
 
 func RoutineDetailsHandler(c echo.Context) error {
-	var user_id int64 = 1
+	var user_id int64 = getLoggedInUserId(c)
 	var slug string
 
 	// Get Request Data --
@@ -722,6 +722,41 @@ func RoutineDetailsHandler(c echo.Context) error {
 	response.HasError = false
 	response.Message = "Successfully retrieved routine data!"
 	response.Data = routine_details
+	return c.JSON(http.StatusOK, response)
+}
+
+func RoutineHistoryHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+	var routine_id int64 = 0
+
+	var user_id int64 = getLoggedInUserId(c)
+	if reqData["id"] == nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Routine ID is required"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	} else {
+		routine_id = anyToInt64(reqData["id"])
+	}
+
+	histories, err := routine.GetRoutineHistories(user_id, routine_id)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Successfully retrieved routine history!"
+	response.Data = histories
 	return c.JSON(http.StatusOK, response)
 }
 
