@@ -10,7 +10,9 @@
 		<Center>
 			<FormHeadingTitle title="Create Routine"></FormHeadingTitle>
 		</Center>
-		<CreateRoutineForm></CreateRoutineForm>
+		<div class="form">
+			<CreateRoutineForm></CreateRoutineForm>
+		</div>
 	</Card>
 </div>
 
@@ -18,5 +20,8 @@
 	.create_routine_form {
 		width: 70%;
 		margin: auto;
+	}
+	.form {
+		padding-top: 30px;
 	}
 </style>

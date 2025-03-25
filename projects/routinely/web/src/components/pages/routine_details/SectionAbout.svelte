@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
+	import { ParseTimeToHumanReadableFormat } from "lib/js/datetime.js";
 
 	export let routine = null;
 	let node_routine_mode_display_string = "";
@@ -12,19 +13,6 @@
 		}
 	}
 
-	function getRoutineTimeString(time) {
-		let time_arr = time.split(":");
-		let zone = "";
-		let hour = 0;
-		if (Number(time_arr[0]) < 12) {
-			zone = "AM";
-			hour = Number(time_arr[0]);
-		} else {
-			zone = "PM";
-			hour = Number(time_arr[0]) - 12;
-		}
-		return hour + ":" + time_arr[1] + " " + zone;
-	}
 	function generateRoutineModeDisplayString(routine) {
 		if (routine == null) {
 			return "";
@@ -138,7 +126,7 @@
 			<RoutineModeDisplayString message={node_routine_mode_display_string}
 			></RoutineModeDisplayString>
 			<div class="time">
-				at {getRoutineTimeString(routine.Time)}
+				at {ParseTimeToHumanReadableFormat(routine.Time)}
 			</div>
 		</div>
 	</div>

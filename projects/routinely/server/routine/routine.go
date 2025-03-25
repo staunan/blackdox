@@ -171,7 +171,7 @@ func CreateRoutine(routine Routine) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	success, err := createRoutineHistory(user_id, lastInsertedId, "Routine Created", "You have created this routine")
+	success, err := createRoutineHistory(user_id, lastInsertedId, "Routine Created", "You have <b>Created</b> this routine")
 	if err != nil {
 		return 0, err
 	}
@@ -650,7 +650,7 @@ func GetRoutineHistories(user_id int64, routine_id int64) ([]RoutineHistory, err
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
 	var routine_id_str string = strconv.Itoa(int(routine_id))
-	rows, err := db.Query("SELECT id, user_id, routine_id, history_type, history_content, created_at FROM routine_history where user_id = ? and routine_id = ?", user_id_str, routine_id_str)
+	rows, err := db.Query("SELECT id, user_id, routine_id, history_type, history_content, created_at FROM routine_history where user_id = ? and routine_id = ? order by created_at desc", user_id_str, routine_id_str)
 	if err != nil {
 		return histories, errors.New("unable to retrieve routine list from Database")
 	}
@@ -716,7 +716,7 @@ func MarkRoutineAsDone(routine_entry RoutineEntry) (RoutineEntry, error) {
 			routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 
 			// Create history --
-			success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Checked", "You have completed this routine")
+			success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Checked", "You have marked this routine as <b>Completed</b>")
 			if err != nil {
 				return routine_entry, err
 			}
@@ -771,7 +771,7 @@ func MarkRoutineAsNotDone(routine_entry RoutineEntry) (RoutineEntry, error) {
 		}
 
 		// Create history --
-		success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Unchecked", "You have marked this routine as not completed")
+		success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Unchecked", "You have marked this routine as <b>Not Completed</b>")
 		if err != nil {
 			return routine_entry, err
 		}

@@ -3,6 +3,9 @@
 	import PanelTrash from "./trash/PanelTrash.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
+	import TrashIcon from "components/svg/TrashIcon.svelte";
+	import PlusIcon from "components/svg/PlusIcon.svelte";
+	import RoutinesIcon from "components/svg/RoutinesIcon.svelte";
 	import { onMount } from "svelte";
 	import { routines } from "store";
 	import { goto } from "$app/navigation";
@@ -71,7 +74,14 @@
 							show_panel_dropdown = false;
 						}}
 					>
-						Routines
+						<div
+							style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;"
+						>
+							<RoutinesIcon size="30px"></RoutinesIcon>
+						</div>
+						<div class="panel_dropdown_list_item_text">
+							Routines
+						</div>
 					</div>
 					<div
 						class="panel_dropdown_list_item trash"
@@ -80,7 +90,10 @@
 							show_panel_dropdown = false;
 						}}
 					>
-						Trash ({total_items_in_trash})
+						<TrashIcon></TrashIcon>
+						<div class="panel_dropdown_list_item_text">
+							Trash ({total_items_in_trash})
+						</div>
 					</div>
 				</div>
 			{/if}
@@ -94,7 +107,9 @@
 						title="Create Routine"
 						on:tap={goToCreateRoutinesHandler}
 						color="blue"
-					></SubmitButton>
+					>
+						<PlusIcon size="30px"></PlusIcon>
+					</SubmitButton>
 				</div>
 			</div>
 		{:else if currentPanel == "trash"}
@@ -121,7 +136,7 @@
 		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 		min-height: 50px;
 		z-index: 10000001;
-		width: 150px;
+		width: 200px;
 	}
 	.panel_title {
 		padding-bottom: 20px;
@@ -162,12 +177,21 @@
 		padding: 15px;
 		display: flex;
 		justify-content: flex-start;
+		align-items: center;
 		font-size: 20px;
 		font-weight: bold;
 		cursor: pointer;
+		border-bottom: 1px solid #ccc;
+		background-color: #ddd;
+	}
+	.panel_dropdown_list_item:last-child {
+		border-bottom: none;
+	}
+	.panel_dropdown_list_item_text {
+		padding-left: 10px;
 	}
 	.panel_dropdown_list_item:hover {
-		background-color: #ddd;
+		background-color: #ff8686;
 	}
 	.right_panel {
 		flex: 1;

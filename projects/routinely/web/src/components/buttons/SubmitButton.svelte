@@ -11,11 +11,26 @@
 	}
 </script>
 
-<button type="button" class={"btn " + color} on:click={onClick} {disabled}
-	><span>{title}</span></button
->
+<button type="button" class={"btn " + color} on:click={onClick} {disabled}>
+	<div class="button_content">
+		<slot></slot>
+		<div class="button_text">{title}</div>
+	</div>
+</button>
 
 <style>
+	.button_content {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-left: 20px;
+		padding-right: 20px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
+	.button_text {
+		padding-left: 15px;
+	}
 	button:disabled {
 		background-color: #ccc !important;
 		color: #333 !important;
@@ -32,13 +47,10 @@
 		cursor: pointer;
 		font-size: 14px;
 		font-family: monospace;
+		height: 50px;
 	}
 	.btn > * {
 		position: relative;
-	}
-	.btn span {
-		display: block;
-		padding: 12px 24px;
 	}
 	.btn:before {
 		content: "";

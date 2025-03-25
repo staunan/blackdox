@@ -1,4 +1,9 @@
 <script>
+	import AboutIcon from "components/svg/AboutIcon.svelte";
+	import HistoryIcon from "components/svg/HistoryIcon.svelte";
+	import ProgressIcon from "components/svg/ProgressIcon.svelte";
+	import SettingsIcon from "components/svg/SettingsIcon.svelte";
+
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
@@ -25,13 +30,25 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="tabs">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={aboutClickHandler}>About</div>
+	<div class="tab" on:click={aboutClickHandler}>
+		<AboutIcon></AboutIcon>
+		<div class="tab_title">About</div>
+	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={progressClickHandler}>Progress</div>
+	<div class="tab" on:click={progressClickHandler}>
+		<ProgressIcon></ProgressIcon>
+		<div class="tab_title">Progress</div>
+	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={historyClickHandler}>History</div>
+	<div class="tab" on:click={historyClickHandler}>
+		<HistoryIcon size="35px"></HistoryIcon>
+		<div class="tab_title">History</div>
+	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={settingsClickHandler}>Settings</div>
+	<div class="tab" on:click={settingsClickHandler}>
+		<SettingsIcon></SettingsIcon>
+		<div class="tab_title">Settings</div>
+	</div>
 	<!-- <div class="tabsShadow"></div> -->
 	<div
 		class="glider"
@@ -102,5 +119,8 @@
 		left: 75%;
 		background: linear-gradient(90deg, #b9326f 0%, #ff5ddc 100%);
 		box-shadow: 0px 0px 8px 0px rgba(231, 13, 93, 0.57);
+	}
+	.tab_title {
+		padding-left: 20px;
 	}
 </style>

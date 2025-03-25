@@ -1,0 +1,28 @@
+<script>
+	export let size = "40px";
+</script>
+
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	fill="#000000"
+	width={size}
+	height={size}
+	viewBox="0 0 24 24"
+	id="edit-circle-alt"
+	data-name="Flat Line"
+	class="icon flat-line"
+	><path
+		id="secondary"
+		d="M20.83,10.24a8.5,8.5,0,0,0-1.22-3l-5.83,5.83L11,13,11,10.22l5.83-5.83a8.5,8.5,0,0,0-3-1.22,9,9,0,1,0,7.07,7.07Z"
+		style="fill: rgb(44, 169, 188); stroke-width: 2;"
+	/><path
+		id="primary"
+		d="M13.78,13.05,11,13,11,10.22,16.67,4.5a2,2,0,0,1,2.83,0h0a2,2,0,0,1,0,2.83Z"
+		style="fill: none; stroke: rgb(0, 0, 0); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"
+	/><path
+		id="primary-2"
+		data-name="primary"
+		d="M21,12a9,9,0,1,1-9-9"
+		style="fill: none; stroke: rgb(0, 0, 0); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"
+	/>
+</svg>

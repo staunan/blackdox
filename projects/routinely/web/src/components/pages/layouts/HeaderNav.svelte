@@ -1,4 +1,6 @@
 <script>
+	import InboxIcon from "components/svg/InboxIcon.svelte";
+	import RoutinesIcon from "components/svg/RoutinesIcon.svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	let currentTabName = "inbox";
@@ -27,17 +29,23 @@
 			class:selected={page.url.pathname === "/inbox"}
 			class="nav_link_item"
 		>
+			<InboxIcon size="30px"></InboxIcon>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div on:click={goToInboxClickHandler}>Inbox</div>
+			<div class="nav_link_text" on:click={goToInboxClickHandler}>
+				Inbox
+			</div>
 		</div>
 		<div
 			class:selected={page.url.pathname === "/routines"}
 			class="nav_link_item"
 		>
+			<RoutinesIcon size="30px"></RoutinesIcon>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div on:click={goToRoutinesClickHandler}>Routines</div>
+			<div class="nav_link_text" on:click={goToRoutinesClickHandler}>
+				Routines
+			</div>
 		</div>
 		{#if navlinks.includes(page.url.pathname)}
 			<div
@@ -57,6 +65,9 @@
 </nav>
 
 <style>
+	.nav_link_text {
+		padding-left: 10px;
+	}
 	nav {
 		display: flex;
 		justify-content: center;
