@@ -7,7 +7,6 @@
 
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
-	import { getProgress } from "apis/apis.js";
 	import { routines, store } from "store";
 
 	let all_routines = [];
@@ -31,44 +30,16 @@
 		try {
 			// Get Routines --
 			if ($routines == null || $routines.length == 0) {
-				await store.getRoutines();
-			}
-
-			let progress_response = await getProgress({ user_id: 1 });
-			if (!progress_response.HasError) {
-				if (progress_response.Data == null) {
-					progress = [];
-				} else {
-					progress = progress_response.Data;
-				}
+				await store.init();
 			}
 		} catch (error) {
 			console.log(error);
 		}
 	});
 	function routinesChanged() {
-		let daily_routine_list = all_routines.filter(
+		daily_routines = all_routines.filter(
 			(r) => r.Mode === "Daily" && r.IsTrash === 0
 		);
-		daily_routine_list.forEach((routine) => {
-			let entry = null;
-			if (progress) {
-				for (let i = 0; i < progress.length; i++) {
-					if (progress[i].RoutineID === routine.ID) {
-						entry = progress[i];
-						break;
-					}
-				}
-			}
-			if (entry) {
-				routine.Done = true;
-				routine.DoneData = entry;
-			} else {
-				routine.Done = false;
-				routine.DoneData = null;
-			}
-		});
-		daily_routines = daily_routine_list;
 		weekly_routines = all_routines.filter(
 			(r) => r.Mode === "Weekly" && r.IsTrash === 0
 		);
@@ -87,31 +58,6 @@
 		} else if (event.detail == "yearly") {
 		}
 	}
-	function entryAddedHandler(event) {
-		let entry = event.detail;
-		daily_routines = daily_routines.map(function (dr) {
-			if (dr.ID === entry.RoutineID) {
-				return { ...dr, Done: true, DoneData: entry };
-			} else {
-				return dr;
-			}
-		});
-		progress.push(entry);
-	}
-	function entryRemovedHandler(event) {
-		let entry = event.detail;
-		daily_routines = daily_routines.map(function (dr) {
-			if (dr.ID === entry.RoutineID) {
-				return { ...dr, Done: false, DoneData: null };
-			} else {
-				return dr;
-			}
-		});
-		progress = progress.filter((p) => p.ID !== entry.ID);
-	}
-	function createRoutineHandler(event) {
-		goto("/create-routine");
-	}
 </script>
 
 <div class="routines_container">
@@ -120,8 +66,6 @@
 		<DailyRoutineList
 			active={currentTabName === "daily"}
 			routines={daily_routines}
-			on:entryadded={entryAddedHandler}
-			on:entryremoved={entryRemovedHandler}
 		></DailyRoutineList>
 		<WeeklyRoutineList active={currentTabName === "weekly"}
 		></WeeklyRoutineList>

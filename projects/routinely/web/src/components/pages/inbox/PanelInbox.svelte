@@ -1,47 +1,39 @@
 <script>
 	import InboxItem from "components/pages/inbox/InboxItem.svelte";
 	import NoItemInInbox from "components/pages/inbox/NoItemInInbox.svelte";
-	import { store, inboxes, routines } from "store";
-	import { TodayDayName } from "lib/js/datetime.js";
+	import { store, inboxes } from "store";
 
-	let all_inbox_items = [];
-	routines.subscribe((r) => {
-		all_inbox_items = generateInboxItems(r);
-	});
-	if ($routines && $routines.length == 0) {
-		store.getRoutines();
-	}
-	function generateInboxItems(routines) {
-		let inbox_items = [];
-		for (let i = 0; i < routines.length; i++) {
-			if (routines[i].Mode == "Daily") {
-				if (validateDailyRoutine(routines[i])) {
-					inbox_items.push(routines[i]);
-				}
+	import { onMount } from "svelte";
+
+	onMount(async () => {
+		try {
+			if ($inboxes == null || $inboxes.length == 0) {
+				await store.init();
 			}
+		} catch (error) {
+			console.log(error);
 		}
-		return inbox_items;
+	});
+
+	function entryAddedHandler(event) {
+		let entry = event.detail;
+		store.addEntry(entry);
 	}
-	function validateDailyRoutine(routine) {
-		if (routine.IsTrash == 1) {
-			return false;
-		}
-		if (routine.Status != "active") {
-			return false;
-		}
-		let routine_days = routine.DailyBasisDays.split(",");
-		if (!routine_days.includes(TodayDayName())) {
-			return false;
-		}
-		return true;
+	function entryRemovedHandler(event) {
+		let entry = event.detail;
+		store.removeEntry(entry);
 	}
 </script>
 
 <div class="inbox_container">
 	<div class="inbox_items">
-		{#if all_inbox_items && all_inbox_items.length}
-			{#each all_inbox_items as inboxItem}
-				<InboxItem item={inboxItem}></InboxItem>
+		{#if $inboxes && $inboxes.length}
+			{#each $inboxes as inboxItem}
+				<InboxItem
+					item={inboxItem}
+					on:entryadded={entryAddedHandler}
+					on:entryremoved={entryRemovedHandler}
+				></InboxItem>
 			{/each}
 		{:else}
 			<NoItemInInbox></NoItemInInbox>

@@ -513,6 +513,19 @@ func DeleteRoutineForever(routine Routine) (bool, error) {
 	}
 
 	if routine_details.IsTrash == 1 {
+		// Delete all routine history --
+		// Preparing SQL statement --
+		routine_history_query := "DELETE FROM `routine_history` where routine_id = ?"
+		routine_history_updateQuery, err := db.Prepare(routine_history_query)
+		if err != nil {
+			return false, err
+		}
+		// Execute DB Query --
+		_, err = routine_history_updateQuery.Exec(routine.ID)
+		if err != nil {
+			return false, errors.New("unable to execute query")
+		}
+
 		// Delete all entries --
 		// Preparing SQL statement --
 		routine_entry_query := "DELETE FROM `routine_entries` where routine_id = ?"
@@ -668,48 +681,58 @@ func MarkRoutineAsDone(routine_entry RoutineEntry) (RoutineEntry, error) {
 		return routine_entry, errors.New("access denied")
 	}
 
-	// Check if data is already present in database --
-	var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
-	var checked_on_date_str string = routine_entry.CheckedOnDate
-	var user_id_str string = strconv.Itoa(int(routine_entry.UserID))
-	var exsisted_row_id int64
-	err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
-	switch {
-	case err == sql.ErrNoRows:
-		// Insert an entry --
-		query := "INSERT INTO `routine_entries` (user_id, routine_id, checked_on_date) VALUES (?, ?, ?);"
-		insert, err := db.Prepare(query)
-		if err != nil {
-			return routine_entry, errors.New("unable to prepare query")
+	if routine_details.Mode == "Daily" {
+		// Check if this routine is allwoed for today to make an entry --
+		days := strings.Split(routine_details.DailyBasisDays, ",")
+		weekDay := getTodayDayName()
+		if !slices.Contains(days, weekDay) {
+			return routine_entry, errors.New("this routine is inactive for weekday : " + weekDay)
 		}
+		// Check if data is already present in database --
+		var routine_id_str string = strconv.Itoa(int(routine_entry.RoutineID))
+		var checked_on_date_str string = routine_entry.CheckedOnDate
+		var user_id_str string = strconv.Itoa(int(routine_entry.UserID))
+		var exsisted_row_id int64
+		err = db.QueryRow("SELECT id FROM routine_entries where routine_id = ? and checked_on_date = ?", routine_id_str, checked_on_date_str).Scan(&exsisted_row_id)
+		switch {
+		case err == sql.ErrNoRows:
+			// Insert an entry --
+			query := "INSERT INTO `routine_entries` (user_id, routine_id, checked_on_date) VALUES (?, ?, ?);"
+			insert, err := db.Prepare(query)
+			if err != nil {
+				return routine_entry, errors.New("unable to prepare query")
+			}
 
-		dbResponse, err := insert.Exec(user_id_str, routine_id_str, checked_on_date_str)
-		if err != nil {
+			dbResponse, err := insert.Exec(user_id_str, routine_id_str, checked_on_date_str)
+			if err != nil {
+				return routine_entry, err
+			}
+			// Return last inserted ID --
+			lastInsertId, err := dbResponse.LastInsertId()
+			if err != nil {
+				return routine_entry, errors.New("unable to retrieve last inserted id")
+			}
+			routine_entry.ID = lastInsertId
+			routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+			// Create history --
+			success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Checked", "You have completed this routine")
+			if err != nil {
+				return routine_entry, err
+			}
+			if success {
+				return routine_entry, nil
+			} else {
+				return routine_entry, errors.New("unable to create history")
+			}
+
+		case err != nil:
 			return routine_entry, err
+		default:
+			return routine_entry, errors.New("row exists")
 		}
-		// Return last inserted ID --
-		lastInsertId, err := dbResponse.LastInsertId()
-		if err != nil {
-			return routine_entry, errors.New("unable to retrieve last inserted id")
-		}
-		routine_entry.ID = lastInsertId
-		routine_entry.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-
-		// Create history --
-		success, err := createRoutineHistory(user_id, routine_entry.RoutineID, "Routine Checked", "You have completed this routine")
-		if err != nil {
-			return routine_entry, err
-		}
-		if success {
-			return routine_entry, nil
-		} else {
-			return routine_entry, errors.New("unable to create history")
-		}
-
-	case err != nil:
-		return routine_entry, err
-	default:
-		return routine_entry, errors.New("row exists")
+	} else {
+		return routine_entry, nil
 	}
 }
 
@@ -972,4 +995,9 @@ func createRoutineHistory(user_id int64, routine_id int64, history_type string, 
 	} else {
 		return false, errors.New("unable to retrieve last inserted id")
 	}
+}
+
+func getTodayDayName() string {
+	t := time.Now()
+	return t.Weekday().String()[0:3]
 }
