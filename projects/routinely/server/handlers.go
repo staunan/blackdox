@@ -762,7 +762,15 @@ func RoutineHistoryHandler(c echo.Context) error {
 
 func GetAllRoutinesHandler(c echo.Context) error {
 	var user_id int64 = 1
-	var routines []routine.Routine = routine.GetRoutines(user_id)
+	routines, err := routine.GetRoutines(user_id)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Unable to retrieve routine list"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
 
 	// Return Response --
 	var response Response
@@ -858,6 +866,34 @@ func GetProgressHandler(c echo.Context) error {
 	var response Response
 	response.HasError = false
 	response.Message = "Successfully retrieved today's progress!"
+	response.Data = routine_entries
+	return c.JSON(http.StatusOK, response)
+}
+
+func GetDayProgressHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+	var date string
+	if reqData["date"] == nil {
+		date = ""
+	} else {
+		date = reqData["date"].(string)
+	}
+	var user_id int64 = getLoggedInUserId(c)
+
+	routine_entries, err := routine.GetDayProgress(user_id, date)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Unable to retrieve day progress"
+		response.Data = routine_entries
+		return c.JSON(http.StatusOK, response)
+	}
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Successfully retrieved given date's progress!"
 	response.Data = routine_entries
 	return c.JSON(http.StatusOK, response)
 }

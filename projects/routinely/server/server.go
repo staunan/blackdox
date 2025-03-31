@@ -54,6 +54,7 @@ func main() {
 
 	// Get Progress --
 	e.GET("/progress", GetProgressHandler)
+	e.POST("/day_progress", GetDayProgressHandler)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

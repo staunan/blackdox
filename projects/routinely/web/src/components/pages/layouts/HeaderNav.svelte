@@ -1,11 +1,12 @@
 <script>
 	import InboxIcon from "components/svg/InboxIcon.svelte";
 	import RoutinesIcon from "components/svg/RoutinesIcon.svelte";
+	import ProgressChartIcon from "components/svg/ProgressChartIcon.svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	let currentTabName = "inbox";
 
-	let navlinks = ["/inbox", "/routines"];
+	let navlinks = ["/inbox", "/progress", "/routines"];
 	function goToInboxClickHandler(event) {
 		currentTabName = "inbox";
 		goto("/inbox");
@@ -13,6 +14,10 @@
 	function goToRoutinesClickHandler(event) {
 		currentTabName = "routines";
 		goto("/routines");
+	}
+	function goToProgressClickHandler(event) {
+		currentTabName = "progress";
+		goto("/progress");
 	}
 </script>
 
@@ -37,6 +42,17 @@
 			</div>
 		</div>
 		<div
+			class:selected={page.url.pathname === "/progress"}
+			class="nav_link_item"
+		>
+			<ProgressChartIcon size="30px"></ProgressChartIcon>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="nav_link_text" on:click={goToProgressClickHandler}>
+				Progress
+			</div>
+		</div>
+		<div
 			class:selected={page.url.pathname === "/routines"}
 			class="nav_link_item"
 		>
@@ -51,6 +67,7 @@
 			<div
 				class="glider"
 				class:inbox={currentTabName == "inbox"}
+				class:progress={currentTabName == "progress"}
 				class:routines={currentTabName == "routines"}
 			></div>
 		{/if}
@@ -106,7 +123,7 @@
 		align-items: center;
 	}
 	.glider {
-		width: 50%;
+		width: 33%;
 		height: 2px;
 		border-radius: 0;
 		position: absolute;
@@ -123,8 +140,13 @@
 	.glider.inbox {
 		left: 0px;
 	}
+	.glider.progress {
+		left: 33%;
+		background: linear-gradient(90deg, #b9326f 0%, #ff5ddc 100%);
+		box-shadow: 0px 0px 8px 0px rgba(231, 13, 93, 0.57);
+	}
 	.glider.routines {
-		left: 50%;
+		left: 66%;
 		background: linear-gradient(90deg, #51a14c 0%, #10c33e 100%);
 		box-shadow: 0px 0px 8px 0px rgba(47, 187, 12, 0.62);
 	}

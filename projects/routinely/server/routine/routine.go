@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"routinely/mysqldb"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -52,6 +54,12 @@ type RoutineHistory struct {
 	HistoryType    string
 	HistoryContent string
 	CreatedAt      string
+}
+type ProgressItem struct {
+	RoutineID    int64
+	RoutineTitle string
+	IsCompleted  bool
+	EntryData    RoutineEntry
 }
 
 func CreateRoutine(routine Routine) (int64, error) {
@@ -571,16 +579,16 @@ func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
 	}
 }
 
-func GetRoutines(user_id int64) []Routine {
+func GetRoutines(user_id int64) ([]Routine, error) {
+	var routines []Routine
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
-		panic("Unable to connect to db")
+		return routines, err
 	}
 
 	// Prepare statement for reading data
 	var user_id_str string = strconv.Itoa(int(user_id))
-
 	rows, err := db.Query("SELECT id, user_id, slug, routine_title, routine_description, routine_mode, daily_basis_days, weekly_basis_weekday, monthly_basis_date, yearly_basis_month_date, routine_time, routine_status, is_trash, created_at FROM routines where user_id = ?", user_id_str)
 	if err != nil {
 		panic("Unable to retrieve routine list from Database")
@@ -588,7 +596,8 @@ func GetRoutines(user_id int64) []Routine {
 	defer rows.Close()
 
 	// Map to Routine List --
-	return mapDBDataToRoutineList(rows)
+	routines = mapDBDataToRoutineList(rows)
+	return routines, nil
 }
 
 func GetProgress(user_id int64) ([]RoutineEntry, error) {
@@ -599,11 +608,29 @@ func GetProgress(user_id int64) ([]RoutineEntry, error) {
 		return routine_entries, errors.New("unable to connect to mysqldb")
 	}
 
-	// Prepare statement for reading data
-	var user_id_str string = strconv.Itoa(int(user_id))
-	rows, err := db.Query("SELECT id, user_id, routine_id, checked_on_date, created_at FROM routine_entries where user_id = ?", user_id_str)
+	// Get all routines --
+	routines, err := GetRoutines(user_id)
 	if err != nil {
-		return routine_entries, errors.New("unable to retrieve routine list from Database")
+		return routine_entries, err
+	}
+	var daily_routine_ids []int64 = []int64{}
+	for _, v := range routines {
+		if v.Mode == "Daily" {
+			daily_routine_ids = append(daily_routine_ids, v.ID)
+		}
+	}
+
+	// Get Daily Progress -
+	var user_id_str string = strconv.Itoa(int(user_id))
+	currentTime := time.Now()
+	var todayDate string = currentTime.Format("2006-01-02")
+	daily_progress_query, args, err := sqlx.In("SELECT id, user_id, routine_id, checked_on_date, created_at FROM routine_entries where routine_id IN(?) and user_id = ? and checked_on_date = ?;", daily_routine_ids, user_id_str, todayDate) // creates the query string and arguments
+	if err != nil {
+		return routine_entries, errors.New("unable to build query")
+	}
+	rows, err := db.Query(daily_progress_query, args...)
+	if err != nil {
+		return routine_entries, errors.New("unable to retrieve daily progress")
 	}
 	defer rows.Close()
 
@@ -611,6 +638,59 @@ func GetProgress(user_id int64) ([]RoutineEntry, error) {
 	routine_entries = mapDBDataToRoutineEntryList(rows)
 
 	return routine_entries, nil
+}
+
+func GetDayProgress(user_id int64, date string) (any, error) {
+	var progress_items []ProgressItem
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return progress_items, errors.New("unable to connect to mysqldb")
+	}
+
+	// Get Routine Entries --
+	var user_id_str string = strconv.Itoa(int(user_id))
+	rows, err := db.Query("select id, user_id, routine_id, checked_on_date, created_at FROM routine_entries where user_id = ? and checked_on_date = ?", user_id_str, date)
+	if err != nil {
+		return progress_items, errors.New("unable to build query")
+	}
+	defer rows.Close()
+	routine_entries := mapDBDataToRoutineEntryList(rows)
+
+	// Get Routines --
+	var routine_ids []int64 = []int64{}
+	for _, entry := range routine_entries {
+		routine_ids = append(routine_ids, entry.RoutineID)
+	}
+	routines_query, args, err := sqlx.In("SELECT id, routine_title FROM routines where id IN(?) or created_at <= ?;", routine_ids, date)
+	if err != nil {
+		return progress_items, errors.New("unable to build query")
+	}
+	routine_rows, err := db.Query(routines_query, args...)
+	if err != nil {
+		return progress_items, errors.New("unable to retrieve execute query")
+	}
+
+	var routine_id int64
+	var routine_title string
+
+	for routine_rows.Next() {
+		var item ProgressItem
+		if err := routine_rows.Scan(&routine_id, &routine_title); err != nil {
+			panic("Error while scaning data")
+		}
+		item.RoutineID = routine_id
+		item.RoutineTitle = routine_title
+		if slices.Contains(routine_ids, routine_id) {
+			item.IsCompleted = true
+			item.EntryData = filter(routine_entries, func(s RoutineEntry) bool { return s.RoutineID == routine_id })[0]
+		} else {
+			item.IsCompleted = false
+		}
+		progress_items = append(progress_items, item)
+	}
+
+	return progress_items, nil
 }
 
 func GetRoutineDetailsById(routine_id int64) Routine {
@@ -1000,4 +1080,13 @@ func createRoutineHistory(user_id int64, routine_id int64, history_type string, 
 func getTodayDayName() string {
 	t := time.Now()
 	return t.Weekday().String()[0:3]
+}
+
+func filter[T any](ss []T, test func(T) bool) (ret []T) {
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
 }

@@ -74,14 +74,23 @@ export async function markRoutineAsNotDone(data){
     return response.data;
 }
 
+export function getUserDefaultImage() {
+    return config.api_base_url + "images/user_default_image.jpg";
+}
+
+// Progress: Start --
+
 export async function getProgress(){
     let response = await axios.get(config.api_base_url + 'progress', reqConfig);
     return response.data;
 }
 
-export function getUserDefaultImage() {
-    return config.api_base_url + "images/user_default_image.jpg";
+export async function getDayProgress(data) {
+    let response = await axios.post(config.api_base_url + 'day_progress', data, reqConfig);
+    return response.data;
 }
+
+// Progress: End --
 
 // User: Start --
 export async function createAccount(data){

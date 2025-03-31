@@ -70,18 +70,29 @@ export function ParseDateToRoutineHistory(date) {
     } else {
         return date_part;
     }
-    // console.log(date_part);
-    // let d = convertMySQLDateTimeToJSDateTime(date);
-    // return date;
 }
-function convertMySQLDateTimeToJSDateTime(date) {
+export function ConvertMySQLDateTimeToJSDateTime(date) {
     // Split timestamp into [ Y, M, D, h, m, s ]
-    var t = "2010-06-09 13:12:01".split(/[- :]/);
+    var t = date.split(/[- :]/);
 
     // Apply each element to the Date function
-    var d = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5]));
+    var d = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
 
     return d;
+}
+export function ConvertJSDateToMySQLDate(selected_date) {
+    let now = "";
+    let date = selected_date.getDate();
+    if (date < 10) {
+        date = "0" + date;
+    }
+    let month = selected_date.getMonth() + 1;
+    if (month < 10) {
+        month = "0" + month;
+    }
+    let year = selected_date.getFullYear();
+    now = year+"-"+month+"-"+date;
+    return now;
 }
 export function ParseTimeToHumanReadableFormat(time) {
     let time_arr = time.split(":");

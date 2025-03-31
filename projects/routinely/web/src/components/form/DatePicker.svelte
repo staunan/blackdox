@@ -1,9 +1,37 @@
 <script>
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { DateInput } from "date-picker-svelte";
-	export let label = "";
+	import {
+		ConvertMySQLDateTimeToJSDateTime,
+		ConvertJSDateToMySQLDate,
+	} from "lib/js/datetime.js";
+	import { createEventDispatcher } from "svelte";
+	const dispatch = createEventDispatcher();
 
+	export let label = "";
+	export let value = 0;
+
+	let initializing = false;
 	let month_date = null;
+
+	$: {
+		if (value) {
+			initializing = true;
+			if (value.length == 10) {
+				value = value + " 00:00:00";
+			}
+			month_date = ConvertMySQLDateTimeToJSDateTime(value);
+		}
+	}
+	$: {
+		if (month_date) {
+			if (!initializing) {
+				dispatch("change", ConvertJSDateToMySQLDate(month_date));
+			} else {
+				initializing = false;
+			}
+		}
+	}
 </script>
 
 <div class="date_picker">

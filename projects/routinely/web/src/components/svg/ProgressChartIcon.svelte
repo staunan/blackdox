@@ -1,0 +1,25 @@
+<script>
+	export let size = "40px";
+</script>
+
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	version="1.0"
+	id="Layer_1"
+	width={size}
+	height={size}
+	viewBox="0 0 64 64"
+	enable-background="new 0 0 64 64"
+	xml:space="preserve"
+>
+	<g>
+		<path
+			fill="#394240"
+			d="M60,32c0-2.211-1.789-4-4-4H44V4c0-2.211-1.789-4-4-4H24c-2.211,0-4,1.789-4,4v12H8c-2.211,0-4,1.789-4,4   v44h56V32z M20,56h-8V24h8V56z M36,32v24h-8V20V8h8V32z M52,56h-8V36h8V56z"
+		/>
+		<rect x="12" y="24" fill="#B4CCB9" width="8" height="32" />
+		<rect x="28" y="8" fill="#45AAB8" width="8" height="48" />
+		<rect x="44" y="36" fill="#F76D57" width="8" height="20" />
+	</g>
+</svg>
