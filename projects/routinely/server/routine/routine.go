@@ -652,7 +652,7 @@ func GetDayProgress(user_id int64, date string) (any, error) {
 	var user_id_str string = strconv.Itoa(int(user_id))
 	rows, err := db.Query("select id, user_id, routine_id, checked_on_date, created_at FROM routine_entries where user_id = ? and checked_on_date = ?", user_id_str, date)
 	if err != nil {
-		return progress_items, errors.New("unable to build query")
+		return progress_items, err
 	}
 	defer rows.Close()
 	routine_entries := mapDBDataToRoutineEntryList(rows)
@@ -662,9 +662,12 @@ func GetDayProgress(user_id int64, date string) (any, error) {
 	for _, entry := range routine_entries {
 		routine_ids = append(routine_ids, entry.RoutineID)
 	}
+	if len(routine_ids) == 0 {
+		return progress_items, nil
+	}
 	routines_query, args, err := sqlx.In("SELECT id, routine_title FROM routines where id IN(?) or created_at <= ?;", routine_ids, date)
 	if err != nil {
-		return progress_items, errors.New("unable to build query")
+		return progress_items, err
 	}
 	routine_rows, err := db.Query(routines_query, args...)
 	if err != nil {

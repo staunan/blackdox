@@ -107,3 +107,46 @@ export function ParseTimeToHumanReadableFormat(time) {
     }
     return hour + ":" + time_arr[1] + " " + zone;
 }
+export function ParseDateToHumanReadableFormat(date) {
+    if (!date) {
+        return "";
+    }
+    let today = new Date();
+    const months = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+    ];
+    const weekdays = [
+		"Sunday",
+		"Monday",
+		"Tuesday",
+		"Wednesday",
+		"Thursday",
+		"Friday",
+		"Saturday",
+	];
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    let the_day_before_yesterday = new Date();
+    the_day_before_yesterday.setDate(the_day_before_yesterday.getDate() - 2);
+
+    if (today.getDate() == date.getDate() && today.getMonth() == date.getMonth() && today.getFullYear() == date.getFullYear()) {
+        return "Today";
+    } else if ((yesterday.getDate() == date.getDate() && yesterday.getMonth() == date.getMonth() && yesterday.getFullYear() == date.getFullYear())) {
+        return "Yesterday";
+    } else if ((the_day_before_yesterday.getDate() == date.getDate() && the_day_before_yesterday.getMonth() == date.getMonth() && the_day_before_yesterday.getFullYear() == date.getFullYear())) {
+        return "The day before yesterday"
+    } else {
+        return weekdays[date.getDay()] + ", " + date.getDate() + " " + (months[date.getMonth() + 1]) + ", " + date.getFullYear();    
+    }
+}

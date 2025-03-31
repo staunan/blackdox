@@ -5,6 +5,8 @@
 	import NotCompletedIcon from "components/svg/NotCompletedIcon.svelte";
 	import CompletedCheckmarkIcon from "components/svg/CompletedCheckmarkIcon.svelte";
 	import Calendar from "components/form/Calendar.svelte";
+
+	let selectedDate = TodayDate();
 	let progressData = [];
 
 	async function getDayProgressHandler(date) {
@@ -15,19 +17,28 @@
 		if (res.HasError) {
 			console.log(res);
 		} else {
-			progressData = res.Data;
-			console.log(progressData);
+			if (res.Data == null) {
+				progressData = [];
+			} else {
+				progressData = res.Data;
+			}
 		}
 	}
 
 	async function dateChangeHandler(event) {
-		await getDayProgressHandler(event.detail);
+		selectedDate = event.detail;
+		await getDayProgressHandler(selectedDate);
 	}
+
+	onMount(async () => {
+		selectedDate = TodayDate();
+		await getDayProgressHandler(selectedDate);
+	});
 </script>
 
 <div class="date_selector">
 	<div class="date_input">
-		<Calendar value="2025-03-29" on:change={dateChangeHandler}></Calendar>
+		<Calendar value={selectedDate} on:change={dateChangeHandler}></Calendar>
 	</div>
 </div>
 
@@ -49,6 +60,13 @@
 				{/if}
 			</div>
 		{/each}
+	{:else}
+		<div class="day_missed">
+			<div class="day_missed_icon">
+				<NotCompletedIcon></NotCompletedIcon>
+			</div>
+			<div class="day_missed_text">Day Missed</div>
+		</div>
 	{/if}
 </div>
 
@@ -60,7 +78,8 @@
 		margin-top: 20px;
 	}
 	.date_input {
-		width: 200px;
+		display: flex;
+		justify-content: center;
 	}
 	.progress_items {
 		border: 1px solid #ccc;
@@ -77,5 +96,20 @@
 	}
 	.item_title {
 		flex: 1;
+	}
+	.day_missed {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		padding: 50px;
+		background-color: #ddd;
+	}
+	.day_missed {
+		border-bottom: 1px solid #ccc;
+	}
+	.day_missed_text {
+		font-size: 24px;
+		font-weight: bold;
 	}
 </style>

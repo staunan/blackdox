@@ -1,12 +1,47 @@
 <script>
 	import { onMount } from "svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
+	import {
+		ConvertMySQLDateTimeToJSDateTime,
+		ConvertJSDateToMySQLDate,
+		TodayDate,
+		ParseDateToHumanReadableFormat,
+	} from "lib/js/datetime.js";
+	import { createEventDispatcher } from "svelte";
 
+	export let value = null;
+
+	const dispatch = createEventDispatcher();
 	let active = false;
 	let date = new Date();
-	let year = date.getFullYear();
-	let month = date.getMonth();
 	let calendar_days = [];
+	let selected_date = null;
+	const months = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	];
+
+	$: {
+		if (value) {
+			if (value.length == 10) {
+				value = value + " 00:00:00";
+			}
+			selected_date = ConvertMySQLDateTimeToJSDateTime(value);
+			generateDays(selected_date);
+		} else {
+			generateDays();
+		}
+	}
 
 	onMount(() => {
 		const funcRef = (event) => {
@@ -26,22 +61,14 @@
 		};
 	});
 
-	const months = [
-		"January",
-		"February",
-		"March",
-		"April",
-		"May",
-		"June",
-		"July",
-		"August",
-		"September",
-		"October",
-		"November",
-		"December",
-	];
-
-	function generateDays() {
+	function generateDays(dateArg) {
+		if (dateArg) {
+			date = dateArg;
+		} else {
+			date = new Date();
+		}
+		let year = date.getFullYear();
+		let month = date.getMonth();
 		// Get the first day of week of the previous month
 		let dayone = new Date(year, month, 1).getDay();
 
@@ -57,28 +84,48 @@
 		// Loop to add the last dates of the previous month
 		let month_days = [];
 		for (let i = dayone; i > 0; i--) {
+			let cell_date = new Date(year, month - 1, monthlastdate - i + 1);
 			month_days.push({
 				month: "previous",
 				value: monthlastdate - i + 1,
 				active: false,
+				date: cell_date,
 			});
 		}
 
 		// Loop to add the dates of the current month
 		for (let i = 1; i <= lastdate; i++) {
-			month_days.push({
-				month: "current",
-				value: i,
-				active: false,
-			});
+			let cell_date = new Date(year, month, i);
+			if (
+				i == new Date().getDate() &&
+				month == new Date().getMonth() &&
+				year == new Date().getFullYear()
+			) {
+				month_days.push({
+					month: "current",
+					value: i,
+					active: false,
+					today: true,
+					date: cell_date,
+				});
+			} else {
+				month_days.push({
+					month: "current",
+					value: i,
+					active: false,
+					date: cell_date,
+				});
+			}
 		}
 
 		// Loop to add the first dates of the next month
 		for (let i = dayend; i < 6; i++) {
+			let cell_date = new Date(year, month + 1, i - dayend + 1);
 			month_days.push({
 				month: "next",
 				value: i - dayend + 1,
 				active: false,
+				date: cell_date,
 			});
 		}
 
@@ -87,49 +134,27 @@
 	function handleDropdownItemClick() {
 		active = !active;
 	}
-	function dayClickedHandler() {}
+	function dayClickedHandler(day) {
+		let date_str = ConvertJSDateToMySQLDate(day.date);
+		selected_date = day.date;
+		dispatch("change", date_str);
+	}
 	function goPrevHandler() {
-		month = month - 1;
-
-		// Check if the month is out of range
-		if (month < 0) {
-			// Set the date to the first day of the
-			// month with the new year
-			date = new Date(year, month, new Date().getDate());
-
-			// Set the year to the new year
-			year = date.getFullYear();
-
-			// Set the month to the new month
-			month = date.getMonth();
-		} else {
-			// Set the date to the current date
-			date = new Date();
-		}
-		generateDays();
+		let month = date.getMonth() - 1;
+		let year = date.getFullYear();
+		let day = 1;
+		generateDays(new Date(year, month, day));
 	}
 	function goNextHandler() {
-		month = month + 1;
-
-		// Check if the month is out of range
-		if (month > 11) {
-			// Set the date to the first day of the
-			// month with the new year
-			date = new Date(year, month, new Date().getDate());
-
-			// Set the year to the new year
-			year = date.getFullYear();
-
-			// Set the month to the new month
-			month = date.getMonth();
-		} else {
-			// Set the date to the current date
-			date = new Date();
-		}
-		generateDays();
+		let month = date.getMonth() + 1;
+		let year = date.getFullYear();
+		let day = 1;
+		generateDays(new Date(year, month, day));
 	}
-
-	generateDays();
+	function goToTodayHandler() {
+		selected_date = new Date();
+		dispatch("change", TodayDate());
+	}
 </script>
 
 <div class="calendar_wrapper">
@@ -139,13 +164,25 @@
 		class="calendar_dropdown_trigger"
 		on:click={() => handleDropdownItemClick()}
 	>
-		Today
+		{ParseDateToHumanReadableFormat(selected_date)}
 	</div>
 	<div class="calendar_dropdown" class:show={active}>
 		<div class="calendar_dropdown_content">
 			<div class="month_navigation">
-				<div class="month_info">{months[month]}, {year}</div>
+				<div class="month_info">
+					{months[date.getMonth()]}, {date.getFullYear()}
+				</div>
 				<div class="navigation_container">
+					<div class="today_container">
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							class="today_button"
+							on:click={() => goToTodayHandler()}
+						>
+							Today
+						</div>
+					</div>
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div class="arrow_down" on:click={() => goPrevHandler()}>
@@ -173,13 +210,23 @@
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						class="day_cell"
-						class:selected={day.active === true}
 						class:prev_month={day.month === "previous"}
 						class:next_month={day.month === "next"}
-						on:click={() => dayClickedHandler(day)}
-						title={day.value}
 					>
-						{day.value}
+						<div
+							class="day"
+							class:today={day.today === true}
+							class:selected={selected_date &&
+								selected_date.getDate() ===
+									day.date.getDate() &&
+								selected_date.getMonth() ==
+									day.date.getMonth() &&
+								selected_date.getFullYear() ==
+									day.date.getFullYear()}
+							on:click={() => dayClickedHandler(day)}
+						>
+							{day.value}
+						</div>
 					</div>
 				{/each}
 			</div>
@@ -209,6 +256,9 @@
 		font-size: 24px;
 		font-weight: bold;
 		cursor: pointer;
+		display: flex;
+		justify-content: center;
+		flex-wrap: nowrap;
 	}
 	.calendar_dropdown {
 		display: none;
@@ -227,6 +277,9 @@
 		display: grid;
 		grid-template-columns: auto auto auto auto auto auto auto;
 	}
+	.calendar_days_grid {
+		padding-bottom: 30px;
+	}
 	.calendar_week_days_grid {
 		padding-top: 30px;
 	}
@@ -235,24 +288,34 @@
 		width: 80px;
 		font-size: 16px;
 		font-weight: bold;
-		cursor: pointer;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		transition: 300ms all;
+		margin-bottom: 5px;
 	}
 	.weekday_cell {
 		width: 80px;
-		font-size: 16px;
+		font-size: 20px;
 		font-weight: bold;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-bottom: 5px;
+	}
+	.day {
+		border-radius: 50%;
+		height: 50px;
+		width: 50px;
 		cursor: pointer;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		transition: 300ms all;
-		padding-bottom: 5px;
 	}
-	.day_cell:hover {
+	.day.today {
+		background-color: #3f51b5;
+		color: #fff;
+	}
+	.day:hover {
 		color: #fff;
 		box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 		background: #0f2027; /* fallback for old browsers */
@@ -268,6 +331,11 @@
 			#203a43,
 			#0f2027
 		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	}
+	.day.selected {
+		color: #fff;
+		box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+		background: #0f2027;
 	}
 	.prev_month,
 	.next_month {
@@ -313,5 +381,23 @@
 		display: flex;
 		padding-left: 20px;
 		height: inherit;
+	}
+	.today_container {
+		display: flex;
+		align-items: center;
+		padding-right: 20px;
+	}
+	.today_button {
+		font-size: 14px;
+		font-weight: bold;
+		padding-left: 10px;
+		padding-right: 10px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		cursor: pointer;
+		box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+		color: #fff;
+		background-color: #673ab7ed;
+		border-radius: 3px;
 	}
 </style>

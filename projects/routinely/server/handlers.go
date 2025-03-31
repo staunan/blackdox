@@ -886,7 +886,7 @@ func GetDayProgressHandler(c echo.Context) error {
 		// Return Response --
 		var response Response
 		response.HasError = true
-		response.Message = "Unable to retrieve day progress"
+		response.Message = err.Error()
 		response.Data = routine_entries
 		return c.JSON(http.StatusOK, response)
 	}
