@@ -5,9 +5,17 @@
 	import NotCompletedIcon from "components/svg/NotCompletedIcon.svelte";
 	import CompletedCheckmarkIcon from "components/svg/CompletedCheckmarkIcon.svelte";
 	import Calendar from "components/form/Calendar.svelte";
+	import { user_details } from "store";
 
 	let selectedDate = TodayDate();
 	let progressData = [];
+	let user = null;
+
+	user_details.subscribe((v) => {
+		if (v) {
+			user = v;
+		}
+	});
 
 	async function getDayProgressHandler(date) {
 		let formData = {
@@ -38,7 +46,8 @@
 
 <div class="date_selector">
 	<div class="date_input">
-		<Calendar value={selectedDate} on:change={dateChangeHandler}></Calendar>
+		<Calendar value={selectedDate} {user} on:change={dateChangeHandler}
+		></Calendar>
 	</div>
 </div>
 
@@ -51,15 +60,23 @@
 				</div>
 				{#if progressItem.IsCompleted == true}
 					<div class="item_checked_status">
-						<CompletedCheckmarkIcon></CompletedCheckmarkIcon>
+						<CompletedCheckmarkIcon size={20}
+						></CompletedCheckmarkIcon>
 					</div>
 				{:else}
 					<div class="item_checked_status">
-						<NotCompletedIcon></NotCompletedIcon>
+						<NotCompletedIcon size={20}></NotCompletedIcon>
 					</div>
 				{/if}
 			</div>
 		{/each}
+	{:else if selectedDate === TodayDate() && progressData.length == 0}
+		<div class="day_missed">
+			<div class="day_missed_icon">
+				<NotCompletedIcon></NotCompletedIcon>
+			</div>
+			<div class="day_missed_text">No progress yet</div>
+		</div>
 	{:else}
 		<div class="day_missed">
 			<div class="day_missed_icon">
@@ -80,11 +97,14 @@
 	.date_input {
 		display: flex;
 		justify-content: center;
+		padding-bottom: 30px;
 	}
 	.progress_items {
 		border: 1px solid #ccc;
 		border-bottom: none;
 		margin-top: 20px;
+		width: 70%;
+		margin: auto;
 	}
 	.progress_item {
 		display: flex;

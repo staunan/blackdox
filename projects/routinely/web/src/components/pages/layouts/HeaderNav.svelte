@@ -1,12 +1,27 @@
 <script>
+	import { onMount } from "svelte";
 	import InboxIcon from "components/svg/InboxIcon.svelte";
 	import RoutinesIcon from "components/svg/RoutinesIcon.svelte";
 	import ProgressChartIcon from "components/svg/ProgressChartIcon.svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	let currentTabName = "inbox";
-
 	let navlinks = ["/inbox", "/progress", "/routines"];
+
+	onMount(() => {
+		if (navlinks.includes(page.url.pathname)) {
+			if (page.url.pathname === "/inbox") {
+				currentTabName = "inbox";
+			} else if (page.url.pathname === "/routines") {
+				currentTabName = "routines";
+			} else if (page.url.pathname === "/progress") {
+				currentTabName = "progress";
+			}
+		} else {
+			currentTabName = "inbox";
+		}
+	});
+
 	function goToInboxClickHandler(event) {
 		currentTabName = "inbox";
 		goto("/inbox");

@@ -7,7 +7,13 @@
 	export let title = "";
 
 	let currentPageUrl = "";
-	let restricted_routes = ["/create-routine", "/inbox", "/me", "/routines"];
+	let restricted_routes = [
+		"/create-routine",
+		"/inbox",
+		"/progress",
+		"/me",
+		"/routines",
+	];
 
 	user_details.subscribe((value) => {
 		if (value && value.ID) {

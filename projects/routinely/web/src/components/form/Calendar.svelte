@@ -10,6 +10,7 @@
 	import { createEventDispatcher } from "svelte";
 
 	export let value = null;
+	export let user = null;
 
 	const dispatch = createEventDispatcher();
 	let active = false;
@@ -81,21 +82,36 @@
 		// Get the last date of the previous month
 		let monthlastdate = new Date(year, month, 0).getDate();
 
+		let user_created_at = null;
+		if (user) {
+			user_created_at = ConvertMySQLDateTimeToJSDateTime(user.CreatedAt);
+			user_created_at.setDate(user_created_at.getDate() - 1);
+		}
+
 		// Loop to add the last dates of the previous month
 		let month_days = [];
 		for (let i = dayone; i > 0; i--) {
 			let cell_date = new Date(year, month - 1, monthlastdate - i + 1);
+			let disabled = false;
+			if (cell_date > new Date() || cell_date < user_created_at) {
+				disabled = true;
+			}
 			month_days.push({
 				month: "previous",
 				value: monthlastdate - i + 1,
 				active: false,
 				date: cell_date,
+				disabled: disabled,
 			});
 		}
 
 		// Loop to add the dates of the current month
 		for (let i = 1; i <= lastdate; i++) {
 			let cell_date = new Date(year, month, i);
+			let disabled = false;
+			if (cell_date > new Date() || cell_date < user_created_at) {
+				disabled = true;
+			}
 			if (
 				i == new Date().getDate() &&
 				month == new Date().getMonth() &&
@@ -107,6 +123,7 @@
 					active: false,
 					today: true,
 					date: cell_date,
+					disabled: disabled,
 				});
 			} else {
 				month_days.push({
@@ -114,6 +131,7 @@
 					value: i,
 					active: false,
 					date: cell_date,
+					disabled: disabled,
 				});
 			}
 		}
@@ -121,11 +139,16 @@
 		// Loop to add the first dates of the next month
 		for (let i = dayend; i < 6; i++) {
 			let cell_date = new Date(year, month + 1, i - dayend + 1);
+			let disabled = false;
+			if (cell_date > new Date() || cell_date < user_created_at) {
+				disabled = true;
+			}
 			month_days.push({
 				month: "next",
 				value: i - dayend + 1,
 				active: false,
 				date: cell_date,
+				disabled: disabled,
 			});
 		}
 
@@ -155,17 +178,54 @@
 		selected_date = new Date();
 		dispatch("change", TodayDate());
 	}
+	function getPrevProgressHandler() {
+		selected_date.setDate(selected_date.getDate() - 1);
+		let date_str = ConvertJSDateToMySQLDate(selected_date);
+		dispatch("change", date_str);
+	}
+	function getNextProgressHandler() {
+		selected_date.setDate(selected_date.getDate() + 1);
+		let date_str = ConvertJSDateToMySQLDate(selected_date);
+		dispatch("change", date_str);
+	}
 </script>
 
 <div class="calendar_wrapper">
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div
-		class="calendar_dropdown_trigger"
-		on:click={() => handleDropdownItemClick()}
-	>
-		{ParseDateToHumanReadableFormat(selected_date)}
+	<div class="calendar_navigation">
+		<div
+			class="calendar_nagivation_left"
+			on:click={() => getPrevProgressHandler()}
+			class:disabled={user &&
+				selected_date <
+					ConvertMySQLDateTimeToJSDateTime(user.CreatedAt)}
+		>
+			<ArrowDown
+				disabled={user &&
+					selected_date <
+						ConvertMySQLDateTimeToJSDateTime(user.CreatedAt)}
+			></ArrowDown>
+		</div>
+		<div
+			class="calendar_dropdown_trigger"
+			on:click={() => handleDropdownItemClick()}
+		>
+			{ParseDateToHumanReadableFormat(selected_date)}
+		</div>
+		<div
+			class="calendar_nagivation_right"
+			on:click={() => getNextProgressHandler()}
+			class:disabled={ConvertJSDateToMySQLDate(selected_date) ===
+				TodayDate()}
+		>
+			<ArrowDown
+				disabled={ConvertJSDateToMySQLDate(selected_date) ===
+					TodayDate()}
+			></ArrowDown>
+		</div>
 	</div>
+
 	<div class="calendar_dropdown" class:show={active}>
 		<div class="calendar_dropdown_content">
 			<div class="month_navigation">
@@ -215,6 +275,7 @@
 					>
 						<div
 							class="day"
+							class:disabled={day.disabled === true}
 							class:today={day.today === true}
 							class:selected={selected_date &&
 								selected_date.getDate() ===
@@ -236,6 +297,38 @@
 </div>
 
 <style>
+	.calendar_navigation {
+		display: flex;
+		height: 60px;
+		justify-content: center;
+		align-items: center;
+	}
+	.calendar_nagivation_left {
+		width: 60px;
+		height: inherit;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transform: rotate(90deg);
+		cursor: pointer;
+	}
+	.calendar_nagivation_right {
+		width: 60px;
+		height: inherit;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transform: rotate(270deg);
+		cursor: pointer;
+	}
+	.calendar_nagivation_right.disabled {
+		pointer-events: none;
+		cursor: not-allowed;
+	}
+	.calendar_nagivation_left.disabled {
+		pointer-events: none;
+		cursor: not-allowed;
+	}
 	.dropdown_triangle {
 		width: 20px;
 		height: 20px;
@@ -259,6 +352,7 @@
 		display: flex;
 		justify-content: center;
 		flex-wrap: nowrap;
+		min-width: 400px;
 	}
 	.calendar_dropdown {
 		display: none;
@@ -336,6 +430,12 @@
 		color: #fff;
 		box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 		background: #0f2027;
+	}
+	.day.disabled {
+		background-color: #ccc !important;
+		color: #333 !important;
+		cursor: not-allowed !important;
+		pointer-events: none;
 	}
 	.prev_month,
 	.next_month {
