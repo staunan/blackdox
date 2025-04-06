@@ -3,8 +3,10 @@
 	import ConfirmRestoreModal from "components/pages/routines/trash/ConfirmRestoreModal.svelte";
 	import ConfirmDeleteModal from "components/pages/routines/trash/ConfirmDeleteModal.svelte";
 	import { TodayDate } from "lib/js/datetime.js";
+	import { createEventDispatcher } from "svelte";
 
 	export let routine = {};
+	const dispatch = createEventDispatcher();
 	let confirmRestoreModalActive = false;
 	let confirmDeleteModalActive = false;
 
@@ -19,6 +21,12 @@
 	}
 	function closeConfirmDeleteModalHandler(event) {
 		confirmDeleteModalActive = false;
+	}
+	function routineRestoredHandler(event) {
+		dispatch("restored");
+	}
+	function routineDeletedHandler(event) {
+		dispatch("deleted");
 	}
 </script>
 
@@ -54,12 +62,14 @@
 		active={confirmRestoreModalActive}
 		{routine}
 		on:close={closeConfirmRestoreModalHandler}
+		on:restored={routineRestoredHandler}
 	></ConfirmRestoreModal>
 
 	<ConfirmDeleteModal
 		active={confirmDeleteModalActive}
 		{routine}
 		on:close={closeConfirmDeleteModalHandler}
+		on:deleted={routineDeletedHandler}
 	></ConfirmDeleteModal>
 </div>
 

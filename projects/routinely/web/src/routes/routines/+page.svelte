@@ -1,7 +1,6 @@
 <script>
 	import RoutinelyPageContainer from "components/RoutinelyPageContainer.svelte";
 	import RoutinesPage from "components/pages/routines/RoutinesPage.svelte";
-	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { goto } from "$app/navigation";
 
 	function createRoutineHandler(event) {

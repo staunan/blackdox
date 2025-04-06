@@ -12,6 +12,7 @@ import (
 
 	"routinely/mysqldb"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -579,7 +580,84 @@ func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
 	}
 }
 
-func GetRoutines(user_id int64) ([]Routine, error) {
+func GetRoutinesByPage(user_id int64, page int, search string) ([]Routine, error) {
+	var routines []Routine
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return routines, err
+	}
+
+	// Prepare statement for reading data
+	var user_id_str string = strconv.Itoa(int(user_id))
+	var offset int = (page - 1) * 10
+
+	sqlBuilder := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Question)
+	queryBuilder := sqlBuilder.Select("id", "user_id", "slug", "routine_title", "routine_description", "routine_mode", "daily_basis_days", "weekly_basis_weekday", "monthly_basis_date", "yearly_basis_month_date", "routine_time", "routine_status", "is_trash", "created_at").From("routines")
+
+	queryBuilder = queryBuilder.Where(squirrel.Eq{"user_id": user_id_str})
+	queryBuilder = queryBuilder.Where(squirrel.Eq{"is_trash": 0})
+	if len(search) > 0 {
+		queryBuilder = queryBuilder.Where("MATCH(routine_title) AGAINST (? IN NATURAL LANGUAGE MODE)", search)
+	}
+	queryBuilder = queryBuilder.
+		OrderBy("id DESC").
+		Limit(10).
+		Offset(uint64(offset))
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return routines, err
+	}
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		panic("Unable to retrieve routine list from Database")
+	}
+	defer rows.Close()
+
+	// Map to Routine List --
+	routines = mapDBDataToRoutineList(rows)
+	return routines, nil
+}
+
+func GetTrashedRoutinesByPage(user_id int64, page int) ([]Routine, error) {
+	var routines []Routine
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return routines, err
+	}
+
+	// Prepare statement for reading data
+	var user_id_str string = strconv.Itoa(int(user_id))
+	var offset int = (page - 1) * 10
+
+	sqlBuilder := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Question)
+	queryBuilder := sqlBuilder.Select("id", "user_id", "slug", "routine_title", "routine_description", "routine_mode", "daily_basis_days", "weekly_basis_weekday", "monthly_basis_date", "yearly_basis_month_date", "routine_time", "routine_status", "is_trash", "created_at").From("routines")
+
+	queryBuilder = queryBuilder.Where(squirrel.Eq{"user_id": user_id_str})
+	queryBuilder = queryBuilder.Where(squirrel.Eq{"is_trash": 1})
+	queryBuilder = queryBuilder.
+		OrderBy("id DESC").
+		Limit(10).
+		Offset(uint64(offset))
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return routines, err
+	}
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		panic("Unable to retrieve routine list from Database")
+	}
+	defer rows.Close()
+
+	// Map to Routine List --
+	routines = mapDBDataToRoutineList(rows)
+	return routines, nil
+}
+
+func GetAllRoutines(user_id int64) ([]Routine, error) {
 	var routines []Routine
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
@@ -609,7 +687,7 @@ func GetProgress(user_id int64) ([]RoutineEntry, error) {
 	}
 
 	// Get all routines --
-	routines, err := GetRoutines(user_id)
+	routines, err := GetAllRoutines(user_id)
 	if err != nil {
 		return routine_entries, err
 	}

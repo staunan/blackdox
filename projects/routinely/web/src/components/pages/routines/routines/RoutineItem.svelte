@@ -33,8 +33,19 @@
 		>
 			{routine.Title}
 		</div>
-		<div class="routine_time">
-			{getRoutineTimeString(routine.Time)}
+		<div class="item_footer">
+			<div
+				class="routine_mode"
+				class:daily={routine.Mode == "Daily"}
+				class:weekly={routine.Mode == "Weekly"}
+				class:monthly={routine.Mode == "Montly"}
+				class:yearly={routine.Mode == "Yearly"}
+			>
+				{routine.Mode}
+			</div>
+			<div class="routine_time">
+				{getRoutineTimeString(routine.Time)}
+			</div>
 		</div>
 	</div>
 </div>
@@ -59,5 +70,23 @@
 	}
 	.routine_time {
 		font-size: 18px;
+	}
+	.item_footer {
+		display: flex;
+		margin-top: 20px;
+	}
+	.routine_mode {
+		padding-left: 5px;
+		padding-right: 5px;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		font-weight: bold;
+		font-size: 13px;
+		width: auto;
+		border-radius: 2px;
+		margin-right: 30px;
+	}
+	.routine_mode.daily {
+		background-color: #2b9e3038;
 	}
 </style>

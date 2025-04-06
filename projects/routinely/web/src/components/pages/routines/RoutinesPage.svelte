@@ -1,25 +1,21 @@
 <script>
+	import PanelIcon from "components/pages/routines/PanelIcon.svelte";
 	import PanelRoutines from "./routines/PanelRoutines.svelte";
 	import PanelTrash from "./trash/PanelTrash.svelte";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
-	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
+
 	import TrashIcon from "components/svg/TrashIcon.svelte";
 	import PlusIcon from "components/svg/PlusIcon.svelte";
 	import RoutinesIcon from "components/svg/RoutinesIcon.svelte";
+
 	import { onMount } from "svelte";
-	import { routines } from "store";
 	import { goto } from "$app/navigation";
+	import SearchBar from "components/form/SearchBar.svelte";
 
 	let currentPanel = "routines";
 	let show_panel_dropdown = false;
 	let total_items_in_trash = 0;
-
-	routines.subscribe((v) => {
-		if (v) {
-			let deleted_routines = v.filter((item) => item.IsTrash === 1);
-			total_items_in_trash = deleted_routines.length;
-		}
-	});
+	let search_text = localStorage.getItem("search");
 
 	onMount(() => {
 		const funcRef = (event) => {
@@ -31,7 +27,6 @@
 		};
 		window.addEventListener("click", funcRef);
 
-		// Called when component is destroyed --
 		return () => {
 			window.removeEventListener("click", funcRef);
 		};
@@ -43,6 +38,10 @@
 	function goToCreateRoutinesHandler(event) {
 		goto("create-routine");
 	}
+	function searchTextChangeHandler(event) {
+		search_text = event.detail;
+		localStorage.setItem("search", search_text);
+	}
 </script>
 
 <div class="routines_page">
@@ -50,21 +49,7 @@
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="routine_panel_menu" on:click={panelMenuClickHandler}>
-			<SpaceBetweenThreeItems>
-				<div slot="left" class="red_petal"></div>
-				<div slot="center" class="green_petal"></div>
-				<div slot="right" class="blue_petal"></div>
-			</SpaceBetweenThreeItems>
-			<SpaceBetweenThreeItems>
-				<div slot="left" class="green_petal"></div>
-				<div slot="center" class="red_petal"></div>
-				<div slot="right" class="blue_petal"></div>
-			</SpaceBetweenThreeItems>
-			<SpaceBetweenThreeItems>
-				<div slot="left" class="red_petal"></div>
-				<div slot="center" class="blue_petal"></div>
-				<div slot="right" class="green_petal"></div>
-			</SpaceBetweenThreeItems>
+			<PanelIcon></PanelIcon>
 			{#if show_panel_dropdown}
 				<div class="routine_panel_dropdown">
 					<div
@@ -91,9 +76,7 @@
 						}}
 					>
 						<TrashIcon></TrashIcon>
-						<div class="panel_dropdown_list_item_text">
-							Trash ({total_items_in_trash})
-						</div>
+						<div class="panel_dropdown_list_item_text">Trash</div>
 					</div>
 				</div>
 			{/if}
@@ -102,25 +85,32 @@
 		{#if currentPanel == "routines"}
 			<div class="panel_title_text">
 				<div class="page_title">Routines</div>
+				<div class="search_routine_container">
+					<SearchBar
+						value={search_text}
+						placeholder="Type to Search Routine..."
+						on:change={searchTextChangeHandler}
+					></SearchBar>
+				</div>
 				<div class="right_panel">
 					<SubmitButton
 						title="Create Routine"
 						on:tap={goToCreateRoutinesHandler}
 						color="blue"
 					>
-						<PlusIcon size="30px"></PlusIcon>
+						<PlusIcon size="20px"></PlusIcon>
 					</SubmitButton>
 				</div>
 			</div>
 		{:else if currentPanel == "trash"}
 			<div class="panel_title_text">
-				<span>Trash ({total_items_in_trash})</span>
+				<span>Trash</span>
 			</div>
 		{/if}
 	</div>
 	<div class="panel_body">
 		{#if currentPanel == "routines"}
-			<PanelRoutines></PanelRoutines>
+			<PanelRoutines search={search_text}></PanelRoutines>
 		{:else if currentPanel == "trash"}
 			<PanelTrash></PanelTrash>
 		{/if}
@@ -128,6 +118,9 @@
 </div>
 
 <style>
+	.routines_page {
+		padding-top: 30px;
+	}
 	.routine_panel_dropdown {
 		position: absolute;
 		top: 110%;
@@ -148,6 +141,7 @@
 		padding-left: 20px;
 		display: flex;
 		width: 100%;
+		height: 50px;
 	}
 	.routine_panel_menu {
 		display: flex;
@@ -158,21 +152,7 @@
 		position: relative;
 		top: 10px;
 	}
-	.red_petal {
-		width: 5px;
-		height: 5px;
-		background-color: red;
-	}
-	.green_petal {
-		width: 5px;
-		height: 5px;
-		background-color: green;
-	}
-	.blue_petal {
-		width: 5px;
-		height: 5px;
-		background-color: blue;
-	}
+
 	.panel_dropdown_list_item {
 		padding: 15px;
 		display: flex;
@@ -197,5 +177,10 @@
 		flex: 1;
 		display: flex;
 		justify-content: flex-end;
+	}
+	.search_routine_container {
+		padding-left: 30px;
+		display: flex;
+		align-items: center;
 	}
 </style>

@@ -54,6 +54,11 @@ export async function getAllRoutines(data){
     return response.data;
 }
 
+export async function getTrashedRoutines(data){
+    let response = await axios.post(config.api_base_url + 'trashed_routines', data, reqConfig);
+    return response.data;
+}
+
 export async function getRoutineDetails(data){
     let response = await axios.post(config.api_base_url + 'routine_details', data, reqConfig);
     return response.data;

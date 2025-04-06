@@ -8,7 +8,6 @@
 	import DeleteSuccessModal from "components/pages/routines/trash/DeleteSuccessModal.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { deleteRoutineForever } from "apis/apis.js";
-	import { store } from "store";
 
 	export let active = false;
 	export let routine = null;
@@ -36,14 +35,13 @@
 			} else {
 				// Show success --
 				is_delete_success_modal_active = true;
+				dispatch("deleted");
 			}
 		} catch (error) {
 			console.log(error);
 		}
 	}
 	function onDeleteSuccessModalCloseHandler(event) {
-		// Update Store --
-		store.deleteRoutineForever(routine);
 		is_delete_success_modal_active = false;
 		closeModal();
 	}

@@ -51,3 +51,4 @@ create table users (
     created_at timestamp default current_timestamp,
     updated_at timestamp on update current_timestamp
 );
+ALTER TABLE routines ADD FULLTEXT(routine_title);

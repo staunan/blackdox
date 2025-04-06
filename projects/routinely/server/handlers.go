@@ -761,8 +761,23 @@ func RoutineHistoryHandler(c echo.Context) error {
 }
 
 func GetAllRoutinesHandler(c echo.Context) error {
-	var user_id int64 = 1
-	routines, err := routine.GetRoutines(user_id)
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+	var page int
+	var search string
+	if reqData["page"] == nil {
+		page = 1
+	} else {
+		page = int(reqData["page"].(float64))
+	}
+	if reqData["search"] == nil {
+		search = ""
+	} else {
+		search = reqData["search"].(string)
+	}
+
+	var user_id int64 = getLoggedInUserId(c)
+	routines, err := routine.GetRoutinesByPage(user_id, page, search)
 	if err != nil {
 		// Return Response --
 		var response Response
@@ -776,6 +791,35 @@ func GetAllRoutinesHandler(c echo.Context) error {
 	var response Response
 	response.HasError = false
 	response.Message = "Successfully retrieved list"
+	response.Data = routines
+	return c.JSON(http.StatusOK, response)
+}
+
+func GetTrashedRoutinesHandler(c echo.Context) error {
+	// Get Request Data --
+	var reqData map[string]any = getRequestData(c)
+	var page int
+	if reqData["page"] == nil {
+		page = 1
+	} else {
+		page = int(reqData["page"].(float64))
+	}
+
+	var user_id int64 = getLoggedInUserId(c)
+	routines, err := routine.GetTrashedRoutinesByPage(user_id, page)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Unable to retrieve trashed items"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Successfully retrieved list of trashed items"
 	response.Data = routines
 	return c.JSON(http.StatusOK, response)
 }

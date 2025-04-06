@@ -39,6 +39,7 @@ func main() {
 	e.POST("/verify_routine_title", VerifyRoutineTitleHandler)
 	e.POST("/update_routine", UpdateRoutineHandler)
 	e.POST("/all_routines", GetAllRoutinesHandler)
+	e.POST("/trashed_routines", GetTrashedRoutinesHandler)
 
 	// Routine Details --
 	e.POST("/routine_details", RoutineDetailsHandler)

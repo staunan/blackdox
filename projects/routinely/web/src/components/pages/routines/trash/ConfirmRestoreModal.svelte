@@ -8,7 +8,6 @@
 	import RestoreSuccessModal from "components/pages/routines/trash/RestoreSuccessModal.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { restoreFromTrash } from "apis/apis.js";
-	import { store } from "store";
 
 	export let active = false;
 	export let routine = null;
@@ -37,8 +36,7 @@
 			} else {
 				// Show Success --
 				is_restore_success_modal_active = true;
-				// Update Routine --
-				store.restoreRoutineFromTrash(routine);
+				dispatch("restored");
 			}
 		} catch (error) {
 			console.log(error);
