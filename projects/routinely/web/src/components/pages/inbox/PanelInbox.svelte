@@ -1,19 +1,23 @@
 <script>
 	import InboxItem from "components/pages/inbox/InboxItem.svelte";
 	import NoItemInInbox from "components/pages/inbox/NoItemInInbox.svelte";
-	import { store, inboxes } from "store";
+	import { getInboxes } from "apis/apis.js";
 
 	import { onMount } from "svelte";
 
+	let inboxItems = [];
 	onMount(async () => {
-		try {
-			if ($inboxes == null || $inboxes.length == 0) {
-				await store.init();
-			}
-		} catch (error) {
-			console.log(error);
-		}
+		await fetchInboxes();
 	});
+
+	const fetchInboxes = async () => {
+		try {
+			const response = await getInboxes({});
+			inboxItems = response.Data;
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+	};
 
 	function entryAddedHandler(event) {
 		let entry = event.detail;
@@ -27,8 +31,8 @@
 
 <div class="inbox_container">
 	<div class="inbox_items">
-		{#if $inboxes && $inboxes.length}
-			{#each $inboxes as inboxItem}
+		{#if inboxItems && inboxItems.length}
+			{#each inboxItems as inboxItem}
 				<InboxItem
 					item={inboxItem}
 					on:entryadded={entryAddedHandler}

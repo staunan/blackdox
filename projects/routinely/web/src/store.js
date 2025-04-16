@@ -1,4 +1,4 @@
-import { getUser, getAllRoutines, getProgress } from "apis/apis.js";
+import { getUser, getAllRoutines } from "apis/apis.js";
 import { TodayDayName } from "lib/js/datetime.js";
 import { get, writable } from "svelte/store";
 
@@ -14,7 +14,6 @@ let initializing_inbox = false;
 export let store = {
     init: async function () {
         await this.getRoutines();
-        await this.getProgressData();
     },
     getUser: async function () {
         let response = await getUser();
@@ -95,18 +94,6 @@ export let store = {
             });
             routines.set(temp_arr);
         }
-    },
-    getProgressData: async function() {
-        let progress_response = await getProgress({ user_id: 1 });
-        if (progress_response.HasError) {
-            progress.set([]);
-        }
-        if (progress_response.Data == null) {
-            progress.set([]);
-        } else {
-            progress.set(progress_response.Data);
-        }
-        progress_initialized = true;
     },
     addEntry: function (entry) {
         let all_progress = get(progress);

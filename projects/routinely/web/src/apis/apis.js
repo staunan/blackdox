@@ -14,48 +14,15 @@ let reqConfig = {
     credentials: 'include'
 };
 
-export async function createRoutine(data){
-    let response = await axios.post(config.api_base_url + 'create_routine', data, reqConfig);
-    return response.data;
-}
-
-export async function updateRoutine(data){
-    let response = await axios.post(config.api_base_url + 'update_routine', data, reqConfig);
-    return response.data;
-}
-
 export async function updateRoutineStatus(data){
     let response = await axios.post(config.api_base_url + 'update_routine_status', data, reqConfig);
     return response.data;
 }
 
-export async function moveToTrash(data){
-    let response = await axios.post(config.api_base_url + 'move_to_trash', data, reqConfig);
-    return response.data;
-}
 
-export async function restoreFromTrash(data){
-    let response = await axios.post(config.api_base_url + 'restore_from_trash', data, reqConfig);
-    return response.data;
-}
-
-export async function deleteRoutineForever(data){
-    let response = await axios.post(config.api_base_url + 'delete_routine_forever', data, reqConfig);
-    return response.data;
-}
 
 export async function verifyRoutineTitle(data){
     let response = await axios.post(config.api_base_url + 'verify_routine_title', data, reqConfig);
-    return response.data;
-}
-
-export async function getAllRoutines(data){
-    let response = await axios.post(config.api_base_url + 'all_routines', data, reqConfig);
-    return response.data;
-}
-
-export async function getTrashedRoutines(data){
-    let response = await axios.post(config.api_base_url + 'trashed_routines', data, reqConfig);
     return response.data;
 }
 
@@ -82,21 +49,51 @@ export async function markRoutineAsNotDone(data){
 export function getUserDefaultImage() {
     return config.api_base_url + "images/user_default_image.jpg";
 }
-
-// Progress: Start --
-
-export async function getProgress(){
-    let response = await axios.get(config.api_base_url + 'progress', reqConfig);
+// Inbox: Start --
+export async function getInboxes(data){
+    let response = await axios.post(config.api_base_url + 'inboxes', data, reqConfig);
     return response.data;
 }
-
+// Inbox: End --
+// ========================================================================================================================
+// Routines: Start --
+export async function createRoutine(data){
+    let response = await axios.post(config.api_base_url + 'create_routine', data, reqConfig);
+    return response.data;
+}
+export async function updateRoutine(data){
+    let response = await axios.post(config.api_base_url + 'update_routine', data, reqConfig);
+    return response.data;
+}
+export async function getAllRoutines(data){
+    let response = await axios.post(config.api_base_url + 'all_routines', data, reqConfig);
+    return response.data;
+}
+export async function getTrashedRoutines(data){
+    let response = await axios.post(config.api_base_url + 'trashed_routines', data, reqConfig);
+    return response.data;
+}
+export async function moveToTrash(data){
+    let response = await axios.post(config.api_base_url + 'move_to_trash', data, reqConfig);
+    return response.data;
+}
+export async function restoreFromTrash(data){
+    let response = await axios.post(config.api_base_url + 'restore_from_trash', data, reqConfig);
+    return response.data;
+}
+export async function deleteRoutineForever(data){
+    let response = await axios.post(config.api_base_url + 'delete_routine_forever', data, reqConfig);
+    return response.data;
+}
+// Routines: End --
+// ========================================================================================================================
+// Progress: Start --
 export async function getDayProgress(data) {
     let response = await axios.post(config.api_base_url + 'day_progress', data, reqConfig);
     return response.data;
 }
-
 // Progress: End --
-
+// ========================================================================================================================
 // User: Start --
 export async function createAccount(data){
     let response = await axios.post(config.api_base_url + 'create_account', data, reqConfig);
@@ -142,3 +139,4 @@ export async function logoutUser(data){
     return response.data;
 }
 // User: End --
+// ========================================================================================================================

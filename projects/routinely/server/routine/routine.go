@@ -3,6 +3,7 @@ package routine
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	_ "fmt"
 	"regexp"
 	"slices"
@@ -23,6 +24,9 @@ const (
 
 	ROUTINE_STATUS_ACTIVE  = "active"
 	ROUTINE_STATUS_DELETED = "deleted"
+
+	RAZORPAY_TEST_KEY_ID     = "rzp_test_2x1RDefUla0t9E"  // "rzp_test_2x1RDefUla0t9E"
+	RAZORPAY_TEST_KEY_SECRET = "0l3kJxCh8ITFjf4KsLpUjsNS" // "0l3kJxCh8ITFjf4KsLpUjsNS"
 )
 
 type Routine struct {
@@ -61,6 +65,24 @@ type ProgressItem struct {
 	RoutineTitle string
 	IsCompleted  bool
 	EntryData    RoutineEntry
+}
+type InboxItem struct {
+	ID                   int64
+	UserId               int64
+	Slug                 string
+	Title                string
+	Description          string
+	Mode                 string
+	DailyBasisDays       string
+	WeeklyBasisWeekDays  string
+	MonthlyBasisDate     int8
+	YearlyBasisMonthDate string
+	Time                 string
+	Status               string
+	IsTrash              int8
+	CreatedAt            string
+	IsCompleted          bool
+	CompletedOn          string
 }
 
 func CreateRoutine(routine Routine) (int64, error) {
@@ -580,7 +602,7 @@ func VerifyRoutineTitle(title string, user_id int64) (bool, error) {
 	}
 }
 
-func GetRoutinesByPage(user_id int64, page int, search string) ([]Routine, error) {
+func GetRoutinesByPage(user_id int64, page int, search string, routine_mode string) ([]Routine, error) {
 	var routines []Routine
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
@@ -599,6 +621,9 @@ func GetRoutinesByPage(user_id int64, page int, search string) ([]Routine, error
 	queryBuilder = queryBuilder.Where(squirrel.Eq{"is_trash": 0})
 	if len(search) > 0 {
 		queryBuilder = queryBuilder.Where("MATCH(routine_title) AGAINST (? IN NATURAL LANGUAGE MODE)", search)
+	}
+	if routine_mode != "" && routine_mode != "All" {
+		queryBuilder = queryBuilder.Where("routine_mode = ?", routine_mode)
 	}
 	queryBuilder = queryBuilder.
 		OrderBy("id DESC").
@@ -678,7 +703,7 @@ func GetAllRoutines(user_id int64) ([]Routine, error) {
 	return routines, nil
 }
 
-func GetProgress(user_id int64) ([]RoutineEntry, error) {
+func GetDailyProgress(user_id int64) ([]RoutineEntry, error) {
 	var routine_entries []RoutineEntry
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
@@ -718,7 +743,7 @@ func GetProgress(user_id int64) ([]RoutineEntry, error) {
 	return routine_entries, nil
 }
 
-func GetDayProgress(user_id int64, date string) (any, error) {
+func GetDayProgress(user_id int64, date string) ([]ProgressItem, error) {
 	var progress_items []ProgressItem
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
@@ -821,6 +846,39 @@ func GetRoutineHistories(user_id int64, routine_id int64) ([]RoutineHistory, err
 	histories = mapDBDataToRoutineHistoryList(rows)
 
 	return histories, nil
+}
+
+func GetInboxes(user_id int64) ([]InboxItem, error) {
+	var inboxes []InboxItem
+	var all_routines []Routine
+	all_routines, err := GetAllRoutines(user_id)
+	if err != nil {
+		return inboxes, err
+	}
+
+	routine_entries, err := GetDailyProgress(user_id)
+	if err != nil {
+		return inboxes, err
+	}
+	for i := range all_routines {
+		var inbox_item InboxItem
+		var routine Routine = all_routines[i]
+		inbox_item.ID = routine.ID
+		inbox_item.UserId = routine.UserId
+		inbox_item.Slug = routine.Slug
+		inbox_item.Title = routine.Title
+		inbox_item.Description = routine.Description
+		for j := range routine_entries {
+			if routine_entries[j].RoutineID == routine.ID {
+				inbox_item.IsCompleted = true
+				inbox_item.CompletedOn = routine_entries[j].CreatedAt
+				break
+			}
+		}
+		inboxes = append(inboxes, inbox_item)
+	}
+	fmt.Println(inboxes[0])
+	return inboxes, err
 }
 
 func MarkRoutineAsDone(routine_entry RoutineEntry) (RoutineEntry, error) {

@@ -70,7 +70,7 @@
 	</div>
 	<div class="routine_item_right">
 		<SuccessTick
-			checked={routine.Done === true ? true : false}
+			checked={routine.IsCompleted === true ? true : false}
 			on:change={(event) => routineCheckHandler(event, routine)}
 		></SuccessTick>
 	</div>

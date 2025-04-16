@@ -49,12 +49,13 @@ func main() {
 	e.POST("/restore_from_trash", RestoreFromTrashHandler)
 	e.POST("/delete_routine_forever", DeleteRoutineForeverHandler)
 
+	e.POST("/inboxes", GetInboxesHandler)
+
 	// Routine Entries
 	e.POST("/mark_routine_as_done", MarkRoutineAsDoneHandler)
 	e.POST("/mark_routine_as_not_done", MarkRoutineAsNotDoneHandler)
 
 	// Get Progress --
-	e.GET("/progress", GetProgressHandler)
 	e.POST("/day_progress", GetDayProgressHandler)
 
 	e.Logger.Fatal(e.Start(":1323"))

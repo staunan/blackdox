@@ -2,10 +2,12 @@
 	import { onMount } from "svelte";
 	import RoutineItem from "components/pages/routines/routines/RoutineItem.svelte";
 	import NoItemRoutineList from "components/pages/routines/routines/NoItemRoutineList.svelte";
+	import RoutineModeFilter from "components/pages/routines/routines/RoutineModeFilter.svelte";
 	import { goto } from "$app/navigation";
 	import { getAllRoutines } from "apis/apis.js";
 
 	export let search = "";
+	let selected_tab = "All";
 	let routines = [];
 
 	function routineClickedHandler(event) {
@@ -25,6 +27,7 @@
 			let formData = {
 				page: page,
 				search: search,
+				mode: selected_tab,
 			};
 			const response = await getAllRoutines(formData);
 			const data = response.Data;
@@ -74,6 +77,18 @@
 	});
 </script>
 
+<div class="routine_mode_filter">
+	<RoutineModeFilter
+		selected={selected_tab}
+		on:buttonClick={(event) => {
+			selected_tab = event.detail.selected;
+			hasMore = true;
+			page = 1;
+			routines = [];
+			fetchRoutines();
+		}}
+	></RoutineModeFilter>
+</div>
 <div class="routine_container">
 	{#if routines && routines.length == 0}
 		<NoItemRoutineList></NoItemRoutineList>
