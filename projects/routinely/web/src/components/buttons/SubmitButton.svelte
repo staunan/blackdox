@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from "svelte";
+	const hasSlot = $$slots.default;
 
 	export let title = "Submit";
 	export let color = "blue";
@@ -13,12 +14,19 @@
 
 <button type="button" class={"btn " + color} on:click={onClick} {disabled}>
 	<div class="button_content">
-		<slot></slot>
+		{#if hasSlot}
+			<div class="button_icon">
+				<slot />
+			</div>
+		{/if}
 		<div class="button_text">{title}</div>
 	</div>
 </button>
 
 <style>
+	.button_icon {
+		padding-right: 15px;
+	}
 	.button_content {
 		display: flex;
 		justify-content: center;
@@ -27,9 +35,6 @@
 		padding-right: 20px;
 		padding-top: 5px;
 		padding-bottom: 5px;
-	}
-	.button_text {
-		padding-left: 15px;
 	}
 	button:disabled {
 		background-color: #ccc !important;
@@ -89,33 +94,13 @@
 	/* Red */
 	.btn.red {
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-		background: #fe8c00; /* fallback for old browsers */
-		background: -webkit-linear-gradient(
-			to right,
-			#f83600,
-			#fe8c00
-		); /* Chrome 10-25, Safari 5.1-6 */
-		background: linear-gradient(
-			to right,
-			#f83600,
-			#fe8c00
-		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
+		background-color: #d32f2f;
 		color: #fff;
 	}
 	.btn.red:hover,
 	.btn.red:focus {
-		background: #fe8c00; /* fallback for old browsers */
-		background: -webkit-linear-gradient(
-			to right,
-			#f83600,
-			#fe8c00
-		); /* Chrome 10-25, Safari 5.1-6 */
-		background: linear-gradient(
-			to right,
-			#f83600,
-			#fe8c00
-		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+		background-color: #d32f2f;
+		color: #fff;
 	}
 	/* Green */
 	.btn.green {
@@ -147,5 +132,16 @@
 			#061700,
 			#52c234
 		); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	}
+	/* GreyBlue */
+	.btn.greyblue {
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+		background-color: #0000001a;
+		color: #000;
+	}
+	.btn.greyblue:hover,
+	.btn.greyblue:focus {
+		background-color: #5e35b1 !important;
+		color: #fff !important;
 	}
 </style>

@@ -15,9 +15,10 @@
 	let currentPanel = "routines";
 	let show_panel_dropdown = false;
 	let total_items_in_trash = 0;
-	let search_text = localStorage.getItem("search");
+	let search_text = "";
 
 	onMount(() => {
+		search_text = localStorage.getItem("search");
 		const funcRef = (event) => {
 			if (event.target.closest(".routine_panel_menu")) {
 				show_panel_dropdown = true;

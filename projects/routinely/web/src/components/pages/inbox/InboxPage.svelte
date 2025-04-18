@@ -3,7 +3,6 @@
 	import SpaceBetweenThreeItems from "components/layouts/SpaceBetweenThreeItems.svelte";
 	import { onMount } from "svelte";
 	import { onDestroy } from "svelte";
-	import { inboxes } from "store";
 
 	let currentPanel = "inbox";
 	let show_panel_dropdown = false;
@@ -60,7 +59,7 @@
 		</div>
 		<div class="panel_title_text">
 			{#if currentPanel == "inbox"}
-				<span class="">Inbox ({$inboxes.length})</span>
+				<span class="">Inbox (0)</span>
 			{/if}
 		</div>
 	</div>
@@ -72,6 +71,9 @@
 </div>
 
 <style>
+	.inbox_page {
+		padding-top: 30px;
+	}
 	.panel_dropdown {
 		position: absolute;
 		top: 110%;

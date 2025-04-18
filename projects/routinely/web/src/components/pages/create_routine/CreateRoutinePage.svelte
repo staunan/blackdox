@@ -20,6 +20,7 @@
 	.create_routine_form {
 		width: 70%;
 		margin: auto;
+		padding-top: 25px;
 	}
 	.form {
 		padding-top: 30px;

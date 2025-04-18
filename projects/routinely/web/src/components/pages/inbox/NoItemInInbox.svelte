@@ -1,14 +1,6 @@
 <script>
-	import { routines } from "store";
 	import SubmitButton from "components/buttons/SubmitButton.svelte";
 	import { goto } from "$app/navigation";
-
-	let hasRoutines = false;
-	routines.subscribe((v) => {
-		if (v && v.length > 0) {
-			hasRoutines = true;
-		}
-	});
 
 	function goToCreateRoutinesHandler(event) {
 		goto("create-routine");
@@ -17,12 +9,10 @@
 
 <div class="no_item_in_inbox">
 	<h3>Inbox Empty</h3>
-	{#if !hasRoutines}
-		<p>
-			You do not have any routine. Click on the following button to create
-			a new routine:
-		</p>
-	{/if}
+	<p>
+		You do not have any routine. Click on the following button to create a
+		new routine:
+	</p>
 	<SubmitButton
 		title="Create Routine"
 		on:tap={goToCreateRoutinesHandler}

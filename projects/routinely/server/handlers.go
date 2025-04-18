@@ -85,7 +85,13 @@ func verifyAndParseToken(tokenString string) (user.User, error) {
 }
 
 func jwtTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	var protected_routes []string = []string{"/user_details", "/upload_photo_registration_step", "/skip_upload_photo_in_registration_step", "/logout", "/create_routine", "/routine_details", "/all_routines", "/mark_routine_as_done", "/mark_routine_as_not_done", "/progress"}
+	var protected_routes []string = []string{
+		"/user_details",
+		"/upload_photo_registration_step",
+		"/skip_upload_photo_in_registration_step",
+		"/logout",
+		"/create_routine", "/routine_details", "/all_routines", "/mark_routine_as_done", "/mark_routine_as_not_done", "/progress",
+	}
 
 	return func(c echo.Context) error {
 		// Retrieve the token from the cookie
@@ -344,7 +350,7 @@ func LoginHandler(c echo.Context) error {
 	if err != nil {
 		// Return Response --
 		var response Response
-		response.Message = "Error while validating login data"
+		response.Message = err.Error()
 		if err.Error() == "user not found" {
 			response.Message = "User :'" + login_user.Email + "' doesn't exists"
 		} else if err.Error() == "incorrect password" {
@@ -355,7 +361,7 @@ func LoginHandler(c echo.Context) error {
 			response.Message = "Password format is invalid"
 		}
 		response.HasError = true
-		response.Data = err.Error()
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
 	// Get User Details --
@@ -873,8 +879,8 @@ func MarkRoutineAsDoneHandler(c echo.Context) error {
 		// Return Response --
 		var response Response
 		response.HasError = true
-		response.Message = "Unable to mark as done"
-		response.Data = err
+		response.Message = err.Error()
+		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
 

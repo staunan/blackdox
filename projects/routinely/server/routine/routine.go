@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "fmt"
 	"regexp"
 	"slices"
 	"strconv"
@@ -83,6 +82,7 @@ type InboxItem struct {
 	CreatedAt            string
 	IsCompleted          bool
 	CompletedOn          string
+	CheckedOnDate        string
 }
 
 func CreateRoutine(routine Routine) (int64, error) {
@@ -868,10 +868,12 @@ func GetInboxes(user_id int64) ([]InboxItem, error) {
 		inbox_item.Slug = routine.Slug
 		inbox_item.Title = routine.Title
 		inbox_item.Description = routine.Description
+		inbox_item.Time = routine.Time
 		for j := range routine_entries {
 			if routine_entries[j].RoutineID == routine.ID {
 				inbox_item.IsCompleted = true
 				inbox_item.CompletedOn = routine_entries[j].CreatedAt
+				inbox_item.CheckedOnDate = routine_entries[j].CheckedOnDate
 				break
 			}
 		}

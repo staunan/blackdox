@@ -5,10 +5,10 @@
 	export let checked = false;
 
 	function checkedChangeHandler(event) {
-		if (checked) {
-			dispatch("change", false);
-		} else {
+		if (event.target.checked) {
 			dispatch("change", true);
+		} else {
+			dispatch("change", false);
 		}
 	}
 </script>
