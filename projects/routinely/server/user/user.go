@@ -377,3 +377,28 @@ func UpdateRegistrationStep(user_id int64, step_number int) (bool, error) {
 		return false, errors.New("invalid step number")
 	}
 }
+
+func CheckIfEmailAvailable(user User) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Validate data --
+	if !isEmailValid(user.Email) {
+		return false, errors.New("invalid email format")
+	}
+
+	// Check if user present in database --
+	var user_id int64
+	query_err := db.QueryRow("SELECT id FROM users where email = ?", user.Email).Scan(&user_id)
+	switch {
+	case query_err == sql.ErrNoRows:
+		return true, nil
+	case query_err != nil:
+		return false, query_err
+	default:
+		return false, nil
+	}
+}

@@ -2,14 +2,12 @@
 	import HeaderProfileIcon from "components/pages/profile/HeaderProfileIcon.svelte";
 	import HeaderNav from "components/pages/layouts/HeaderNav.svelte";
 	import logo from "$lib/images/svelte-logo.svg";
-	import { user_details, store } from "store";
+	import { user_details } from "store";
 	import { goto } from "$app/navigation";
 
 	let user = null;
 	user_details.subscribe((newValue) => {
-		if (newValue && newValue.DisplayPictureName !== "") {
-			user = newValue;
-		}
+		user = newValue;
 	});
 
 	function goToProfilePageHandler() {

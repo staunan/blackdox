@@ -34,6 +34,9 @@ func main() {
 	// User Logout --
 	e.POST("/logout", LogoutHandler)
 
+	// User Details Update --
+	e.POST("/check_if_email_available", CheckIfEmailAvailableHandler)
+
 	// Routines --
 	e.POST("/create_routine", CreateRoutineHandler)
 	e.POST("/verify_routine_title", VerifyRoutineTitleHandler)

@@ -138,5 +138,15 @@ export async function logoutUser(data){
     let response = await axios.post(config.api_base_url + 'logout', data, reqConfig);
     return response.data;
 }
+
+export async function checkIfEmailAvailable(data){
+    let response = await axios.post(config.api_base_url + 'check_if_email_available', data, reqConfig);
+    return response.data;
+}
+
+export async function changeUserEmail(data){
+    let response = await axios.post(config.api_base_url + 'change_user_email', data, reqConfig);
+    return response.data;
+}
 // User: End --
 // ========================================================================================================================

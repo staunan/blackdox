@@ -10,11 +10,13 @@
 	import UsernameIcon from "components/svg/UsernameIcon.svelte";
 	import EmailIcon from "components/svg/EmailIcon.svelte";
 	import EditPenIcon from "components/svg/EditPenIcon.svelte";
+	import ChangeEmailModal from "components/pages/me/ChangeEmailModal.svelte";
 	import { store, user_details } from "store";
 	import { goto } from "$app/navigation";
 	import { logoutUser } from "apis/apis.js";
 
 	let user = null;
+	let isChangeEmailModalActive = false;
 	user_details.subscribe((v) => {
 		if (v) {
 			user = v;
@@ -30,6 +32,10 @@
 			console.log("Error while logging out");
 			console.log(response);
 		}
+	}
+
+	function openEmailChangeModal(event) {
+		isChangeEmailModalActive = true;
 	}
 </script>
 
@@ -53,7 +59,7 @@
 				<Left>
 					<SubmitButton
 						title="Change Email"
-						on:tap={logoutHandler}
+						on:tap={openEmailChangeModal}
 						color="greyblue"
 					>
 						<EditPenIcon size="20px"></EditPenIcon>
@@ -131,6 +137,11 @@
 			</Card>
 		</div>
 	{/if}
+
+	<ChangeEmailModal
+		active={isChangeEmailModalActive}
+		on:close={() => (isChangeEmailModalActive = false)}
+	></ChangeEmailModal>
 </RoutinelyPageContainer>
 
 <style>
