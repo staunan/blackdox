@@ -40,33 +40,35 @@
 			return;
 		}
 		let formData = {
-			newEmail: newEmail,
+			email: newEmail,
 		};
 		let response = await changeUserEmail(formData);
 
-		closeModal();
+		if (response.HasError == false) {
+			await store.getUser();
+			dispatch("emailchanged");
+			newEmail = "";
+		}
 	}
 	function emailChangedHandler(event) {
 		isEmailAvailable = false;
 		available_message = "";
-
-		newEmail = event.detail;
 		clearTimeout(typingTimer); // Clear the previous timer
 		typingTimer = setTimeout(() => {
-			checkIfEmailIsAvailable();
+			checkIfEmailIsAvailable(event.detail);
 		}, typingDelay);
 	}
-	async function checkIfEmailIsAvailable() {
-		if (newEmail) {
-			if (!validateEmail(newEmail)) {
+	async function checkIfEmailIsAvailable(email_text) {
+		if (email_text) {
+			if (!validateEmail(email_text)) {
 				return;
 			}
-			if (newEmail === user.Email) {
+			if (email_text === user.Email) {
 				return;
 			}
 			try {
 				let formData = {
-					email: newEmail,
+					email: email_text,
 				};
 				let response = await checkIfEmailAvailable(formData);
 				if (response.HasError === true) {
@@ -75,6 +77,7 @@
 					if (response.Data === true) {
 						isEmailAvailable = true;
 						available_message = "Email is available";
+						newEmail = email_text;
 					} else {
 						isEmailAvailable = false;
 						available_message = "Email is taken";

@@ -401,3 +401,35 @@ func CheckIfEmailAvailable(user User) (bool, error) {
 		return false, nil
 	}
 }
+
+func UpdateUserEmail(user User) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Validate data --
+	if !isEmailValid(user.Email) {
+		return false, errors.New("invalid email format")
+	}
+
+	emailAvailable, err := CheckIfEmailAvailable(user)
+	if err != nil {
+		return false, err
+	}
+	if emailAvailable {
+		query := "UPDATE users SET email = ? WHERE id = ?"
+		update_result, err := db.Exec(query, user.Email, user.ID)
+		if err != nil {
+			return false, err
+		}
+		rows_updated, err := update_result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+		return rows_updated > 0, nil
+	} else {
+		return false, errors.New("email not available")
+	}
+}

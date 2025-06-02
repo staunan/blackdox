@@ -37,6 +37,7 @@ func main() {
 
 	// User Details Update --
 	e.POST("/check_if_email_available", CheckIfEmailAvailableHandler)
+	e.POST("/change_user_email", changeUserEmailHandler)
 
 	// Routines --
 	e.POST("/create_routine", CreateRoutineHandler)

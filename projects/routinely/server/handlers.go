@@ -1012,3 +1012,31 @@ func CheckIfEmailAvailableHandler(c echo.Context) error {
 	response.Data = exists
 	return c.JSON(http.StatusOK, response)
 }
+
+func changeUserEmailHandler(c echo.Context) error {
+	// Get Request Data --
+	var userObj user.User
+	var reqData map[string]any = getRequestData(c)
+	if reqData["email"] == nil {
+		userObj.Email = ""
+	} else {
+		userObj.Email = reqData["email"].(string)
+	}
+	userObj.ID = getLoggedInUserId(c)
+
+	success, err := user.UpdateUserEmail(userObj)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Email has been updated successfully!"
+	response.Data = success
+	return c.JSON(http.StatusOK, response)
+}

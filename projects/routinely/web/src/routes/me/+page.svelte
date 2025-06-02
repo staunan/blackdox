@@ -11,12 +11,15 @@
 	import EmailIcon from "components/svg/EmailIcon.svelte";
 	import EditPenIcon from "components/svg/EditPenIcon.svelte";
 	import ChangeEmailModal from "components/pages/me/ChangeEmailModal.svelte";
+	import EmailUpdatedSuccess from "components/pages/me/EmailUpdatedSuccess.svelte";
 	import { store, user_details } from "store";
 	import { goto } from "$app/navigation";
 	import { logoutUser } from "apis/apis.js";
 
 	let user = null;
+	let isEmailUpdatedSuccessModalActive = false;
 	let isChangeEmailModalActive = false;
+
 	user_details.subscribe((v) => {
 		if (v) {
 			user = v;
@@ -36,6 +39,13 @@
 
 	function openEmailChangeModal(event) {
 		isChangeEmailModalActive = true;
+	}
+	function emailChangedHandler() {
+		isEmailUpdatedSuccessModalActive = true;
+	}
+	function closeEmamilUploadedSuccessModalHandler() {
+		isEmailUpdatedSuccessModalActive = false;
+		isChangeEmailModalActive = false;
 	}
 </script>
 
@@ -141,7 +151,13 @@
 	<ChangeEmailModal
 		active={isChangeEmailModalActive}
 		on:close={() => (isChangeEmailModalActive = false)}
+		on:emailchanged={emailChangedHandler}
 	></ChangeEmailModal>
+
+	<EmailUpdatedSuccess
+		active={isEmailUpdatedSuccessModalActive}
+		on:close={closeEmamilUploadedSuccessModalHandler}
+	></EmailUpdatedSuccess>
 </RoutinelyPageContainer>
 
 <style>
