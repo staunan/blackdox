@@ -214,7 +214,7 @@ func CreateAccountHandler(c echo.Context) error {
 }
 
 func UploadPhotoInRegistrationStepHandler(c echo.Context) error {
-	var user_id int64 = 1
+	user_id := getLoggedInUserId(c)
 	// Source
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -225,7 +225,7 @@ func UploadPhotoInRegistrationStepHandler(c echo.Context) error {
 		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
-	success, err := user.UpdateDisplayPicture(file)
+	success, err := user.UpdateDisplayPicture(file, user_id)
 	if err != nil {
 		// Return Response --
 		var response Response
@@ -258,6 +258,36 @@ func UploadPhotoInRegistrationStepHandler(c echo.Context) error {
 		response.Data = nil
 		return c.JSON(http.StatusOK, response)
 	}
+}
+
+func updateDisplayPhotoHandler(c echo.Context) error {
+	user_id := getLoggedInUserId(c)
+	// Source
+	file, err := c.FormFile("file")
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = "Please provide image"
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+	success, err := user.UpdateDisplayPicture(file, user_id)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = err
+		return c.JSON(http.StatusOK, response)
+	}
+
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = "Display picture has been updated"
+	response.Data = success
+	return c.JSON(http.StatusOK, response)
 }
 
 func SkipUploadPhotoInRegistrationStepHandler(c echo.Context) error {

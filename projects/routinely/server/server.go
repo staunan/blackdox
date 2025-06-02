@@ -27,6 +27,7 @@ func main() {
 	e.POST("/upload_photo_registration_step", UploadPhotoInRegistrationStepHandler)
 	e.POST("/skip_upload_photo_in_registration_step", SkipUploadPhotoInRegistrationStepHandler)
 	e.GET("/user_details", UserDetailsHandler)
+	e.POST("/update_display_photo", updateDisplayPhotoHandler)
 
 	// User Login --
 	e.POST("/login", LoginHandler)

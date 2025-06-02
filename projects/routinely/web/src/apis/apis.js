@@ -148,5 +148,24 @@ export async function changeUserEmail(data){
     let response = await axios.post(config.api_base_url + 'change_user_email', data, reqConfig);
     return response.data;
 }
+
+export async function uploadDisplayPhotoInMyAccount(data) {
+    let formData = new FormData();
+    formData.append('file', data.file, data.file.name);
+
+    let req_config = {
+        headers: {
+            'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+            "Access-Control-Allow-Origin": true,
+            "Accept-Language": 'en-US,en;q=0.8'
+        },
+        withCredentials: true,
+        credentials: 'include',
+        maxRedirects: 0,
+    }
+ 
+    let response = await axios.post(config.api_base_url + 'update_display_photo', formData, req_config);
+    return response.data;
+}
 // User: End --
 // ========================================================================================================================

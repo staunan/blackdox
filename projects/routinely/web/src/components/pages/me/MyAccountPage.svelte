@@ -1,29 +1,54 @@
 <script>
 	import { user_details } from "store";
 	import { config } from "config/api_url.js";
-	import { getUserDefaultImage } from "apis/apis.js";
+	import ProfilePictureUpdatedSuccess from "components/pages/me/ProfilePictureUpdatedSuccess.svelte";
+	import { store } from "store";
+	import {
+		getUserDefaultImage,
+		uploadDisplayPhotoInMyAccount,
+	} from "apis/apis.js";
+	import ProfilePicture from "components/pages/me/ProfilePicture.svelte";
 
 	let user = null;
 	let avatar;
+	let isDisplayPhotoUploadedSuccessModalActive = false;
 	user_details.subscribe((v) => {
 		if (v) {
 			user = v;
 		}
 	});
+
+	async function profilePictureChangedHandler(event) {
+		let image = event.detail;
+		if (!image) {
+			console.log("Missing Image");
+			return;
+		}
+		let data = { file: image };
+		let response = await uploadDisplayPhotoInMyAccount(data);
+		if (response.HasError == false) {
+			isDisplayPhotoUploadedSuccessModalActive = true;
+			await store.getUser();
+		} else {
+			console.log("Some error has occured!");
+		}
+	}
+	function closeDisplayPhotoUploadedSuccessModalHandler() {
+		isDisplayPhotoUploadedSuccessModalActive = false;
+	}
 </script>
 
 <div class="display_profile_picture_container">
 	<div class="picture">
 		{#if user && user.DisplayPictureName}
-			<img
-				class="avatar"
-				src={config.user_display_picture_url +
+			<ProfilePicture
+				avatar={config.user_display_picture_url +
 					"user_profile_pictures/" +
 					user.DisplayPictureName}
-				alt="d"
-			/>
+				on:change={profilePictureChangedHandler}
+			></ProfilePicture>
 		{:else}
-			<img class="avatar" src={getUserDefaultImage()} alt="" />
+			<ProfilePicture avatar={getUserDefaultImage()}></ProfilePicture>
 		{/if}
 	</div>
 	{#if user && user.FullName}
@@ -36,6 +61,11 @@
 			{user.Email}
 		</div>
 	{/if}
+
+	<ProfilePictureUpdatedSuccess
+		active={isDisplayPhotoUploadedSuccessModalActive}
+		on:close={closeDisplayPhotoUploadedSuccessModalHandler}
+	></ProfilePictureUpdatedSuccess>
 </div>
 
 <style>
@@ -45,13 +75,6 @@
 		justify-content: center;
 		align-items: center;
 		padding-top: 30px;
-	}
-	.picture img.avatar {
-		object-fit: cover;
-		width: 200px;
-		height: 200px;
-		border-radius: 50%;
-		box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 	}
 	.name {
 		font-size: 30px;

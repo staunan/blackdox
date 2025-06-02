@@ -127,8 +127,7 @@ func GenerateJWTToken(user_details User) (string, error) {
 	return token.SignedString([]byte(JWT_SIGNING_SECRET))
 }
 
-func UpdateDisplayPicture(file *multipart.FileHeader) (bool, error) {
-	var user_id int64 = 1
+func UpdateDisplayPicture(file *multipart.FileHeader, user_id int64) (bool, error) {
 	// Connect to db --
 	db, err := mysqldb.ConnectMySQL()
 	if err != nil {
