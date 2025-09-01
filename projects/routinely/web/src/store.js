@@ -11,6 +11,9 @@ export let store = {
             user_details.set(response.Data)
         }
     },
+    updateDisplayPictureName: function(newFileName) {
+        user_details.set(...user_details, { DisplayPictureName: newFileName });
+    },
     logout: function () {
         user_details.set(null);
     }

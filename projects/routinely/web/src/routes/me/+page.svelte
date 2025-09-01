@@ -11,6 +11,7 @@
 	import EmailIcon from "components/svg/EmailIcon.svelte";
 	import EditPenIcon from "components/svg/EditPenIcon.svelte";
 	import ChangeEmailModal from "components/pages/me/ChangeEmailModal.svelte";
+	import ChangeUsernameModal from "components/pages/me/ChangeUsernameModal.svelte";
 	import EmailUpdatedSuccess from "components/pages/me/EmailUpdatedSuccess.svelte";
 	import { store, user_details } from "store";
 	import { goto } from "$app/navigation";
@@ -19,6 +20,7 @@
 	let user = null;
 	let isEmailUpdatedSuccessModalActive = false;
 	let isChangeEmailModalActive = false;
+	let isUsernameModalActive = false;
 
 	user_details.subscribe((v) => {
 		if (v) {
@@ -46,6 +48,9 @@
 	function closeEmamilUploadedSuccessModalHandler() {
 		isEmailUpdatedSuccessModalActive = false;
 		isChangeEmailModalActive = false;
+	}
+	function openUsernameChangeModal() {
+		isUsernameModalActive = true;
 	}
 </script>
 
@@ -94,7 +99,7 @@
 				<Left>
 					<SubmitButton
 						title="Update Username"
-						on:tap={logoutHandler}
+						on:tap={openUsernameChangeModal}
 						color="greyblue"
 					>
 						<EditPenIcon size="20px"></EditPenIcon>
@@ -153,6 +158,12 @@
 		on:close={() => (isChangeEmailModalActive = false)}
 		on:emailchanged={emailChangedHandler}
 	></ChangeEmailModal>
+
+	<ChangeUsernameModal
+		active={isUsernameModalActive}
+		on:close={() => (isUsernameModalActive = false)}
+		on:emailchanged={emailChangedHandler}
+	></ChangeUsernameModal>
 
 	<EmailUpdatedSuccess
 		active={isEmailUpdatedSuccessModalActive}

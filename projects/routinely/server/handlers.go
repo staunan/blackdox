@@ -1040,3 +1040,31 @@ func changeUserEmailHandler(c echo.Context) error {
 	response.Data = success
 	return c.JSON(http.StatusOK, response)
 }
+
+func CheckIfUsernameAvailableHandler(c echo.Context) error {
+	// Get Request Data --
+	var userObj user.User
+	var reqData map[string]any = getRequestData(c)
+	if reqData["username"] == nil {
+		userObj.Username = ""
+	} else {
+		userObj.Username = reqData["username"].(string)
+	}
+	userObj.ID = getLoggedInUserId(c)
+
+	exists, err := user.CheckIfUsernameAvailable(userObj)
+	if err != nil {
+		// Return Response --
+		var response Response
+		response.HasError = true
+		response.Message = err.Error()
+		response.Data = nil
+		return c.JSON(http.StatusOK, response)
+	}
+	// Return Response --
+	var response Response
+	response.HasError = false
+	response.Message = ""
+	response.Data = exists
+	return c.JSON(http.StatusOK, response)
+}

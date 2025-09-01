@@ -270,6 +270,13 @@ func isEmailValid(email string) bool {
 	return err == nil
 }
 
+func validateUsername(username string) (bool, error) {
+	if len(username) > 20 {
+		return false, errors.New("username should not be greater than 20 character")
+	}
+	return true, nil
+}
+
 func isPasswordValid(password string) bool {
 	var (
 		hasMinLen  = false
@@ -431,5 +438,35 @@ func UpdateUserEmail(user User) (bool, error) {
 		return rows_updated > 0, nil
 	} else {
 		return false, errors.New("email not available")
+	}
+}
+
+func CheckIfUsernameAvailable(user User) (bool, error) {
+	// Connect to db --
+	db, err := mysqldb.ConnectMySQL()
+	if err != nil {
+		return false, err
+	}
+
+	// Validate data --
+	valid, err := validateUsername(user.Username)
+	if err != nil {
+		return false, err
+	}
+
+	if valid {
+		// Check if user present in database --
+		var user_id int64
+		query_err := db.QueryRow("SELECT id FROM users where username = ?", user.Username).Scan(&user_id)
+		switch {
+		case query_err == sql.ErrNoRows:
+			return true, nil
+		case query_err != nil:
+			return false, query_err
+		default:
+			return false, nil
+		}
+	} else {
+		return false, errors.New("username is not valid")
 	}
 }

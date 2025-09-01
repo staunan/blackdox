@@ -28,7 +28,7 @@
 		let response = await uploadDisplayPhotoInMyAccount(data);
 		if (response.HasError == false) {
 			isDisplayPhotoUploadedSuccessModalActive = true;
-			await store.getUser();
+			store.updateDisplayPictureName(response.Data);
 		} else {
 			console.log("Some error has occured!");
 		}
