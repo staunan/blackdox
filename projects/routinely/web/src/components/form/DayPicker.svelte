@@ -1,10 +1,18 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import Dropdown from "components/form/Dropdown.svelte";
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let label = "";
-	export let value = 0;
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {number} [value]
+	 */
+
+	/** @type {Props} */
+	let { label = "", value = 0 } = $props();
 
 	const dispatch = createEventDispatcher();
 	let Days = [
@@ -43,15 +51,15 @@
 		{ label: "30", value: 30 },
 		{ label: "31", value: 31 },
 	];
-	let day = null;
+	let day = $state(null);
 
-	$: {
+	run(() => {
 		if (value && value <= 33) {
 			day = Days.filter((d) => d.value == value)[0];
 		} else if (value === 0) {
 			day = Days[0];
 		}
-	}
+	});
 
 	function dayChangeHandler(event) {
 		day = event.detail;

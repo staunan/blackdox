@@ -5,7 +5,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { goto } from "$app/navigation";
 
-	export let active;
+	let { active } = $props();
 
 	const dispatch = createEventDispatcher();
 	function closeModal() {
@@ -24,18 +24,22 @@
 >
 	<div class="button_group">
 		<SpaceBetweenTwoItem>
-			<SubmitButton
-				slot="left"
-				title="Go to list"
-				on:tap={closeModal}
-				color="red"
-			></SubmitButton>
-			<SubmitButton
-				slot="right"
-				title="Create Another"
-				on:tap={createAnotherHandler}
-				color="blue"
-			></SubmitButton>
+			{#snippet left()}
+						<SubmitButton
+					
+					title="Go to list"
+					on:tap={closeModal}
+					color="red"
+				></SubmitButton>
+					{/snippet}
+			{#snippet right()}
+						<SubmitButton
+					
+					title="Create Another"
+					on:tap={createAnotherHandler}
+					color="blue"
+				></SubmitButton>
+					{/snippet}
 		</SpaceBetweenTwoItem>
 	</div>
 </SuccessModal>

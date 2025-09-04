@@ -1,13 +1,25 @@
 <script>
 	import FormLabel from "components/form/FormLabel.svelte";
 	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
-	export let label = "Input Label";
-	export let placeholder = "Input Placeholder...";
-	export let hasError = false;
-	export let errorMessage = "";
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
-	export let value = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {string} [placeholder]
+	 * @property {boolean} [hasError]
+	 * @property {string} [errorMessage]
+	 * @property {string} [value]
+	 */
+
+	/** @type {Props} */
+	let {
+		label = "Input Label",
+		placeholder = "Input Placeholder...",
+		hasError = false,
+		errorMessage = "",
+		value = ""
+	} = $props();
 	function onTextChange(event) {
 		dispatch("change", event.target.value);
 	}
@@ -15,7 +27,7 @@
 
 <div class="form_field">
 	<FormLabel {label}></FormLabel>
-	<textarea rows="5" {placeholder} {value} on:keyup={onTextChange}></textarea>
+	<textarea rows="5" {placeholder} {value} onkeyup={onTextChange}></textarea>
 	{#if hasError}
 		<FormErrorMessage message={errorMessage}></FormErrorMessage>
 	{/if}

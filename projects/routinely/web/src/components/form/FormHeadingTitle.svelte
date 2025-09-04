@@ -1,5 +1,11 @@
 <script>
-	export let title = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [title]
+	 */
+
+	/** @type {Props} */
+	let { title = "" } = $props();
 </script>
 
 <div class="header_title">{title}</div>

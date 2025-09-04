@@ -5,7 +5,7 @@
 
 	import { onMount } from "svelte";
 
-	let inboxItems = [];
+	let inboxItems = $state([]);
 	onMount(async () => {
 		await fetchInboxes();
 	});

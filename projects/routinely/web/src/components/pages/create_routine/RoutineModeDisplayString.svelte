@@ -1,6 +1,12 @@
 <script>
 	import RichText from "components/typography/RichText.svelte";
-	export let message = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [message]
+	 */
+
+	/** @type {Props} */
+	let { message = "" } = $props();
 </script>
 
 <div class="routine_mode_display_string">

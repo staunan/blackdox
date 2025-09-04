@@ -7,7 +7,7 @@
 </script>
 
 <!-- svelte-ignore a11y_consider_explicit_label -->
-<button class="delete" on:click={buttonClick}></button>
+<button class="delete" onclick={buttonClick}></button>
 
 <style>
 	.delete {

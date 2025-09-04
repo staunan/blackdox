@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import FormLabel from "components/form/FormLabel.svelte";
 	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
@@ -7,23 +9,37 @@
 	import { onMount } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let label = "";
-	export let items = [];
-	export let currentitem = null;
-	export let placeholder = "--Select Item--";
-	export let hasError = false;
-	export let errorMessage = "";
-	export let disabled = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {any} [items]
+	 * @property {any} [currentitem]
+	 * @property {string} [placeholder]
+	 * @property {boolean} [hasError]
+	 * @property {string} [errorMessage]
+	 * @property {boolean} [disabled]
+	 */
 
-	let active = false;
-	let selected_item = null;
-	$: {
+	/** @type {Props} */
+	let {
+		label = "",
+		items = [],
+		currentitem = null,
+		placeholder = "--Select Item--",
+		hasError = false,
+		errorMessage = "",
+		disabled = false
+	} = $props();
+
+	let active = $state(false);
+	let selected_item = $state(null);
+	run(() => {
 		if (currentitem) {
 			selected_item = currentitem;
 		} else {
 			selected_item = null;
 		}
-	}
+	});
 	onMount(() => {
 		document.addEventListener("click", function (event) {
 			if (!event.target.closest(".dropdown")) {
@@ -46,9 +62,9 @@
 		<FormLabel {label}></FormLabel>
 	{/if}
 	<div class="dropdown">
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="dropdown_trigger" on:click={() => (active = !active)}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="dropdown_trigger" onclick={() => (active = !active)}>
 			{#if selected_item}
 				<div class="dropdown_label">{selected_item.label}</div>
 			{:else}
@@ -62,13 +78,13 @@
 			<div class="dropdown_list">
 				{#if items.length > 0}
 					{#each items as item}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
 							class="dropdown_listitem"
 							class:selected={selected_item &&
 								item.value === selected_item.value}
-							on:click={() => handleDropdownItemClick(item)}
+							onclick={() => handleDropdownItemClick(item)}
 						>
 							{item.label}
 						</div>

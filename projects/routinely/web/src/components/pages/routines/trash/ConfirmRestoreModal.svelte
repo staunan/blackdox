@@ -9,12 +9,18 @@
 	import { createEventDispatcher } from "svelte";
 	import { restoreFromTrash } from "apis/apis.js";
 
-	export let active = false;
-	export let routine = null;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {any} [routine]
+	 */
 
-	let is_error_modal_active = false;
-	let is_restore_success_modal_active = false;
-	let error_modal_message = "";
+	/** @type {Props} */
+	let { active = false, routine = null } = $props();
+
+	let is_error_modal_active = $state(false);
+	let is_restore_success_modal_active = $state(false);
+	let error_modal_message = $state("");
 	let overlayclose = false;
 	let title = "Confirm Restore";
 	let message =
@@ -63,18 +69,22 @@
 		</Center>
 		<div class="button_group">
 			<SpaceBetweenTwoItem>
-				<SubmitButton
-					slot="left"
-					title="Oops! My mistake"
-					on:tap={closeModal}
-					color="blue"
-				></SubmitButton>
-				<SubmitButton
-					slot="right"
-					title="Yes, Restore it"
-					on:tap={confirmRestoreHandler}
-					color="red"
-				></SubmitButton>
+				{#snippet left()}
+								<SubmitButton
+						
+						title="Oops! My mistake"
+						on:tap={closeModal}
+						color="blue"
+					></SubmitButton>
+							{/snippet}
+				{#snippet right()}
+								<SubmitButton
+						
+						title="Yes, Restore it"
+						on:tap={confirmRestoreHandler}
+						color="red"
+					></SubmitButton>
+							{/snippet}
 			</SpaceBetweenTwoItem>
 		</div>
 	</div>

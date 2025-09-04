@@ -1,12 +1,20 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let label = "";
-	export let value = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {string} [value]
+	 */
+
+	/** @type {Props} */
+	let { label = "", value = "" } = $props();
 
 	const dispatch = createEventDispatcher();
-	let selectedDay = null;
+	let selectedDay = $state(null);
 	let days = [
 		{ id: 1, short: "Sun", title: "Sunday" },
 		{ id: 2, short: "Mon", title: "Monday" },
@@ -16,13 +24,13 @@
 		{ id: 6, short: "Fri", title: "Friday" },
 		{ id: 7, short: "Sat", title: "Saturday" },
 	];
-	$: {
+	run(() => {
 		if (value) {
 			selectedDay = days.filter((day) => day.short == value)[0];
 		} else {
 			selectedDay = null;
 		}
-	}
+	});
 	function dayClickedHandler(day) {
 		if (selectedDay && day.id === selectedDay.id) {
 			selectedDay = null;
@@ -42,11 +50,11 @@
 		{#if days.length > 0}
 			{#each days as day}
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="day"
 					class:selected={selectedDay && day.id == selectedDay.id}
-					on:click={() => dayClickedHandler(day)}
+					onclick={() => dayClickedHandler(day)}
 					title={day.title}
 				>
 					{day.short}

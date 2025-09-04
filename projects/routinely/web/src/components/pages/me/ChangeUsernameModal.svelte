@@ -7,8 +7,14 @@
 	import { store, user_details } from "store";
 	import { validateUsername } from "lib/js/validation.js";
 
-	export let active = false;
-	export let overlayclose = true;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {boolean} [overlayclose]
+	 */
+
+	/** @type {Props} */
+	let { active = false, overlayclose = true } = $props();
 
 	let user = null;
 	user_details.subscribe((v) => {
@@ -17,15 +23,15 @@
 		}
 	});
 
-	let newUsername = "";
-	let hasError = false;
-	let errorMessage = "";
+	let newUsername = $state("");
+	let hasError = $state(false);
+	let errorMessage = $state("");
 
 	let typingTimer = null;
 	const typingDelay = 1000;
 
-	let isUsernameAvailable = false;
-	let available_message = "";
+	let isUsernameAvailable = $state(false);
+	let available_message = $state("");
 
 	const dispatch = createEventDispatcher();
 

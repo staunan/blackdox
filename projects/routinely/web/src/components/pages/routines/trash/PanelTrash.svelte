@@ -5,11 +5,11 @@
 	import NoItemInTrash from "components/pages/routines/trash/NoItemInTrash.svelte";
 	import { getTrashedRoutines } from "apis/apis.js";
 
-	let routines = [];
+	let routines = $state([]);
 
 	let page = 1; // Current page to fetch
-	let loading = false; // Loading state
-	let hasMore = true; // Check if there's more data
+	let loading = $state(false); // Loading state
+	let hasMore = $state(true); // Check if there's more data
 
 	const fetchTrashedRoutines = async () => {
 		if (loading || !hasMore) return; // Avoid duplicate requests

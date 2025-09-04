@@ -2,7 +2,13 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let checked = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [checked]
+	 */
+
+	/** @type {Props} */
+	let { checked = false } = $props();
 
 	function checkedChangeHandler(event) {
 		if (event.target.checked) {
@@ -19,7 +25,7 @@
 			class="field__checkbox"
 			type="checkbox"
 			{checked}
-			on:change={checkedChangeHandler}
+			onchange={checkedChangeHandler}
 		/>
 		<span class="field__label">
 			<svg class="check" viewBox="0 0 64 64" aria-hidden="true">

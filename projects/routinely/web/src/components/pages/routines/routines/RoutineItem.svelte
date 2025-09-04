@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { TodayDate } from "lib/js/datetime.js";
 
-	export let routine = {};
+	let { routine = {} } = $props();
 
 	const dispatch = createEventDispatcher();
 	function routineClickedHandler(routine) {
@@ -24,12 +24,12 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="routine_item" title={routine.Title}>
 	<div class="routine_item_left">
 		<div
 			class="routine_title"
-			on:click={() => routineClickedHandler(routine)}
+			onclick={() => routineClickedHandler(routine)}
 		>
 			{routine.Title}
 		</div>

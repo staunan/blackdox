@@ -1,9 +1,9 @@
 <script>
 	import CameraIcon from "components/svg/CameraIcon.svelte";
 	import { createEventDispatcher } from "svelte";
-	export let avatar;
+	let { avatar = $bindable() } = $props();
 
-	let fileinput;
+	let fileinput = $state();
 	const dispatch = createEventDispatcher();
 
 	function handleProfilePictureClick() {
@@ -28,7 +28,7 @@
 	<img src={avatar} class="profile-picture" />
 	<div
 		class="change-profile-picture-icon"
-		on:click={handleProfilePictureClick}
+		onclick={handleProfilePictureClick}
 	>
 		<CameraIcon size="30px"></CameraIcon>
 	</div>
@@ -37,7 +37,7 @@
 			style="display:none"
 			type="file"
 			accept=".jpg, .jpeg, .png"
-			on:change={(e) => onFileSelectedHandler(e)}
+			onchange={(e) => onFileSelectedHandler(e)}
 			bind:this={fileinput}
 		/>
 	</div>

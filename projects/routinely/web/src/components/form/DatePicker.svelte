@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { DateInput } from "date-picker-svelte";
 	import {
@@ -8,13 +10,19 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let label = "";
-	export let value = 0;
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {number} [value]
+	 */
 
-	let initializing = false;
-	let month_date = null;
+	/** @type {Props} */
+	let { label = "", value = $bindable(0) } = $props();
 
-	$: {
+	let initializing = $state(false);
+	let month_date = $state(null);
+
+	run(() => {
 		if (value) {
 			initializing = true;
 			if (value.length == 10) {
@@ -22,8 +30,8 @@
 			}
 			month_date = ConvertMySQLDateTimeToJSDateTime(value);
 		}
-	}
-	$: {
+	});
+	run(() => {
 		if (month_date) {
 			if (!initializing) {
 				dispatch("change", ConvertJSDateToMySQLDate(month_date));
@@ -31,7 +39,7 @@
 				initializing = false;
 			}
 		}
-	}
+	});
 </script>
 
 <div class="date_picker">

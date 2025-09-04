@@ -4,7 +4,7 @@
 	import Center from "components/layouts/Center.svelte";
 	import { goto } from "$app/navigation";
 
-	export let active;
+	let { active } = $props();
 
 	function goToList() {
 		goto("/routines");

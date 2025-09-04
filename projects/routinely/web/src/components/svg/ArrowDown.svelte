@@ -1,5 +1,11 @@
 <script>
-	export let disabled = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [disabled]
+	 */
+
+	/** @type {Props} */
+	let { disabled = false } = $props();
 </script>
 
 <svg

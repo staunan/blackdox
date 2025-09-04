@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from "svelte";
 	import ArrowDown from "components/svg/ArrowDown.svelte";
 	import {
@@ -9,14 +11,20 @@
 	} from "lib/js/datetime.js";
 	import { createEventDispatcher } from "svelte";
 
-	export let value = null;
-	export let user = null;
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} [value]
+	 * @property {any} [user]
+	 */
+
+	/** @type {Props} */
+	let { value = $bindable(null), user = null } = $props();
 
 	const dispatch = createEventDispatcher();
-	let active = false;
-	let date = new Date();
-	let calendar_days = [];
-	let selected_date = null;
+	let active = $state(false);
+	let date = $state(new Date());
+	let calendar_days = $state([]);
+	let selected_date = $state(null);
 	const months = [
 		"January",
 		"February",
@@ -32,17 +40,6 @@
 		"December",
 	];
 
-	$: {
-		if (value) {
-			if (value.length == 10) {
-				value = value + " 00:00:00";
-			}
-			selected_date = ConvertMySQLDateTimeToJSDateTime(value);
-			generateDays(selected_date);
-		} else {
-			generateDays();
-		}
-	}
 
 	onMount(() => {
 		const funcRef = (event) => {
@@ -188,15 +185,26 @@
 		let date_str = ConvertJSDateToMySQLDate(selected_date);
 		dispatch("change", date_str);
 	}
+	run(() => {
+		if (value) {
+			if (value.length == 10) {
+				value = value + " 00:00:00";
+			}
+			selected_date = ConvertMySQLDateTimeToJSDateTime(value);
+			generateDays(selected_date);
+		} else {
+			generateDays();
+		}
+	});
 </script>
 
 <div class="calendar_wrapper">
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="calendar_navigation">
 		<div
 			class="calendar_nagivation_left"
-			on:click={() => getPrevProgressHandler()}
+			onclick={() => getPrevProgressHandler()}
 			class:disabled={user &&
 				selected_date <
 					ConvertMySQLDateTimeToJSDateTime(user.CreatedAt)}
@@ -209,13 +217,13 @@
 		</div>
 		<div
 			class="calendar_dropdown_trigger"
-			on:click={() => handleDropdownItemClick()}
+			onclick={() => handleDropdownItemClick()}
 		>
 			{ParseDateToHumanReadableFormat(selected_date)}
 		</div>
 		<div
 			class="calendar_nagivation_right"
-			on:click={() => getNextProgressHandler()}
+			onclick={() => getNextProgressHandler()}
 			class:disabled={ConvertJSDateToMySQLDate(selected_date) ===
 				TodayDate()}
 		>
@@ -234,23 +242,23 @@
 				</div>
 				<div class="navigation_container">
 					<div class="today_container">
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
 							class="today_button"
-							on:click={() => goToTodayHandler()}
+							onclick={() => goToTodayHandler()}
 						>
 							Today
 						</div>
 					</div>
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div class="arrow_down" on:click={() => goPrevHandler()}>
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div class="arrow_down" onclick={() => goPrevHandler()}>
 						<ArrowDown></ArrowDown>
 					</div>
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div class="arrow_up" on:click={() => goNextHandler()}>
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div class="arrow_up" onclick={() => goNextHandler()}>
 						<ArrowDown></ArrowDown>
 					</div>
 				</div>
@@ -267,7 +275,7 @@
 			<div class="calendar_days_grid">
 				{#each calendar_days as day}
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
 						class="day_cell"
 						class:prev_month={day.month === "previous"}
@@ -284,7 +292,7 @@
 									day.date.getMonth() &&
 								selected_date.getFullYear() ==
 									day.date.getFullYear()}
-							on:click={() => dayClickedHandler(day)}
+							onclick={() => dayClickedHandler(day)}
 						>
 							{day.value}
 						</div>

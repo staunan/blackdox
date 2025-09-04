@@ -1,5 +1,11 @@
 <script>
-	export let label = "Input Label";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 */
+
+	/** @type {Props} */
+	let { label = "Input Label" } = $props();
 </script>
 
 <div class="form_label">{label}</div>

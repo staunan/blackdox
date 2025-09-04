@@ -4,8 +4,8 @@
 	import "animate.css";
 
 	const dispatch = createEventDispatcher();
-	let fileinput;
-	let avatar;
+	let fileinput = $state();
+	let avatar = $state();
 
 	async function onFileSelectedHandler(e) {
 		let image = e.target.files[0];
@@ -23,7 +23,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="picture"
-	on:click={() => {
+	onclick={() => {
 		fileinput.click();
 	}}
 >
@@ -38,7 +38,7 @@
 			style="display:none"
 			type="file"
 			accept=".jpg, .jpeg, .png"
-			on:change={(e) => onFileSelectedHandler(e)}
+			onchange={(e) => onFileSelectedHandler(e)}
 			bind:this={fileinput}
 		/>
 	</div>

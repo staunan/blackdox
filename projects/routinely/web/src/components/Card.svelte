@@ -1,6 +1,13 @@
 <script>
-	export let padding = 0;
-	export let background = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {number} [padding]
+	 * @property {string} [background]
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let { padding = 0, background = "", children } = $props();
 </script>
 
 <div
@@ -12,7 +19,7 @@
 		(background ? background : "transparent") +
 		";"}
 >
-	<slot></slot>
+	{@render children?.()}
 </div>
 
 <style>

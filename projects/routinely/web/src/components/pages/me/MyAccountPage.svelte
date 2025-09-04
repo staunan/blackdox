@@ -9,9 +9,9 @@
 	} from "apis/apis.js";
 	import ProfilePicture from "components/pages/me/ProfilePicture.svelte";
 
-	let user = null;
+	let user = $state(null);
 	let avatar;
-	let isDisplayPhotoUploadedSuccessModalActive = false;
+	let isDisplayPhotoUploadedSuccessModalActive = $state(false);
 	user_details.subscribe((v) => {
 		if (v) {
 			user = v;

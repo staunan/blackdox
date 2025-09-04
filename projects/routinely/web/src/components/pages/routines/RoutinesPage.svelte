@@ -12,10 +12,10 @@
 	import { goto } from "$app/navigation";
 	import SearchBar from "components/form/SearchBar.svelte";
 
-	let currentPanel = "routines";
-	let show_panel_dropdown = false;
+	let currentPanel = $state("routines");
+	let show_panel_dropdown = $state(false);
 	let total_items_in_trash = 0;
-	let search_text = "";
+	let search_text = $state("");
 
 	onMount(() => {
 		search_text = localStorage.getItem("search");
@@ -49,13 +49,13 @@
 	<div class="panel_title">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="routine_panel_menu" on:click={panelMenuClickHandler}>
+		<div class="routine_panel_menu" onclick={panelMenuClickHandler}>
 			<PanelIcon></PanelIcon>
 			{#if show_panel_dropdown}
 				<div class="routine_panel_dropdown">
 					<div
 						class="panel_dropdown_list_item routine"
-						on:click={() => {
+						onclick={() => {
 							currentPanel = "routines";
 							show_panel_dropdown = false;
 						}}
@@ -71,7 +71,7 @@
 					</div>
 					<div
 						class="panel_dropdown_list_item trash"
-						on:click={() => {
+						onclick={() => {
 							currentPanel = "trash";
 							show_panel_dropdown = false;
 						}}

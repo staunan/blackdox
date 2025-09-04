@@ -1,5 +1,5 @@
 <script>
-	import { page } from "$app/stores";
+	import { page } from "$app/state";
 	import { onMount } from "svelte";
 
 	import { getRoutineDetails } from "apis/apis.js";
@@ -11,10 +11,10 @@
 	import SectionSetting from "components/pages/routine_details/SectionSetting.svelte";
 	import SectionHistory from "components/pages/routine_details/SectionHistory.svelte";
 
-	let routine_slug = $page.params.routine_slug;
+	let routine_slug = page.params.routine_slug;
 
-	let currentTabName = "about";
-	let routine_details = null;
+	let currentTabName = $state("about");
+	let routine_details = $state(null);
 
 	onMount(async () => {
 		let res = await getRoutineDetails({

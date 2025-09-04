@@ -4,7 +4,15 @@
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
 
-	export let title = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [title]
+	 * @property {import('svelte').Snippet} [title_right]
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let { title = "", title_right, children } = $props();
 
 	let currentPageUrl = "";
 	let restricted_routes = [
@@ -61,12 +69,12 @@
 				<div class="page_title_text">{title}</div>
 			</div>
 			<div class="page_title_right">
-				<slot name="title_right"></slot>
+				{@render title_right?.()}
 			</div>
 		</div>
 	{/if}
 	<div class="page_content">
-		<slot></slot>
+		{@render children?.()}
 	</div>
 </div>
 

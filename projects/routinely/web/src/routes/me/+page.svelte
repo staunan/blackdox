@@ -17,10 +17,10 @@
 	import { goto } from "$app/navigation";
 	import { logoutUser } from "apis/apis.js";
 
-	let user = null;
-	let isEmailUpdatedSuccessModalActive = false;
-	let isChangeEmailModalActive = false;
-	let isUsernameModalActive = false;
+	let user = $state(null);
+	let isEmailUpdatedSuccessModalActive = $state(false);
+	let isChangeEmailModalActive = $state(false);
+	let isUsernameModalActive = $state(false);
 
 	user_details.subscribe((v) => {
 		if (v) {

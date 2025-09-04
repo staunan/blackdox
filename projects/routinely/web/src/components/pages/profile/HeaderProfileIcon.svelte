@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let user;
+	let { user } = $props();
 
 	function tabHandler(event) {
 		dispatch("click");
@@ -12,7 +12,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="header_profile_image" on:click={tabHandler}>
+<div class="header_profile_image" onclick={tabHandler}>
 	{#if user}
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<img

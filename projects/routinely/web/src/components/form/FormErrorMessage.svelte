@@ -1,5 +1,11 @@
 <script>
-	export let message = "Error Message...";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [message]
+	 */
+
+	/** @type {Props} */
+	let { message = "Error Message..." } = $props();
 </script>
 
 <div class="error_message">{message}</div>

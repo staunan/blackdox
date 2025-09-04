@@ -1,14 +1,22 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from "svelte";
 	import Dropdown from "components/form/Dropdown.svelte";
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
-	export let label = "";
-	export let value = "00:00";
-	export let format = "24Hours";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {string} [value]
+	 * @property {string} [format]
+	 */
 
-	let Hours = [];
+	/** @type {Props} */
+	let { label = "", value = "00:00", format = "24Hours" } = $props();
+
+	let Hours = $state([]);
 	let Minutes = [
 		{ label: "00", value: 0 },
 		{ label: "05", value: 5 },
@@ -28,9 +36,9 @@
 		{ label: "PM", value: "PM" },
 	];
 
-	let selectedHour = null;
-	let selectedMinute = null;
-	let selectedZone = Zone[0];
+	let selectedHour = $state(null);
+	let selectedMinute = $state(null);
+	let selectedZone = $state(Zone[0]);
 
 	onMount(() => {
 		if (format === "24Hours") {
@@ -78,7 +86,7 @@
 		}
 	});
 
-	$: {
+	run(() => {
 		if (value) {
 			let arr = value.split(":");
 			try {
@@ -110,7 +118,7 @@
 				console.log(err);
 			}
 		}
-	}
+	});
 
 	function hourChangeHandler(event) {
 		selectedHour = event.detail;

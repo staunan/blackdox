@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from "svelte";
 	import RoutineItem from "components/pages/routines/routines/RoutineItem.svelte";
 	import NoItemRoutineList from "components/pages/routines/routines/NoItemRoutineList.svelte";
@@ -6,18 +8,24 @@
 	import { goto } from "$app/navigation";
 	import { getAllRoutines } from "apis/apis.js";
 
-	export let search = "";
-	let selected_tab = "All";
-	let routines = [];
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [search]
+	 */
+
+	/** @type {Props} */
+	let { search = "" } = $props();
+	let selected_tab = $state("All");
+	let routines = $state([]);
 
 	function routineClickedHandler(event) {
 		let slug = event.detail.Slug;
 		goto("/routine/" + slug);
 	}
 
-	let page = 1; // Current page to fetch
-	let loading = false; // Loading state
-	let hasMore = true; // Check if there's more data
+	let page = $state(1); // Current page to fetch
+	let loading = $state(false); // Loading state
+	let hasMore = $state(true); // Check if there's more data
 
 	const fetchRoutines = async () => {
 		if (loading || !hasMore) return; // Avoid duplicate requests
@@ -53,7 +61,7 @@
 		}
 	};
 
-	$: {
+	run(() => {
 		if (search) {
 			hasMore = true;
 			page = 1;
@@ -65,7 +73,7 @@
 			routines = [];
 			fetchRoutines();
 		}
-	}
+	});
 
 	onMount(() => {
 		fetchRoutines(); // Fetch initial data

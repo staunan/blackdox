@@ -4,8 +4,15 @@
 	import { onMount } from "svelte";
 	import "animate.css";
 
-	export let active = false;
-	export let overlayclose = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {boolean} [overlayclose]
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let { active = false, overlayclose = false, children } = $props();
 
 	const dispatch = createEventDispatcher();
 	onMount(() => {
@@ -27,7 +34,7 @@
 		<div class="modal_overlay"></div>
 		<div class="content_modal_window">
 			<div class="content_area">
-				<slot></slot>
+				{@render children?.()}
 			</div>
 		</div>
 	</div>

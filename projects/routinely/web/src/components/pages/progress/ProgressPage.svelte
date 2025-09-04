@@ -7,9 +7,9 @@
 	import Calendar from "components/form/Calendar.svelte";
 	import { user_details } from "store";
 
-	let selectedDate = TodayDate();
-	let progressData = [];
-	let user = null;
+	let selectedDate = $state(TodayDate());
+	let progressData = $state([]);
+	let user = $state(null);
 
 	user_details.subscribe((v) => {
 		if (v) {

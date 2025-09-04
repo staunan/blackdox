@@ -1,11 +1,19 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import Dropdown from "components/form/Dropdown.svelte";
 	import FormLabel from "components/form/FormLabel.svelte";
 	import { onMount } from "svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let label = "";
-	export let value = null;
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {any} [value]
+	 */
+
+	/** @type {Props} */
+	let { label = "", value = null } = $props();
 
 	const dispatch = createEventDispatcher();
 	let Months = [
@@ -23,32 +31,11 @@
 		{ label: "November", value: 11 },
 		{ label: "December", value: 12 },
 	];
-	let Days = [];
-	let dayDropdownDisabled = false;
-	let selectedMonth = null;
-	let selectedDay = null;
+	let Days = $state([]);
+	let dayDropdownDisabled = $state(false);
+	let selectedMonth = $state(null);
+	let selectedDay = $state(null);
 
-	$: {
-		if (value) {
-			let arr = value.split("-");
-			let initialMonth = parseInt(arr[0]);
-			let initialDay = parseInt(arr[1]);
-			if (initialMonth === 0) {
-				selectedMonth = Months[0];
-			} else {
-				selectedMonth = Months.filter(
-					(m) => m.value === initialMonth
-				)[0];
-			}
-			if (initialDay === 0) {
-				selectedDay = null;
-			} else {
-				selectedDay = Days.filter((d) => d.value === initialDay)[0];
-			}
-		} else {
-			changeMonth(Months[0]);
-		}
-	}
 
 	onMount(() => {
 		Days = calculateDays();
@@ -133,6 +120,27 @@
 		}
 		dispatch("change", m + "-" + d);
 	}
+	run(() => {
+		if (value) {
+			let arr = value.split("-");
+			let initialMonth = parseInt(arr[0]);
+			let initialDay = parseInt(arr[1]);
+			if (initialMonth === 0) {
+				selectedMonth = Months[0];
+			} else {
+				selectedMonth = Months.filter(
+					(m) => m.value === initialMonth
+				)[0];
+			}
+			if (initialDay === 0) {
+				selectedDay = null;
+			} else {
+				selectedDay = Days.filter((d) => d.value === initialDay)[0];
+			}
+		} else {
+			changeMonth(Months[0]);
+		}
+	});
 </script>
 
 <div class="datemonthpicker_container">

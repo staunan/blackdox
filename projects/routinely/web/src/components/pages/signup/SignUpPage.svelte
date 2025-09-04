@@ -6,12 +6,12 @@
 	import { getUser } from "apis/apis.js";
 	import { onMount } from "svelte";
 
-	let Dots = [
+	let Dots = $state([
 		{ id: 1, title: "User Details", completed: false },
 		{ id: 2, title: "Profile Picture", completed: false },
 		{ id: 3, title: "Registration Successful", completed: false },
-	];
-	let selected_dot = Dots[0];
+	]);
+	let selected_dot = $state(Dots[0]);
 	let user_details = null;
 
 	onMount(async () => {

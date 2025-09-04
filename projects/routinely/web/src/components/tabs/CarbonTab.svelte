@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	let currentTabName = "daily";
+	let currentTabName = $state("daily");
 
 	function dailyClickHandler(event) {
 		currentTabName = "daily";
@@ -25,13 +25,13 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="tabs">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={dailyClickHandler}>Daily</div>
+	<div class="tab" onclick={dailyClickHandler}>Daily</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={weeklyClickHandler}>Weekly</div>
+	<div class="tab" onclick={weeklyClickHandler}>Weekly</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={monthlyClickHandler}>Monthly</div>
+	<div class="tab" onclick={monthlyClickHandler}>Monthly</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={yearlyClickHandler}>Yearly</div>
+	<div class="tab" onclick={yearlyClickHandler}>Yearly</div>
 	<!-- <div class="tabsShadow"></div> -->
 	<div
 		class="glider"

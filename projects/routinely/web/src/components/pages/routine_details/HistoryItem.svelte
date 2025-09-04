@@ -4,7 +4,7 @@
 	import CompletedCheckmarkIcon from "components/svg/CompletedCheckmarkIcon.svelte";
 	import NotCompletedIcon from "components/svg/NotCompletedIcon.svelte";
 	import RichText from "components/typography/RichText.svelte";
-	export let history;
+	let { history } = $props();
 </script>
 
 {#if history}

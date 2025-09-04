@@ -10,12 +10,18 @@
 	import { moveToTrash } from "apis/apis.js";
 	import { store } from "store";
 
-	export let active = false;
-	export let routine = null;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {any} [routine]
+	 */
 
-	let is_error_modal_active = false;
-	let is_delete_success_modal_active = false;
-	let error_modal_message = "";
+	/** @type {Props} */
+	let { active = false, routine = null } = $props();
+
+	let is_error_modal_active = $state(false);
+	let is_delete_success_modal_active = $state(false);
+	let error_modal_message = $state("");
 	let overlayclose = false;
 	let title = "Confirm Delete";
 	let message = "Are you sure you want to delete this routine?";
@@ -60,18 +66,22 @@
 		</Center>
 		<div class="button_group">
 			<SpaceBetweenTwoItem>
-				<SubmitButton
-					slot="left"
-					title="Oops! My mistake"
-					on:tap={closeModal}
-					color="blue"
-				></SubmitButton>
-				<SubmitButton
-					slot="right"
-					title="Yes, Move to trash"
-					on:tap={moveToTrashHandler}
-					color="red"
-				></SubmitButton>
+				{#snippet left()}
+								<SubmitButton
+						
+						title="Oops! My mistake"
+						on:tap={closeModal}
+						color="blue"
+					></SubmitButton>
+							{/snippet}
+				{#snippet right()}
+								<SubmitButton
+						
+						title="Yes, Move to trash"
+						on:tap={moveToTrashHandler}
+						color="red"
+					></SubmitButton>
+							{/snippet}
 			</SpaceBetweenTwoItem>
 		</div>
 	</div>

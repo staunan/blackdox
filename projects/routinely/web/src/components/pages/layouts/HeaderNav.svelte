@@ -5,7 +5,7 @@
 	import ProgressChartIcon from "components/svg/ProgressChartIcon.svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	let currentTabName = "inbox";
+	let currentTabName = $state("inbox");
 	let navlinks = ["/inbox", "/progress", "/routines"];
 
 	onMount(() => {
@@ -52,7 +52,7 @@
 			<InboxIcon size="30px"></InboxIcon>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="nav_link_text" on:click={goToInboxClickHandler}>
+			<div class="nav_link_text" onclick={goToInboxClickHandler}>
 				Inbox
 			</div>
 		</div>
@@ -63,7 +63,7 @@
 			<ProgressChartIcon size="30px"></ProgressChartIcon>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="nav_link_text" on:click={goToProgressClickHandler}>
+			<div class="nav_link_text" onclick={goToProgressClickHandler}>
 				Progress
 			</div>
 		</div>
@@ -74,7 +74,7 @@
 			<RoutinesIcon size="30px"></RoutinesIcon>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="nav_link_text" on:click={goToRoutinesClickHandler}>
+			<div class="nav_link_text" onclick={goToRoutinesClickHandler}>
 				Routines
 			</div>
 		</div>

@@ -3,19 +3,37 @@
 </script>
 
 <SpaceBetweenThreeItems>
-	<div slot="left" class="red_petal"></div>
-	<div slot="center" class="green_petal"></div>
-	<div slot="right" class="blue_petal"></div>
+	{#snippet left()}
+		<div  class="red_petal"></div>
+	{/snippet}
+	{#snippet center()}
+		<div  class="green_petal"></div>
+	{/snippet}
+	{#snippet right()}
+		<div  class="blue_petal"></div>
+	{/snippet}
 </SpaceBetweenThreeItems>
 <SpaceBetweenThreeItems>
-	<div slot="left" class="green_petal"></div>
-	<div slot="center" class="red_petal"></div>
-	<div slot="right" class="blue_petal"></div>
+	{#snippet left()}
+		<div  class="green_petal"></div>
+	{/snippet}
+	{#snippet center()}
+		<div  class="red_petal"></div>
+	{/snippet}
+	{#snippet right()}
+		<div  class="blue_petal"></div>
+	{/snippet}
 </SpaceBetweenThreeItems>
 <SpaceBetweenThreeItems>
-	<div slot="left" class="red_petal"></div>
-	<div slot="center" class="blue_petal"></div>
-	<div slot="right" class="green_petal"></div>
+	{#snippet left()}
+		<div  class="red_petal"></div>
+	{/snippet}
+	{#snippet center()}
+		<div  class="blue_petal"></div>
+	{/snippet}
+	{#snippet right()}
+		<div  class="green_petal"></div>
+	{/snippet}
 </SpaceBetweenThreeItems>
 
 <style>

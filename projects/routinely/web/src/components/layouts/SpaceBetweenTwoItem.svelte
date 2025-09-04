@@ -1,9 +1,20 @@
+<script>
+	/**
+	 * @typedef {Object} Props
+	 * @property {import('svelte').Snippet} [left]
+	 * @property {import('svelte').Snippet} [right]
+	 */
+
+	/** @type {Props} */
+	let { left, right } = $props();
+</script>
+
 <div class="row">
 	<div class="column_left">
-		<slot name="left"></slot>
+		{@render left?.()}
 	</div>
 	<div class="column_right">
-		<slot name="right"></slot>
+		{@render right?.()}
 	</div>
 </div>
 

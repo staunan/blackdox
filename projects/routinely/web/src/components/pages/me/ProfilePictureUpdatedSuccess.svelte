@@ -5,7 +5,7 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let active;
+	let { active } = $props();
 
 	function modalClose() {
 		dispatch("close");

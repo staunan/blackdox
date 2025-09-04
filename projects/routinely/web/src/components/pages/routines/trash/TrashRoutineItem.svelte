@@ -5,10 +5,10 @@
 	import { TodayDate } from "lib/js/datetime.js";
 	import { createEventDispatcher } from "svelte";
 
-	export let routine = {};
+	let { routine = {} } = $props();
 	const dispatch = createEventDispatcher();
-	let confirmRestoreModalActive = false;
-	let confirmDeleteModalActive = false;
+	let confirmRestoreModalActive = $state(false);
+	let confirmDeleteModalActive = $state(false);
 
 	function restoreRoutineHandler(event) {
 		confirmRestoreModalActive = true;
@@ -31,7 +31,7 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="routine_item" title={routine.Title}>
 	<div class="routine_item_left">
 		<div class="routine_title">

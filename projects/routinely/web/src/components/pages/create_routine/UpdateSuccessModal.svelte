@@ -4,7 +4,7 @@
 	import Center from "components/layouts/Center.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let active;
+	let { active } = $props();
 
 	const dispatch = createEventDispatcher();
 	function closeModal() {

@@ -8,12 +8,12 @@
 	import Card from "components/Card.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let routine;
+	let { routine } = $props();
 
 	const dispatch = createEventDispatcher();
-	let is_confirm_delete_modal_active = false;
+	let is_confirm_delete_modal_active = $state(false);
 	let editRoutineModalOverlayClose = true;
-	let editRoutineModalActive = false;
+	let editRoutineModalActive = $state(false);
 
 	function editRoutineHandler(event) {
 		editRoutineModalActive = true;

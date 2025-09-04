@@ -9,10 +9,10 @@
 		skipUploadDisplayPhotoInRegistrationStep,
 	} from "apis/apis.js";
 	const dispatch = createEventDispatcher();
-	let photo_upload_button_text = "Upload Display Photo";
-	let disable_upload_button = false;
-	let skip_button_text = "Skip this step";
-	let disable_skip_button = false;
+	let photo_upload_button_text = $state("Upload Display Photo");
+	let disable_upload_button = $state(false);
+	let skip_button_text = $state("Skip this step");
+	let disable_skip_button = $state(false);
 
 	let selectedProfilePhoto = null;
 	function imageChangeHandler(e) {

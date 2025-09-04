@@ -1,17 +1,19 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from "svelte";
 	import RoutineModeDisplayString from "components/pages/create_routine/RoutineModeDisplayString.svelte";
 	import { ParseTimeToHumanReadableFormat } from "lib/js/datetime.js";
 
-	export let routine = null;
-	let node_routine_mode_display_string = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} [routine]
+	 */
 
-	$: {
-		if (routine) {
-			node_routine_mode_display_string =
-				generateRoutineModeDisplayString(routine);
-		}
-	}
+	/** @type {Props} */
+	let { routine = null } = $props();
+	let node_routine_mode_display_string = $state("");
+
 
 	function generateRoutineModeDisplayString(routine) {
 		if (routine == null) {
@@ -113,6 +115,12 @@
 		}
 		return str;
 	}
+	run(() => {
+		if (routine) {
+			node_routine_mode_display_string =
+				generateRoutineModeDisplayString(routine);
+		}
+	});
 </script>
 
 {#if routine}

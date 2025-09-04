@@ -6,11 +6,23 @@
 	import { createEventDispatcher } from "svelte";
 	import "animate.css";
 
-	export let active = false;
-	export let overlayclose = false;
-	export let title = "Title";
-	export let message = "Error Message";
-	export let buttonname = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {boolean} [overlayclose]
+	 * @property {string} [title]
+	 * @property {string} [message]
+	 * @property {string} [buttonname]
+	 */
+
+	/** @type {Props} */
+	let {
+		active = false,
+		overlayclose = false,
+		title = "Title",
+		message = "Error Message",
+		buttonname = ""
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 	function okButtonClickHandler() {

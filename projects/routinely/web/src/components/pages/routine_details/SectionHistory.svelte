@@ -4,8 +4,8 @@
 	import HistoryItem from "components/pages/routine_details/HistoryItem.svelte";
 	import { getRoutineHistory } from "apis/apis.js";
 
-	export let routine;
-	let histories = [];
+	let { routine } = $props();
+	let histories = $state([]);
 
 	onMount(async () => {
 		let res = await getRoutineHistory({

@@ -4,9 +4,15 @@
 	import CreateRoutineForm from "components/pages/create_routine/CreateRoutineForm.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let active = false;
-	export let overlayclose = false;
-	export let routine = null;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {boolean} [overlayclose]
+	 * @property {any} [routine]
+	 */
+
+	/** @type {Props} */
+	let { active = false, overlayclose = false, routine = null } = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -19,7 +25,9 @@
 </script>
 
 <ContentModal {active} {overlayclose} on:close={closeEditModalHandler}>
-	<FormHeadingTitle slot="header" title="Edit Routine"></FormHeadingTitle>
+	{#snippet header()}
+		<FormHeadingTitle  title="Edit Routine"></FormHeadingTitle>
+	{/snippet}
 	<div class="routine_form">
 		<CreateRoutineForm
 			disableadvancesettings={true}

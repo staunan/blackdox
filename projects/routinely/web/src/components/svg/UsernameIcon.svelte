@@ -1,5 +1,11 @@
 <script>
-	export let size = "40px";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [size]
+	 */
+
+	/** @type {Props} */
+	let { size = "40px" } = $props();
 </script>
 
 <svg

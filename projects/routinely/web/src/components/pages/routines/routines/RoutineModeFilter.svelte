@@ -1,7 +1,13 @@
 <script>
 	import { createEventDispatcher } from "svelte";
 
-	export let selected = "all"; // Prop to pass the selected button value
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [selected] - Prop to pass the selected button value
+	 */
+
+	/** @type {Props} */
+	let { selected = $bindable("all") } = $props();
 	const dispatch = createEventDispatcher();
 
 	const buttons = ["All", "Daily", "Weekly", "Monthly", "Yearly"];
@@ -16,7 +22,7 @@
 	{#each buttons as button}
 		<button
 			class:selected={selected === button}
-			on:click={() => selectButton(button)}
+			onclick={() => selectButton(button)}
 		>
 			{button}
 		</button>

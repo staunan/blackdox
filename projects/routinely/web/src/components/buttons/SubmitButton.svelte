@@ -1,10 +1,22 @@
 <script>
 	import { createEventDispatcher } from "svelte";
-	const hasSlot = $$slots.default;
+	const hasSlot = children;
 
-	export let title = "Submit";
-	export let color = "blue";
-	export let disabled = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {import('svelte').Snippet} [children]
+	 * @property {string} [title]
+	 * @property {string} [color]
+	 * @property {boolean} [disabled]
+	 */
+
+	/** @type {Props} */
+	let {
+		children,
+		title = "Submit",
+		color = "blue",
+		disabled = false
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 	function onClick(event) {
@@ -12,11 +24,11 @@
 	}
 </script>
 
-<button type="button" class={"btn " + color} on:click={onClick} {disabled}>
+<button type="button" class={"btn " + color} onclick={onClick} {disabled}>
 	<div class="button_content">
 		{#if hasSlot}
 			<div class="button_icon">
-				<slot />
+				{@render children?.()}
 			</div>
 		{/if}
 		<div class="button_text">{title}</div>

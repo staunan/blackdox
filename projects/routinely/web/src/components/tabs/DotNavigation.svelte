@@ -1,14 +1,22 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	export let dots = [];
-	export let selected = dots[0];
-	export let disabled = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} [dots]
+	 * @property {any} [selected]
+	 * @property {boolean} [disabled]
+	 */
 
-	let current_dot = null;
+	/** @type {Props} */
+	let { dots = [], selected = dots[0], disabled = false } = $props();
 
-	$: {
+	let current_dot = $state(null);
+
+	run(() => {
 		if (selected) {
 			if (dots.length > 0) {
 				for (let i = 0; i < dots.length; i++) {
@@ -19,7 +27,7 @@
 				}
 			}
 		}
-	}
+	});
 
 	function dotClickHandler(event, dot) {
 		current_dot = dot;
@@ -35,7 +43,7 @@
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				<li
 					class:active={current_dot.id == dot.id}
-					on:click={(event) => {
+					onclick={(event) => {
 						dotClickHandler(event, dot);
 					}}
 				>

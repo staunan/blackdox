@@ -1,7 +1,13 @@
 <script>
-	export let label = "";
-	export let disabled = false;
 	import { createEventDispatcher } from "svelte";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [label]
+	 * @property {boolean} [disabled]
+	 */
+
+	/** @type {Props} */
+	let { label = "", disabled = false } = $props();
 	const dispatch = createEventDispatcher();
 	function onClick(event) {
 		dispatch("tap");
@@ -11,7 +17,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_missing_attribute -->
-<a class="link_button btn" on:click={onClick} class:disabled>
+<a class="link_button btn" onclick={onClick} class:disabled>
 	<span>{label}</span>
 </a>
 

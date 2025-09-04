@@ -1,10 +1,16 @@
 <script>
 	import FormLabel from "components/form/FormLabel.svelte";
 	import FormErrorMessage from "components/form/FormErrorMessage.svelte";
-	export let placeholder = "Input Placeholder...";
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
-	export let value = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [placeholder]
+	 * @property {string} [value]
+	 */
+
+	/** @type {Props} */
+	let { placeholder = "Input Placeholder...", value = "" } = $props();
 
 	let typingTimer = null;
 	const typingDelay = 1000;
@@ -18,7 +24,7 @@
 </script>
 
 <div class="search_box">
-	<input type="text" {placeholder} {value} on:keyup={onTextChange} />
+	<input type="text" {placeholder} {value} onkeyup={onTextChange} />
 </div>
 
 <style>

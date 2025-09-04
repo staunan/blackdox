@@ -7,10 +7,23 @@
 	import { onMount } from "svelte";
 	import "animate.css";
 
-	export let active = false;
-	export let overlayclose = false;
-	export let title = "";
-	export let message = "";
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [active]
+	 * @property {boolean} [overlayclose]
+	 * @property {string} [title]
+	 * @property {string} [message]
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let {
+		active = false,
+		overlayclose = false,
+		title = "",
+		message = "",
+		children
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 	function closeModal() {
@@ -31,7 +44,7 @@
 			</div>
 		</Center>
 		<div class="button_container">
-			<slot></slot>
+			{@render children?.()}
 		</div>
 	</div>
 </Modal>

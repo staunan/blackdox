@@ -5,7 +5,7 @@
 	import { onDestroy } from "svelte";
 
 	let currentPanel = "inbox";
-	let show_panel_dropdown = false;
+	let show_panel_dropdown = $state(false);
 	let event_listener = null;
 
 	onMount(() => {
@@ -36,22 +36,40 @@
 		<div
 			style="display: none;"
 			class="panel_menu"
-			on:click={panelMenuClickHandler}
+			onclick={panelMenuClickHandler}
 		>
 			<SpaceBetweenThreeItems>
-				<div slot="left" class="red_petal"></div>
-				<div slot="center" class="green_petal"></div>
-				<div slot="right" class="blue_petal"></div>
+				{#snippet left()}
+								<div  class="red_petal"></div>
+							{/snippet}
+				{#snippet center()}
+								<div  class="green_petal"></div>
+							{/snippet}
+				{#snippet right()}
+								<div  class="blue_petal"></div>
+							{/snippet}
 			</SpaceBetweenThreeItems>
 			<SpaceBetweenThreeItems>
-				<div slot="left" class="green_petal"></div>
-				<div slot="center" class="red_petal"></div>
-				<div slot="right" class="blue_petal"></div>
+				{#snippet left()}
+								<div  class="green_petal"></div>
+							{/snippet}
+				{#snippet center()}
+								<div  class="red_petal"></div>
+							{/snippet}
+				{#snippet right()}
+								<div  class="blue_petal"></div>
+							{/snippet}
 			</SpaceBetweenThreeItems>
 			<SpaceBetweenThreeItems>
-				<div slot="left" class="red_petal"></div>
-				<div slot="center" class="blue_petal"></div>
-				<div slot="right" class="green_petal"></div>
+				{#snippet left()}
+								<div  class="red_petal"></div>
+							{/snippet}
+				{#snippet center()}
+								<div  class="blue_petal"></div>
+							{/snippet}
+				{#snippet right()}
+								<div  class="green_petal"></div>
+							{/snippet}
 			</SpaceBetweenThreeItems>
 			{#if show_panel_dropdown}
 				<div class="panel_dropdown"></div>

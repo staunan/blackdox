@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from "svelte";
 	import TextBox from "components/form/TextBox.svelte";
 	import TextArea from "components/form/TextArea.svelte";
@@ -27,26 +29,32 @@
 		verifyRoutineTitle,
 	} from "apis/apis.js";
 
-	// Props --
-	export let disableadvancesettings = false;
-	export let edit = false;
-	export let routine = null;
+	
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [disableadvancesettings] - Props --
+	 * @property {boolean} [edit]
+	 * @property {any} [routine]
+	 */
+
+	/** @type {Props} */
+	let { disableadvancesettings = false, edit = false, routine = null } = $props();
 
 	// Form Settings Variable --
 	const dispatch = createEventDispatcher();
-	let advanceSettings = disableadvancesettings;
-	let routine_title_label = "";
-	let node_routine_mode_display_string;
-	let routine_mode_display_string_has_error;
-	let routine_mode_display_string_error_message;
-	let routine_action_button_title = "Create Routine";
+	let advanceSettings = $state(disableadvancesettings);
+	let routine_title_label = $state("");
+	let node_routine_mode_display_string = $state();
+	let routine_mode_display_string_has_error = $state();
+	let routine_mode_display_string_error_message = $state();
+	let routine_action_button_title = $state("Create Routine");
 	let titleVerifyTimer = null;
 	let slug_exists = false;
-	let createRoutineButtonDisabled = false;
-	let is_create_success_modal_active = false;
-	let is_update_success_modal_active = false;
-	let is_error_modal_active = false;
-	let error_modal_message = "";
+	let createRoutineButtonDisabled = $state(false);
+	let is_create_success_modal_active = $state(false);
+	let is_update_success_modal_active = $state(false);
+	let is_error_modal_active = $state(false);
+	let error_modal_message = $state("");
 
 	// Dropdown Data Variable --
 	let all_routine_modes = [
@@ -57,28 +65,28 @@
 	];
 
 	// Form Input Variables --
-	let routine_title = "";
-	let routineTitleHasError = false;
-	let routineTitleErrorMessage = "";
-	let routine_details = "";
-	let routineDetailsHasError = false;
-	let routineDetailsErrorMessage = "";
-	let selected_routine_mode = null;
-	let routineModeHasError = false;
-	let routineModeErrorMessage = "";
-	let selected_days = [];
-	let selected_week_day = "";
-	let selected_month_day = "";
-	let selected_month_and_date = "";
-	let selectedTime = "";
+	let routine_title = $state("");
+	let routineTitleHasError = $state(false);
+	let routineTitleErrorMessage = $state("");
+	let routine_details = $state("");
+	let routineDetailsHasError = $state(false);
+	let routineDetailsErrorMessage = $state("");
+	let selected_routine_mode = $state(null);
+	let routineModeHasError = $state(false);
+	let routineModeErrorMessage = $state("");
+	let selected_days = $state([]);
+	let selected_week_day = $state("");
+	let selected_month_day = $state("");
+	let selected_month_and_date = $state("");
+	let selectedTime = $state("");
 
-	$: {
+	run(() => {
 		if (advanceSettings === true) {
 			routine_title_label = "Routine Title";
 		} else {
 			routine_title_label = "";
 		}
-	}
+	});
 
 	onMount(() => {
 		resetForm();

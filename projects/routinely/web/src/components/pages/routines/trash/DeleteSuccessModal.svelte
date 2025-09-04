@@ -5,7 +5,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { goto } from "$app/navigation";
 
-	export let active;
+	let { active } = $props();
 	const dispatch = createEventDispatcher();
 
 	function closeModal() {

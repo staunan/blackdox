@@ -10,21 +10,21 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	let username = "ssantanuberaa";
-	let usernameHasError = "";
-	let usernameErrorMessage = "";
-	let userFullName = "Santanu Bera";
-	let userFullNameHasError = false;
-	let userFullNameErrorMessage = "";
-	let userEmail = "ssantanuberaa@gmail.com";
-	let userEmailHasError = false;
-	let userEmailErrorMessage = "";
-	let userPassword = "123";
-	let userPasswordHasError = "";
-	let userPasswordErrorMessage = "";
-	let confirmPassword = "123";
-	let confirmPasswordHasError = "";
-	let confirmPasswordErrorMessage = "";
+	let username = $state("ssantanuberaa");
+	let usernameHasError = $state("");
+	let usernameErrorMessage = $state("");
+	let userFullName = $state("Santanu Bera");
+	let userFullNameHasError = $state(false);
+	let userFullNameErrorMessage = $state("");
+	let userEmail = $state("ssantanuberaa@gmail.com");
+	let userEmailHasError = $state(false);
+	let userEmailErrorMessage = $state("");
+	let userPassword = $state("123");
+	let userPasswordHasError = $state("");
+	let userPasswordErrorMessage = $state("");
+	let confirmPassword = $state("123");
+	let confirmPasswordHasError = $state("");
+	let confirmPasswordErrorMessage = $state("");
 
 	function userFullNameChangedHandler(event) {
 		userFullName = event.detail;

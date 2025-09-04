@@ -9,17 +9,17 @@
 	import { loginUser } from "apis/apis.js";
 	import { store } from "store";
 
-	let userEmail = "ssantanuberaa@gmail.com";
-	let userEmailHasError = false;
-	let userEmailErrorMessage = "";
-	let userPassword = "Santanu@123";
-	let userPasswordHasError = "";
-	let userPasswordErrorMessage = "";
-	let login_button_disabled = false;
-	let login_button_text = "Login to Routinely";
-	let errorModalActive = false;
-	let errorModalTitle = "";
-	let errorModalMessage = "";
+	let userEmail = $state("ssantanuberaa@gmail.com");
+	let userEmailHasError = $state(false);
+	let userEmailErrorMessage = $state("");
+	let userPassword = $state("Santanu@123");
+	let userPasswordHasError = $state("");
+	let userPasswordErrorMessage = $state("");
+	let login_button_disabled = $state(false);
+	let login_button_text = $state("Login to Routinely");
+	let errorModalActive = $state(false);
+	let errorModalTitle = $state("");
+	let errorModalMessage = $state("");
 
 	function emailChangedHandler(event) {
 		userEmail = event.detail;

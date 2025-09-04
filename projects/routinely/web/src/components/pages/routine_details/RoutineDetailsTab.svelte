@@ -7,7 +7,7 @@
 	import { createEventDispatcher } from "svelte";
 	const dispatch = createEventDispatcher();
 
-	let currentTabName = "about";
+	let currentTabName = $state("about");
 
 	function aboutClickHandler(event) {
 		currentTabName = "about";
@@ -30,22 +30,22 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="tabs">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={aboutClickHandler}>
+	<div class="tab" onclick={aboutClickHandler}>
 		<AboutIcon></AboutIcon>
 		<div class="tab_title">About</div>
 	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={progressClickHandler}>
+	<div class="tab" onclick={progressClickHandler}>
 		<ProgressIcon></ProgressIcon>
 		<div class="tab_title">Progress</div>
 	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={historyClickHandler}>
+	<div class="tab" onclick={historyClickHandler}>
 		<HistoryIcon size="35px"></HistoryIcon>
 		<div class="tab_title">History</div>
 	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="tab" on:click={settingsClickHandler}>
+	<div class="tab" onclick={settingsClickHandler}>
 		<SettingsIcon></SettingsIcon>
 		<div class="tab_title">Settings</div>
 	</div>

@@ -5,7 +5,7 @@
 	import { user_details } from "store";
 	import { goto } from "$app/navigation";
 
-	let user = null;
+	let user = $state(null);
 	user_details.subscribe((newValue) => {
 		user = newValue;
 	});
@@ -22,7 +22,7 @@
 	<div class="website_logo">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<img on:click={goToHomeClickHandler} src={logo} alt="SvelteKit" />
+		<img onclick={goToHomeClickHandler} src={logo} alt="SvelteKit" />
 	</div>
 	<div class="routine_nav">
 		<HeaderNav></HeaderNav>
